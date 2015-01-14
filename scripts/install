@@ -1,0 +1,176 @@
+#!/bin/bash                                                                                                                                                                                      
+
+# Retrieve arguments
+domain=$1
+path=$2
+
+# TODO : if arch != x86 or amd64 => unsupported
+arch=$(uname -m)
+if [[ "$arch" != "i686" ]] && [[ "$arch" != "x86_64" ]] ; then
+  echo "Currently supported only on i686 or x86_64."
+  echo "ARM platforms are NOT supported right now."
+  exit 1
+fi
+
+if [[ "$path" != "/" ]] ; then
+  echo "Only '/' is supported as path for the moment."
+  exit 1
+fi 
+
+sudo yunohost app checkurl $domain$path -a jitsi
+if [[ ! $? -eq 0 ]]; then 
+  exit 1
+fi
+
+sudo apt-get update
+sudo apt-get install openjdk-7-jre ant openjdk-6-jdk -y
+
+# TODO do we really need this ???
+#sudo apt-get install lua-dbi-sqlite3 -y
+
+#git clone https://github.com/andyet/otalk-server ../src/otalk-server
+# TODO mam,websocket(s) already available in default metronome
+#cp -r ../src/otalk-server/mod_{smacks,carbons,mam,websocket,turncredentials} /usr/lib/metronome/modules
+
+YNH_YOURSECRET1=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
+YNH_YOURSECRET2=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
+YNH_YOURSECRET3=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
+YNH_YOURSECRET4=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
+
+jitsi_domain="jitsi.${domain}"
+# TODO verify $jitsi_domain is not already used somehow...
+
+sudo groupadd jitsi
+
+
+#--- Install Jitsi videobridge ---
+jvb_buildnum=$(cat ../conf/jvb.version)
+if [[ "$arch" == "i686" ]] ; then
+  jvb_arch="x86"
+else
+  jvb_arch="x64"
+fi
+mkdir ../src
+wget -O ../src/jitsi-videobridge.zip https://download.jitsi.org/jitsi-videobridge/linux/jitsi-videobridge-linux-$jvb_arch-$jvb_buildnum.zip
+unzip ../src/jitsi-videobridge.zip -d ../src/jitsi-videobridge
+jvb_root=/opt/yunohost/jitsi-videobridge
+sudo mkdir -p $jvb_root
+sudo cp -ar ../src/jitsi-videobridge/jitsi-videobridge-linux-$jvb_arch-$jvb_buildnum/* $jvb_root
+sudo useradd -r -g jitsi -d $jvb_root --shell /bin/bash jvb
+sudo chown -R jvb:jitsi $jvb_root
+sudo mkdir -p /var/log/jitsi
+sudo chown jvb:jitsi /var/log/jitsi
+sudo chmod 770 /var/log/jitsi
+
+cat << EOF > ../src/jvb_options
+JVB_HOSTNAME=$jitsi_domain
+JVB_PORT=5347
+JVB_SECRET=$YNH_YOURSECRET1
+JVB_OPTS=""
+EOF
+
+sudo mv ../src/jvb_options /etc/default/jitsi-videobridge
+sudo cp ../conf/jitsi-videobridge.init /etc/init.d/jitsi-videobridge
+sudo chmod +x /etc/init.d/jitsi-videobridge
+sudo update-rc.d jitsi-videobridge defaults
+sudo yunohost service add jitsi-videobridge -l /var/log/jitsi/jvb.log
+
+# TODO : install java7
+# TODO : create .sip-communicator to handle videobridge behind NAT
+# TODO : avoid error in logs Failed to load class "org.slf4j.impl.StaticLoggerBinder"
+#        See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+# TODO : logrotate
+# TODO : hook to monit
+# TODO : enable jitsi stats : what wan we do with it ?
+
+#--- Install Jicofo ---
+wget -O ../src/jicofo.zip https://github.com/jitsi/jicofo/archive/master.zip
+unzip ../src/jicofo.zip -d ../src/jicofo
+if [[ "$arch" == "i686" ]] ; then
+  jicofo_target="lin"
+  jicofo_arch="x86"
+else
+  jicofo_target="lin64"
+  jicofo_arch="x64"
+fi
+bash -c "cd ../src/jicofo/jicofo-master; ant dist.$jicofo_target"
+jicofo_dist_zip=$(ls ../src/jicofo/jicofo-master/dist/linux/*.zip)
+unzip $jicofo_dist_zip -d ../src/jicofo_dist
+
+jicofo_root=/opt/yunohost/jicofo
+sudo mkdir -p $jicofo_root
+sudo cp -ar ../src/jicofo_dist/$(basename "$jicofo_dist_zip" .zip)/* $jicofo_root
+sudo useradd -r -g jitsi -d $jicofo_root --shell /bin/bash jicofo
+sudo chown -R jicofo:jitsi $jicofo_root
+
+cat << EOF > ../src/jicofo_options
+# Jitsi Conference Focus settings
+JICOFO_HOST=localhost
+JICOFO_HOSTNAME=$jitsi_domain
+JICOFO_SECRET=$YNH_YOURSECRET2
+JICOFO_PORT=5347
+JICOFO_AUTH_DOMAIN=auth.$jitsi_domain
+JICOFO_AUTH_USER=focus
+JICOFO_AUTH_PASSWORD=$YNH_YOURSECRET3
+JICOFO_OPTS=""
+EOF
+
+sudo mv ../src/jicofo_options /etc/default/jicofo
+sudo cp ../conf/jitsi-jicofo.init /etc/init.d/jicofo
+sudo chmod +x /etc/init.d/jicofo
+sudo update-rc.d jicofo defaults
+sudo yunohost service add jicofo -l /var/log/jitsi/jvb.log
+
+# TODO : build with java7, since java6 outputs more warnings
+# TODO : logrotate
+# TODO : hook to monit
+
+
+#--- Install Jireco daemon ---
+# TODO for later...
+
+#--- Install Jitsi-meet ---
+wget -O ../src/jitsi-meet.zip https://github.com/jitsi/jitsi-meet/archive/master.zip
+unzip ../src/jitsi-meet.zip -d ../src/jitsi-meet
+jitsimeet_path=/var/www/jitsi
+sudo mkdir -p $jitsimeet_path
+sudo cp -ar ../src/jitsi-meet/jitsi-meet-master/* $jitsimeet_path
+
+sed -i "s@YNH_JITSI_XMPP_HOST@$jitsi_domain@g" ../conf/jitsimeet-config.js
+sudo cp ../conf/jitsimeet-config.js $jitsimeet_path/config.js
+
+sudo chown -R root: $jitsimeet_path
+sudo find $jitsimeet_path -type f | xargs sudo chmod 644
+sudo find $jitsimeet_path -type d | xargs sudo chmod 755
+
+# TODO : remove tracking
+# TODO : remove GoogleAnalytics
+
+#--- Configure metronome ---
+sed -i "s@YNH_JITSI_XMPP_HOST@$jitsi_domain@g" ../conf/metronome.conf
+sed -i "s@YNH_YOURSECRET1@$YNH_YOURSECRET1@g" ../conf/metronome.conf
+sed -i "s@YNH_YOURSECRET2@$YNH_YOURSECRET2@g" ../conf/metronome.conf
+sed -i "s@YNH_YOURSECRET4@$YNH_YOURSECRET4@g" ../conf/metronome.conf
+
+sudo cp ../conf/metronome.conf /etc/metronome/conf.d/$jitsi_domain.cfg.lua
+sudo chown metronome: /etc/metronome/conf.d/$jitsi_domain.cfg.lua
+
+sudo openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj \
+    "/O=$domain/OU=$domain/CN=$jitsi_domain/emailAddress=webmaster@$domain" \
+    -keyout /var/lib/metronome/$jitsi_domain.key \
+    -out /var/lib/metronome/$jitsi_domain.crt
+
+
+# sudo metronomectl register focus auth.$jitsi_domain $YNH_YOURSECRET3
+
+
+#--- Configure Nginx ---
+# remove trailing '/'. this leaves '/something' untouched, but changes '/' to ''
+path=${path%/}
+sed -i "s@YNH_LOCATION@$path@g" ../conf/nginx.conf
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/jitsi.conf
+
+sudo service metronome reload
+sudo service jitsi-videobridge restart
+sudo service jicofo restart
+sudo service nginx reload

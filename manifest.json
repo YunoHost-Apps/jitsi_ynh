@@ -1,0 +1,37 @@
+{
+  "name": "Jitsi Meet",
+  "id": "jitsi",
+  "description": {
+    "en": "Video conferencing web application",
+    "fr": "Application web de conférence vidéo"
+  },
+  "url": "https://jitsi.org/Projects/JitMeet",
+  "maintainer": {
+    "name": "ju",
+    "email": "julien.malik@paraiso.me"
+  },
+  "multi_instance": "false",
+  "arguments": {
+    "install": [
+      {
+        "name": "domain",
+        "type": "domain",
+        "ask": {
+          "en": "Choose a domain for Jitsi Meet",
+          "fr": "Choisissez un domaine pour Jitsi Meet"
+        },
+        "example": "domain.org"
+      },
+      {
+        "name": "path",
+        "type": "path",
+        "ask": {
+          "en": "Choose a path for Jitsi Meet",
+          "fr": "Choisissez un chemin pour Jitsi Meet"
+        },
+        "example": "/",
+        "default": "/"
+      }
+    ]
+  }
+}

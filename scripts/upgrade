@@ -1,0 +1,14 @@
+#!/bin/bash                                                                                                                                                                                      
+
+# Retrieve arguments
+domain=$(sudo yunohost app setting jitsi domain)
+path=$(sudo yunohost app setting jitsi path)
+
+# Remove trailing "/" for next commands
+path=${path%/}
+
+# Configure Nginx and reload
+sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/jitsi.conf
+sudo service nginx reload
+sudo service jitsi reload

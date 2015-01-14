@@ -1,0 +1,34 @@
+#!/bin/bash
+
+domain=$(sudo yunohost app setting jitsi domain)
+
+sudo service jitsi-videobridge stop
+sudo service jicofo stop
+
+sudo rm -rf /opt/yunohost/jicofo
+sudo rm -rf /opt/yunohost/jitsi-videobridge
+sudo rm /etc/default/jitsi-videobridge
+sudo rm /etc/default/jicofo
+
+sudo update-rc.d jitsi-videobridge remove
+sudo rm /etc/init.d/jitsi-videobridge
+sudo yunohost service remove jitsi-videobridge
+
+sudo update-rc.d jicofo remove
+sudo rm /etc/init.d/jicofo
+sudo yunohost service remove jicofo
+
+jitsi_domain=jitsi.$domain
+sudo rm /etc/metronome/conf.d/$jitsi_domain.cfg.lua
+sudo service metronome restart
+
+sudo rm /etc/nginx/conf.d/$domain.d/jitsi.conf
+sudo service nginx reload
+sudo yunohost app ssowatconf                                                                                                                                                                     
+
+sudo rm -rf /var/log/jitsi
+
+sudo userdel jvb
+sudo userdel jicofo
+sudo groupdel jitsi
+
