@@ -92,10 +92,14 @@ case "$1" in
     start
     ;;
   reload)
-    reload
+    #reload
+    stop
+    start
     ;;
   force-reload)
-    reload
+    #reload
+    stop
+    start
     ;;
   status)
     status
