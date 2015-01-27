@@ -4,7 +4,6 @@
 domain=$1
 path=$2
 
-# TODO : if arch != x86 or amd64 => unsupported
 arch=$(uname -m)
 if [[ "$arch" != "i686" ]] && [[ "$arch" != "x86_64" ]] ; then
   echo "Currently supported only on i686 or x86_64."
@@ -23,10 +22,9 @@ if [[ ! $? -eq 0 ]]; then
 fi
 
 sudo apt-get update
-sudo apt-get install openjdk-7-jre ant openjdk-6-jdk -y
+sudo apt-get install openjdk-7-jdk ant -y
 
-# TODO do we really need this ???
-#sudo apt-get install lua-dbi-sqlite3 -y
+# TODO need lua-sec >= 0.5 otherwise jicofo cannot connect because of "no shared ciphers"
 
 #git clone https://github.com/andyet/otalk-server ../src/otalk-server
 # TODO mam,websocket(s) already available in default metronome
@@ -41,7 +39,6 @@ jitsi_domain="jitsi.${domain}"
 # TODO verify $jitsi_domain is not already used somehow...
 
 sudo groupadd jitsi
-
 
 #--- Install Jitsi videobridge ---
 jvb_buildnum=$(cat ../conf/jvb.version)
@@ -81,7 +78,7 @@ sudo yunohost service add jitsi-videobridge -l /var/log/jitsi/jvb.log
 #        See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
 # TODO : logrotate
 # TODO : hook to monit
-# TODO : enable jitsi stats : what wan we do with it ?
+# TODO : enable jitsi stats : what do we do with it ?
 
 #--- Install Jicofo ---
 wget -O ../src/jicofo.zip https://github.com/jitsi/jicofo/archive/master.zip
@@ -93,7 +90,7 @@ else
   jicofo_target="lin64"
   jicofo_arch="x64"
 fi
-bash -c "cd ../src/jicofo/jicofo-master; ant dist.$jicofo_target"
+bash -c "cd ../src/jicofo/jicofo-master; PATH=/usr/lib/jvm/java-7-openjdk-amd64/bin:$PATH ant dist.$jicofo_target"
 jicofo_dist_zip=$(ls ../src/jicofo/jicofo-master/dist/linux/*.zip)
 unzip $jicofo_dist_zip -d ../src/jicofo_dist
 
@@ -124,7 +121,6 @@ sudo yunohost service add jicofo -l /var/log/jitsi/jvb.log
 # TODO : build with java7, since java6 outputs more warnings
 # TODO : logrotate
 # TODO : hook to monit
-
 
 #--- Install Jireco daemon ---
 # TODO for later...
@@ -160,15 +156,16 @@ sudo openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj \
     -keyout /var/lib/metronome/$jitsi_domain.key \
     -out /var/lib/metronome/$jitsi_domain.crt
 
-
-# sudo metronomectl register focus auth.$jitsi_domain $YNH_YOURSECRET3
-
+# TODO : adduser headless with python pexpect ?
+sudo metronomectl adduser focus@auth.$jitsi_domain # $YNH_YOURSECRET3
 
 #--- Configure Nginx ---
 # remove trailing '/'. this leaves '/something' untouched, but changes '/' to ''
 path=${path%/}
 sed -i "s@YNH_LOCATION@$path@g" ../conf/nginx.conf
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/jitsi.conf
+
+# TODO : subdir support
 
 sudo service metronome reload
 sudo service jitsi-videobridge restart
