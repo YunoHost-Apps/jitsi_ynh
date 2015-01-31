@@ -1,0 +1,14 @@
+* backport luasec 0.5 from jessie for PFS ciphers
+* why tls between jicofo and metronome (luasec >= 0.5 required)
+* why tls between jvb and metronome (luasec >= 0.5 required)
+* support subdir : which rewrite rule ?
+* desktop sharing : chrome extension needs to be reference the host explicitely
+* config.js clientNode : what's this ? see XEP-0115
+* metronome conf : bind vhost and components to localhost
+* wireshark the thing : is everything encrypted ?
+* recording : what can be done ?
+* etherpad
+* ipv6 : what's the status ? clients/server...
+* mod_{smacks,carbons,mam,websocket,turncredentials} not needed actually ?
+* jigasi SIP gateway
+* is there any web based video-sip client around ?

@@ -157,7 +157,7 @@ sudo openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj \
     -out /var/lib/metronome/$jitsi_domain.crt
 
 # TODO : adduser headless with python pexpect ?
-sudo metronomectl adduser focus@auth.$jitsi_domain # $YNH_YOURSECRET3
+#sudo metronomectl adduser focus@auth.$jitsi_domain # $YNH_YOURSECRET3
 
 #--- Configure Nginx ---
 # remove trailing '/'. this leaves '/something' untouched, but changes '/' to ''
