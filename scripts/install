@@ -1,173 +1,241 @@
-#!/bin/bash                                                                                                                                                                                      
+#!/bin/bash
 
-# Retrieve arguments
-domain=$1
-path=$2
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-arch=$(uname -m)
-if [[ "$arch" != "i686" ]] && [[ "$arch" != "x86_64" ]] ; then
-  echo "Currently supported only on i686 or x86_64."
-  echo "ARM platforms are NOT supported right now."
-  exit 1
-fi
+source _common.sh
+source /usr/share/yunohost/helpers
 
-if [[ "$path" != "/" ]] ; then
-  echo "Only '/' is supported as path for the moment."
-  exit 1
-fi 
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
 
-sudo yunohost app checkurl $domain$path -a jitsi
-if [[ ! $? -eq 0 ]]; then 
-  exit 1
-fi
+ynh_clean_setup () {
+	read -p "key"
+	true
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
-sudo apt-get update
-sudo apt-get install openjdk-7-jdk ant -y
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
 
-# TODO need lua-sec >= 0.5 otherwise jicofo cannot connect because of "no shared ciphers"
+domain=$YNH_APP_ARG_DOMAIN
+path_url="/"
 
-#git clone https://github.com/andyet/otalk-server ../src/otalk-server
-# TODO mam,websocket(s) already available in default metronome
-#cp -r ../src/otalk-server/mod_{smacks,carbons,mam,websocket,turncredentials} /usr/lib/metronome/modules
+#YOURSECRET3
+focus_password=$(ynh_string_random --length=8)
+#YOURSECRET1
+videobridge_secret=$(ynh_string_random --length=8)
+#YOURSECRET2
+focus_secret=$(ynh_string_random --length=8)
 
-YNH_YOURSECRET1=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
-YNH_YOURSECRET2=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
-YNH_YOURSECRET3=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
-YNH_YOURSECRET4=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
+app=$YNH_APP_INSTANCE_NAME
 
-jitsi_domain="jitsi.${domain}"
-# TODO verify $jitsi_domain is not already used somehow...
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
+ynh_script_progression --message="Validating installation parameters..." --time --weight=1
 
-sudo groupadd jitsi
+final_path=/var/www/$app
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
 
-#--- Install Jitsi videobridge ---
-jvb_buildnum=$(cat ../conf/jvb.version)
-if [[ "$arch" == "i686" ]] ; then
-  jvb_arch="x86"
-else
-  jvb_arch="x64"
-fi
-mkdir ../src
-wget -O ../src/jitsi-videobridge.zip https://download.jitsi.org/jitsi-videobridge/linux/jitsi-videobridge-linux-$jvb_arch-$jvb_buildnum.zip
-unzip ../src/jitsi-videobridge.zip -d ../src/jitsi-videobridge
-jvb_root=/opt/yunohost/jitsi-videobridge
-sudo mkdir -p $jvb_root
-sudo cp -ar ../src/jitsi-videobridge/jitsi-videobridge-linux-$jvb_arch-$jvb_buildnum/* $jvb_root
-sudo useradd -r -g jitsi -d $jvb_root --shell /bin/bash jvb
-sudo chown -R jvb:jitsi $jvb_root
-sudo mkdir -p /var/log/jitsi
-sudo chown jvb:jitsi /var/log/jitsi
-sudo chmod 770 /var/log/jitsi
+# Register (book) web path
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
-cat << EOF > ../src/jvb_options
-JVB_HOSTNAME=$jitsi_domain
-JVB_PORT=5347
-JVB_SECRET=$YNH_YOURSECRET1
-JVB_OPTS=""
-EOF
+#! ynh_user_exists --username=${app}-focus || ynh_die --message="User ${app}-focus already exist, please remove it first"
 
-sudo mv ../src/jvb_options /etc/default/jitsi-videobridge
-sudo cp ../conf/jitsi-videobridge.init /etc/init.d/jitsi-videobridge
-sudo chmod +x /etc/init.d/jitsi-videobridge
-sudo update-rc.d jitsi-videobridge defaults
-sudo yunohost service add jitsi-videobridge -l /var/log/jitsi/jvb.log
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+ynh_script_progression --message="Storing installation settings..." --time --weight=1
 
-# TODO : install java7
-# TODO : create .sip-communicator to handle videobridge behind NAT
-# TODO : avoid error in logs Failed to load class "org.slf4j.impl.StaticLoggerBinder"
-#        See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-# TODO : logrotate
-# TODO : hook to monit
-# TODO : enable jitsi stats : what do we do with it ?
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
+ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
+ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
 
-#--- Install Jicofo ---
-wget -O ../src/jicofo.zip https://github.com/jitsi/jicofo/archive/master.zip
-unzip ../src/jicofo.zip -d ../src/jicofo
-if [[ "$arch" == "i686" ]] ; then
-  jicofo_target="lin"
-  jicofo_arch="x86"
-else
-  jicofo_target="lin64"
-  jicofo_arch="x64"
-fi
-bash -c "cd ../src/jicofo/jicofo-master; PATH=/usr/lib/jvm/java-7-openjdk-amd64/bin:$PATH ant dist.$jicofo_target"
-jicofo_dist_zip=$(ls ../src/jicofo/jicofo-master/dist/linux/*.zip)
-unzip $jicofo_dist_zip -d ../src/jicofo_dist
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# FIND AND OPEN A PORT
+#=================================================
+ynh_script_progression --message="Configuring firewall..." --time --weight=1
 
-jicofo_root=/opt/yunohost/jicofo
-sudo mkdir -p $jicofo_root
-sudo cp -ar ../src/jicofo_dist/$(basename "$jicofo_dist_zip" .zip)/* $jicofo_root
-sudo useradd -r -g jitsi -d $jicofo_root --shell /bin/bash jicofo
-sudo chown -R jicofo:jitsi $jicofo_root
+# Find a free port
+port=$(ynh_find_port --port=4443)
+# Open this port
+ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
+ynh_app_setting_set --app=$app --key=port --value=$port
 
-cat << EOF > ../src/jicofo_options
-# Jitsi Conference Focus settings
-JICOFO_HOST=localhost
-JICOFO_HOSTNAME=$jitsi_domain
-JICOFO_SECRET=$YNH_YOURSECRET2
-JICOFO_PORT=5347
-JICOFO_AUTH_DOMAIN=auth.$jitsi_domain
-JICOFO_AUTH_USER=focus
-JICOFO_AUTH_PASSWORD=$YNH_YOURSECRET3
-JICOFO_OPTS=""
-EOF
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Installing dependencies..." --time --weight=1
 
-sudo mv ../src/jicofo_options /etc/default/jicofo
-sudo cp ../conf/jitsi-jicofo.init /etc/init.d/jicofo
-sudo chmod +x /etc/init.d/jicofo
-sudo update-rc.d jicofo defaults
-sudo yunohost service add jicofo -l /var/log/jitsi/jvb.log
+ynh_install_app_dependencies $pkg_dependencies
 
-# TODO : build with java7, since java6 outputs more warnings
-# TODO : logrotate
-# TODO : hook to monit
+ynh_install_nodejs --nodejs_version=10
 
-#--- Install Jireco daemon ---
-# TODO for later...
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression --message="Setting up source files..." --time --weight=1
 
-#--- Install Jitsi-meet ---
-wget -O ../src/jitsi-meet.zip https://github.com/jitsi/jitsi-meet/archive/master.zip
-unzip ../src/jitsi-meet.zip -d ../src/jitsi-meet
-jitsimeet_path=/var/www/jitsi
-sudo mkdir -p $jitsimeet_path
-sudo cp -ar ../src/jitsi-meet/jitsi-meet-master/* $jitsimeet_path
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
+ynh_setup_source --dest_dir="$final_path/jitsi-jicofo" --source_id=jitsi-jicofo
+ynh_setup_source --dest_dir="$final_path/jitsi-meet" --source_id=jitsi-meet
 
-sed -i "s@YNH_JITSI_XMPP_HOST@$jitsi_domain@g" ../conf/jitsimeet-config.js
-sudo cp ../conf/jitsimeet-config.js $jitsimeet_path/config.js
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Configuring nginx web server..." --time --weight=1
 
-sudo chown -R root: $jitsimeet_path
-sudo find $jitsimeet_path -type f | xargs sudo chmod 644
-sudo find $jitsimeet_path -type d | xargs sudo chmod 755
+# Create a dedicated nginx config
+ynh_add_nginx_config
 
-# TODO : remove tracking
-# TODO : remove GoogleAnalytics
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Configuring system user..." --time --weight=1
 
-#--- Configure metronome ---
-sed -i "s@YNH_JITSI_XMPP_HOST@$jitsi_domain@g" ../conf/metronome.conf
-sed -i "s@YNH_YOURSECRET1@$YNH_YOURSECRET1@g" ../conf/metronome.conf
-sed -i "s@YNH_YOURSECRET2@$YNH_YOURSECRET2@g" ../conf/metronome.conf
-sed -i "s@YNH_YOURSECRET4@$YNH_YOURSECRET4@g" ../conf/metronome.conf
+# Create a system user
+ynh_system_user_create --username=$app --home_dir=$final_path
 
-sudo cp ../conf/metronome.conf /etc/metronome/conf.d/$jitsi_domain.cfg.lua
-sudo chown metronome: /etc/metronome/conf.d/$jitsi_domain.cfg.lua
+#=================================================
+# SPECIFIC SETUP
+#=================================================
+# CONFIGURE METRONOME
+#=================================================
 
-sudo openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj \
-    "/O=$domain/OU=$domain/CN=$jitsi_domain/emailAddress=webmaster@$domain" \
-    -keyout /var/lib/metronome/$jitsi_domain.key \
-    -out /var/lib/metronome/$jitsi_domain.crt
+# Create additional domains
+yunohost domain add auth.$domain
 
-# TODO : adduser headless with python pexpect ?
-#sudo metronomectl adduser focus@auth.$jitsi_domain # $YNH_YOURSECRET3
+# Create focus user
+yunohost user create ${app}-focus -f ${app}-focus -l ${app}-focus -m ${app}-focus@auth.$domain -p $focus_password -q 0
 
-#--- Configure Nginx ---
-# remove trailing '/'. this leaves '/something' untouched, but changes '/' to ''
-path=${path%/}
-sed -i "s@YNH_LOCATION@$path@g" ../conf/nginx.conf
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/jitsi.conf
+# Configure metronome
+mv /etc/metronome/conf.d/$domain.cfg.lua /etc/metronome/conf.d/$domain.cfg.lua.back
+mv /etc/metronome/conf.d/auth.$domain.cfg.lua /etc/metronome/conf.d/auth.$domain.cfg.lua.back
+metronome="/etc/metronome/conf.d/$domain.cfg.lua"
+cp ../conf/metronome.cfg.lua "$metronome"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome"
+ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome"
+ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome"
+ynh_systemd_action --service_name=metronome --action=reload
 
-# TODO : subdir support
+#=================================================
+# BUILD JITSI-VIDEOBRIDGE
+#=================================================
 
-sudo service metronome reload
-sudo service jitsi-videobridge restart
-sudo service jicofo restart
-sudo service nginx reload
+pushd "$final_path/jitsi-videobridge"
+    mvn compile exec:exec -Dexec.executable=java -Dexec.args="-cp %classpath org.jitsi.videobridge.Main --domain=\"$domain\" --host=\"localhost \" --port=\"5347\" --secret=\"$videobridge_secret\" -Djava.library.path=$JVB_HOME/lib/native/linux-64 -Djava.util.logging.config.file=$JVB_HOME/lib/logging.properties -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=.jitsi-videobridge "
+popd
+
+#=================================================
+# BUILD JITSI-JICOFO
+#=================================================
+
+pushd "$final_path/jitsi-jicofo"
+    mvn package -DskipTests -Dassembly.skipAssembly=false
+popd
+
+#=================================================
+# BUILD JITSI-MEET
+#=================================================
+
+pushd "$final_path/jitsi-meet"
+    ynh_use_nodejs
+    npm install
+    make
+popd
+
+config="$final_path/jitsi-meet/config.js"
+cp ../conf/config.js "$config"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Configuring a systemd service..." --time --weight=1
+
+# Create a dedicated systemd config
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
+ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="../conf/jitsi-videobridge.service"
+ynh_add_systemd_config --service=$app-jitsi-videobridge --template=jitsi-videobridge
+
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
+ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
+ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
+ynh_add_systemd_config --service=$app-jitsi-jicofo --template=jitsi-jicofo
+
+#=================================================
+# STORE THE CONFIG FILE CHECKSUM
+#=================================================
+
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum --file="$config"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
+
+# Set permissions to app files
+chown -R root: $final_path
+
+#=================================================
+# SETUP LOGROTATE
+#=================================================
+ynh_script_progression --message="Configuring log rotation..." --time --weight=1
+
+# Use logrotate to manage application logfile(s)
+ynh_use_logrotate
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+#yunohost service add $app --log "/var/log/$app/$app.log"
+# if using yunohost version 3.2 or more in the 'manifest.json', a description can be added
+yunohost service add $app-jitsi-videobridge --description "$app jitsi-videobridge for jitsi" --log "/var/log/$app/$app-jitsi-videobridge.log"
+yunohost service add $app-jitsi-jicofo --description "$app jitsi-jicofo for jitsi" --log "/var/log/$app/$app-jitsi-jicofo.log"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting a systemd service..." --time --weight=1
+
+# Start a systemd service
+ynh_systemd_action --service_name=$app-jitsi-videobridge --action="start" --log_path="/var/log/$app/$app-jitsi-videobridge.log"
+ynh_systemd_action --service_name=$app-jitsi-jicofo --action="start" --log_path="/var/log/$app/$app-jitsi-jicofo.log"
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+ynh_script_progression --message="Configuring SSOwat..." --time --weight=1
+
+# Make app public
+ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_script_progression --message="Reloading nginx web server..." --time --weight=1
+
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Installation of $app completed" --time --last

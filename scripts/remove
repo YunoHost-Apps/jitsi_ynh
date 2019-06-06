@@ -1,34 +1,133 @@
 #!/bin/bash
 
-domain=$(sudo yunohost app setting jitsi domain)
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-sudo service jitsi-videobridge stop
-sudo service jicofo stop
+source _common.sh
+source /usr/share/yunohost/helpers
 
-sudo rm -rf /opt/yunohost/jicofo
-sudo rm -rf /opt/yunohost/jitsi-videobridge
-sudo rm /etc/default/jitsi-videobridge
-sudo rm /etc/default/jicofo
+#=================================================
+# LOAD SETTINGS
+#=================================================
+ynh_script_progression --message="Loading installation settings..." --time --weight=1
 
-sudo update-rc.d jitsi-videobridge remove
-sudo rm /etc/init.d/jitsi-videobridge
-sudo yunohost service remove jitsi-videobridge
+app=$YNH_APP_INSTANCE_NAME
 
-sudo update-rc.d jicofo remove
-sudo rm /etc/init.d/jicofo
-sudo yunohost service remove jicofo
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+port=$(ynh_app_setting_get --app=$app --key=port)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-jitsi_domain=jitsi.$domain
-sudo rm /etc/metronome/conf.d/$jitsi_domain.cfg.lua
-sudo service metronome restart
+#=================================================
+# STANDARD REMOVE
+#=================================================
+# REMOVE SERVICE FROM ADMIN PANEL
+#=================================================
 
-sudo rm /etc/nginx/conf.d/$domain.d/jitsi.conf
-sudo service nginx reload
-sudo yunohost app ssowatconf                                                                                                                                                                     
+# Remove a service from the admin panel, added by `yunohost service add`
+if ynh_exec_warn_less yunohost service status $app-jitsi-videobridge >/dev/null
+then
+	ynh_script_progression --message="Removing $app-jitsi-videobridge service..." --time --weight=1
+	yunohost service remove $app-jitsi-videobridge
+fi
+if ynh_exec_warn_less yunohost service status $app-jitsi-jicofo >/dev/null
+then
+	ynh_script_progression --message="Removing $app-jitsi-jicofo service..." --time --weight=1
+	yunohost service remove $app-jitsi-jicofo
+fi
 
-sudo rm -rf /var/log/jitsi
+#=================================================
+# STOP AND REMOVE SERVICE
+#=================================================
+ynh_script_progression --message="Stopping and removing the systemd service..." --time --weight=1
 
-sudo userdel jvb
-sudo userdel jicofo
-sudo groupdel jitsi
+# Remove the dedicated systemd config
+ynh_remove_systemd_config --service=$app-jitsi-videobridge
+ynh_remove_systemd_config --service=$app-jitsi-jicofo
 
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Removing dependencies..." --time --weight=1
+
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
+
+ynh_remove_nodejs
+
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
+ynh_script_progression --message="Removing app main directory..." --time --weight=1
+
+# Remove the app directory securely
+ynh_secure_remove --file="$final_path"
+
+#=================================================
+# REMOVE NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Removing nginx web server configuration..." --time --weight=1
+
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
+
+#=================================================
+# REMOVE LOGROTATE CONFIGURATION
+#=================================================
+ynh_script_progression --message="Removing logrotate configuration..." --time --weight=1
+
+# Remove the app-specific logrotate config
+ynh_remove_logrotate
+
+#=================================================
+# CLOSE A PORT
+#=================================================
+
+if yunohost firewall list | grep -q "\- $port$"
+then
+	ynh_script_progression --message="Closing port $port..."
+	ynh_exec_warn_less yunohost firewall disallow TCP $port
+fi
+
+#=================================================
+# SPECIFIC REMOVE
+#=================================================
+# REMOVE METRONOME
+#=================================================
+
+# Reconfigure metronome
+ynh_secure_remove --file="/etc/metronome/conf.d/$domain.cfg.lua.back"
+mv /etc/metronome/conf.d/$domain.cfg.lua.back /etc/metronome/conf.d/$domain.cfg.lua
+mv /etc/metronome/conf.d/auth.$domain.cfg.lua.back /etc/metronome/conf.d/auth.$domain.cfg.lua
+ynh_systemd_action --service_name=metronome --action=reload
+
+# Delete focus user
+yunohost user delete ${app}-focus --purge
+
+# Removing additional domains
+yunohost domain remove auth.$domain
+
+#=================================================
+# REMOVE THE CRON FILE
+#=================================================
+
+# Remove the log files
+ynh_secure_remove --file="/var/log/$app/"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# REMOVE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Removing the dedicated system user..." --time --weight=1
+
+# Delete a system user
+ynh_system_user_delete --username=$app
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Removal of $app completed" --time --last

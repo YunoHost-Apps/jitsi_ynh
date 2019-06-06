@@ -1,16 +1,27 @@
 {
   "name": "Jitsi Meet",
   "id": "jitsi",
+    "packaging_format": 1,
   "description": {
     "en": "Video conferencing web application",
     "fr": "Application web de conférence vidéo"
   },
+    "version": "1.0.3775~ynh1",
   "url": "https://jitsi.org/Projects/JitMeet",
+    "license": "Apache-2.0",
   "maintainer": {
     "name": "ju",
     "email": "julien.malik@paraiso.me"
   },
+    "requirements": {
+        "yunohost": ">= 3.5"
+    },
   "multi_instance": "false",
+    "services": [
+        "nginx",
+        "php7.0-fpm",
+        "mysql"
+    ],
   "arguments": {
     "install": [
       {
@@ -21,16 +32,6 @@
           "fr": "Choisissez un domaine pour Jitsi Meet"
         },
         "example": "domain.org"
-      },
-      {
-        "name": "path",
-        "type": "path",
-        "ask": {
-          "en": "Choose a path for Jitsi Meet",
-          "fr": "Choisissez un chemin pour Jitsi Meet"
-        },
-        "example": "/",
-        "default": "/"
       }
     ]
   }

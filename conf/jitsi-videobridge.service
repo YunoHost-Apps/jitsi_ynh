@@ -1,0 +1,13 @@
+[Unit]
+Description=jitsi-videobridge
+After=network.target
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+WorkingDirectory=__FINALPATH__/jitsi-videobridge/
+ExecStart=__FINALPATH__/jitsi-videobridge/jvb.sh --host=localhost --domain=__DOMAIN__ --port=5347 --secret=__VIDEOBRIDGE_SECRET__ & >> /var/log/__APP__/__APP__-jitsi-videobridge.log 2>&1
+
+[Install]
+WantedBy=multi-user.target

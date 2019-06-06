@@ -1,0 +1,6 @@
+SOURCE_URL=https://github.com/jitsi/jicofo/archive/472.tar.gz
+SOURCE_SUM=5c3c63a15119187bf547400e1fec04c6cc53fd82dec9fdef33b82a27379d6fc1
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=tar.gz
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=
