@@ -18,7 +18,9 @@ app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 port=$(ynh_app_setting_get --app=$app --key=port)
+port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 
 #=================================================
 # STANDARD REMOVE
@@ -27,15 +29,16 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 #=================================================
 
 # Remove a service from the admin panel, added by `yunohost service add`
-if ynh_exec_warn_less yunohost service status $app-jitsi-videobridge >/dev/null
+if ynh_exec_warn_less yunohost service status $app-videobridge >/dev/null
 then
-	ynh_script_progression --message="Removing $app-jitsi-videobridge service..." --time --weight=1
-	yunohost service remove $app-jitsi-videobridge
+	ynh_script_progression --message="Removing $app-videobridge service..." --time --weight=1
+	yunohost service remove $app-videobridge
 fi
-if ynh_exec_warn_less yunohost service status $app-jitsi-jicofo >/dev/null
+
+if ynh_exec_warn_less yunohost service status $app-jicofo >/dev/null
 then
-	ynh_script_progression --message="Removing $app-jitsi-jicofo service..." --time --weight=1
-	yunohost service remove $app-jitsi-jicofo
+	ynh_script_progression --message="Removing $app-jicofo service..." --time --weight=1
+	yunohost service remove $app-jicofo
 fi
 
 #=================================================
@@ -44,8 +47,8 @@ fi
 ynh_script_progression --message="Stopping and removing the systemd service..." --time --weight=1
 
 # Remove the dedicated systemd config
-ynh_remove_systemd_config --service=$app-jitsi-videobridge
-ynh_remove_systemd_config --service=$app-jitsi-jicofo
+ynh_remove_systemd_config --service=$app-videobridge
+ynh_remove_systemd_config --service=$app-jicofo
 
 #=================================================
 # REMOVE DEPENDENCIES
@@ -91,6 +94,12 @@ then
 	ynh_exec_warn_less yunohost firewall disallow TCP $port
 fi
 
+if yunohost firewall list | grep -q "\- $port_videobridge$"
+then
+	ynh_script_progression --message="Closing port $port_videobridge..."
+	ynh_exec_warn_less yunohost firewall disallow TCP $port_videobridge
+fi
+
 #=================================================
 # SPECIFIC REMOVE
 #=================================================
@@ -98,16 +107,24 @@ fi
 #=================================================
 
 # Reconfigure metronome
-ynh_secure_remove --file="/etc/metronome/conf.d/$domain.cfg.lua.back"
+ynh_secure_remove --file="/etc/metronome/conf.d/$domain.cfg.lua"
 mv /etc/metronome/conf.d/$domain.cfg.lua.back /etc/metronome/conf.d/$domain.cfg.lua
 mv /etc/metronome/conf.d/auth.$domain.cfg.lua.back /etc/metronome/conf.d/auth.$domain.cfg.lua
-ynh_systemd_action --service_name=metronome --action=reload
+mv /etc/metronome/conf.d/conference.$domain.cfg.lua.back /etc/metronome/conf.d/conference.$domain.cfg.lua
+mv /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua.back /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua
+mv /etc/metronome/conf.d/focus.$domain.cfg.lua.back /etc/metronome/conf.d/focus.$domain.cfg.lua
+
+ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
+ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
+#ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
+
+ynh_systemd_action --service_name=metronome --action=restart
 
 # Delete focus user
-yunohost user delete ${app}-focus --purge
+yunohost user delete $focus_user --purge
 
 # Removing additional domains
-yunohost domain remove auth.$domain
+#yunohost domain remove auth.$domain
 
 #=================================================
 # REMOVE THE CRON FILE

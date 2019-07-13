@@ -88,25 +88,25 @@ ynh_install_nodejs --nodejs_version=10
 #=================================================
 ynh_script_progression --message="Restoring the systemd configuration..." --time --weight=1
 
-ynh_restore_file --origin_path="/etc/systemd/system/$app-jitsi-videobridge.service"
-systemctl enable $app-jitsi-videobridge.service
-ynh_restore_file --origin_path="/etc/systemd/system/$app-jitsi-jicofo.service"
-systemctl enable $app-jitsi-jicofo.service
+ynh_restore_file --origin_path="/etc/systemd/system/$app-videobridge.service"
+systemctl enable $app-videobridge.service
+ynh_restore_file --origin_path="/etc/systemd/system/$app-jicofo.service"
+systemctl enable $app-jicofo.service
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app-jitsi-videobridge --log "/var/log/$app/$app-jitsi-videobridge.log"
-yunohost service add $app-jitsi-jicofo --log "/var/log/$app/$app-jitsi-jicofo.log"
+yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log"
+yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..." --time --weight=1
 
-ynh_systemd_action --service_name=$app-jitsi-videobridge --action="start" --log_path="/var/log/$app/$app-jitsi-videobridge.log"
-ynh_systemd_action --service_name=$app-jitsi-jicofo --action="start" --log_path="/var/log/$app/$app-jitsi-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION

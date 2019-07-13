@@ -17,10 +17,10 @@ Jitsi Meet is an open-source (Apache) WebRTC JavaScript application that uses Ji
 
 1. **Jitsi** require a dedicated **root domain**, eg. jitsi.domain.tld
 1. **Jitsi** require your create additionals dns names in your dns that goes to your YunoHost
-  1. auth.jitsi.domain.tld
-  1. conference.jitsi.domain.tld
-  1. jitsi-videobridge.jitsi.domain.tld
-  1. focus.jitsi.domain.tld
+  * auth.jitsi.domain.tld
+  * conference.jitsi.domain.tld
+  * jitsi-videobridge.jitsi.domain.tld
+  * focus.jitsi.domain.tld
 1. **Jitsi** require the ports TCP/4443 and UDP/10000 been redirected to your YunoHost
 
 ## Screenshots

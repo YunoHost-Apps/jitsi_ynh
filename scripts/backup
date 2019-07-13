@@ -37,8 +37,8 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..." --time --weight=1
 
-ynh_systemd_action --service_name=$app-jitsi-videobridge --action="stop" --log_path="/var/log/$app/$app-jitsi-videobridge.log"
-ynh_systemd_action --service_name=$app-jitsi-jicofo --action="stop" --log_path="/var/log/$app/$app-jitsi-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # BACKUP THE APP MAIN DIR
@@ -68,16 +68,16 @@ ynh_backup --src_path="/etc/logrotate.d/$app"
 #=================================================
 ynh_script_progression --message="Backing up systemd configuration..." --time --weight=1
 
-ynh_backup --src_path="/etc/systemd/system/$app-jitsi-videobridge.service"
-ynh_backup --src_path="/etc/systemd/system/$app-jitsi-jicofo.service"
+ynh_backup --src_path="/etc/systemd/system/$app-videobridge.service"
+ynh_backup --src_path="/etc/systemd/system/$app-jicofo.service"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..." --time --weight=1
 
-ynh_systemd_action --service_name=$app-jitsi-videobridge --action="start" --log_path="/var/log/$app/$app-jitsi-videobridge.log"
-ynh_systemd_action --service_name=$app-jitsi-jicofo --action="start" --log_path="/var/log/$app/$app-jitsi-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # END OF SCRIPT

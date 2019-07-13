@@ -5,7 +5,7 @@
 #=================================================
 
 # dependencies used by the app
-pkg_dependencies="openjdk-8-jre maven"
+pkg_dependencies="openjdk-8-jdk openjdk-8-jre maven"
 
 #=================================================
 # PERSONAL HELPERS

@@ -21,8 +21,8 @@
 -- Example: admins = { "user1@example.com", "user2@example.net" }
 admins = { "focus__APP__@auth.__DOMAIN__" }
 daemonize = true
--- cross_domain_bosh = true;
-component_ports = { 5347 }
+cross_domain_bosh = true;
+component_ports = { __PORT_VIDEOBRIDGE__ }
 --component_interface = "192.168.0.10"
 
 -- Enable use of libevent for better performance under high load

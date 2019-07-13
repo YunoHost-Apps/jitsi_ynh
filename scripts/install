@@ -27,6 +27,8 @@ ynh_abort_if_errors
 domain=$YNH_APP_ARG_DOMAIN
 path_url="/"
 
+app=$YNH_APP_INSTANCE_NAME
+
 #YOURSECRET3
 focus_password=$(ynh_string_random --length=8)
 #YOURSECRET1
@@ -34,7 +36,7 @@ videobridge_secret=$(ynh_string_random --length=8)
 #YOURSECRET2
 focus_secret=$(ynh_string_random --length=8)
 
-app=$YNH_APP_INSTANCE_NAME
+focus_user=${app}focus
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -47,7 +49,7 @@ test ! -e "$final_path" || ynh_die --message="This path already contains a folde
 # Register (book) web path
 ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
-#! ynh_user_exists --username=${app}-focus || ynh_die --message="User ${app}-focus already exist, please remove it first"
+#ynh_user_exists --username=$focus_user || ynh_die --message="User $focus_user already exist, please remove it first"
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
@@ -59,6 +61,7 @@ ynh_app_setting_set --app=$app --key=path --value=$path_url
 ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
 ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
+ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -72,6 +75,12 @@ port=$(ynh_find_port --port=4443)
 # Open this port
 ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set --app=$app --key=port --value=$port
+
+# Find a free port
+port_videobridge=$(ynh_find_port --port=5347)
+# Open this port
+ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
+ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -90,7 +99,7 @@ ynh_script_progression --message="Setting up source files..." --time --weight=1
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
-ynh_setup_source --dest_dir="$final_path/jitsi-jicofo" --source_id=jitsi-jicofo
+ynh_setup_source --dest_dir="$final_path/jitsi-jicofo-build" --source_id=jitsi-jicofo
 ynh_setup_source --dest_dir="$final_path/jitsi-meet" --source_id=jitsi-meet
 
 #=================================================
@@ -114,43 +123,64 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # CONFIGURE METRONOME
 #=================================================
+ynh_script_progression --message="Configuring metronome..." --time --weight=1
 
 # Create additional domains
-yunohost domain add auth.$domain
+#yunohost domain add auth.$domain
 
 # Create focus user
-yunohost user create ${app}-focus -f ${app}-focus -l ${app}-focus -m ${app}-focus@auth.$domain -p $focus_password -q 0
+yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
 
 # Configure metronome
 mv /etc/metronome/conf.d/$domain.cfg.lua /etc/metronome/conf.d/$domain.cfg.lua.back
 mv /etc/metronome/conf.d/auth.$domain.cfg.lua /etc/metronome/conf.d/auth.$domain.cfg.lua.back
+mv /etc/metronome/conf.d/conference.$domain.cfg.lua /etc/metronome/conf.d/conference.$domain.cfg.lua.back
+mv /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua.back
+mv /etc/metronome/conf.d/focus.$domain.cfg.lua /etc/metronome/conf.d/focus.$domain.cfg.lua.back
+
 metronome="/etc/metronome/conf.d/$domain.cfg.lua"
 cp ../conf/metronome.cfg.lua "$metronome"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome"
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome"
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome"
-ynh_systemd_action --service_name=metronome --action=reload
+ynh_replace_string --match_string="__PORT_VIDEOBRIDGE__" --replace_string="$port_videobridge" --target_file="$metronome"
+chown -R metronome:metronome "/etc/metronome/conf.d/"
+
+cp ../conf/mod_carbons.lua /usr/lib/metronome/modules/mod_carbons.lua
+cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
+#cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
+
+#metronomectl adduser focusjitsi auth.test31.yh.yalh.net OCL1sd7d
+
+ynh_systemd_action --service_name=metronome --action=restart
 
 #=================================================
 # BUILD JITSI-VIDEOBRIDGE
 #=================================================
+ynh_script_progression --message="Building Jitsi-Videobridge..." --time --weight=1
 
-pushd "$final_path/jitsi-videobridge"
-    mvn compile exec:exec -Dexec.executable=java -Dexec.args="-cp %classpath org.jitsi.videobridge.Main --domain=\"$domain\" --host=\"localhost \" --port=\"5347\" --secret=\"$videobridge_secret\" -Djava.library.path=$JVB_HOME/lib/native/linux-64 -Djava.util.logging.config.file=$JVB_HOME/lib/logging.properties -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=.jitsi-videobridge "
-popd
+mkdir -p "$final_path/.sip-communicator"
+cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.propertie"
+chown -R $app: $final_path
 
 #=================================================
 # BUILD JITSI-JICOFO
 #=================================================
+ynh_script_progression --message="Building Jitsi-Jicofo..." --time --weight=1
 
-pushd "$final_path/jitsi-jicofo"
+pushd "$final_path/jitsi-jicofo-build"
     mvn package -DskipTests -Dassembly.skipAssembly=false
 popd
+
+unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d $final_path
+
+mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
 
 #=================================================
 # BUILD JITSI-MEET
 #=================================================
+ynh_script_progression --message="Building Jitsi-Meet..." --time --weight=1
 
 pushd "$final_path/jitsi-meet"
     ynh_use_nodejs
@@ -170,12 +200,14 @@ ynh_script_progression --message="Configuring a systemd service..." --time --wei
 # Create a dedicated systemd config
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="../conf/jitsi-videobridge.service"
-ynh_add_systemd_config --service=$app-jitsi-videobridge --template=jitsi-videobridge
+ynh_replace_string --match_string="__PORT_VIDEOBRIDGE__" --replace_string="$port_videobridge" --target_file="../conf/jitsi-videobridge.service"
+ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
 
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
+ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
-ynh_add_systemd_config --service=$app-jitsi-jicofo --template=jitsi-jicofo
+ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
@@ -191,7 +223,7 @@ ynh_store_file_checksum --file="$config"
 #=================================================
 
 # Set permissions to app files
-chown -R root: $final_path
+chown -R $app: $final_path
 
 #=================================================
 # SETUP LOGROTATE
@@ -207,8 +239,8 @@ ynh_use_logrotate
 
 #yunohost service add $app --log "/var/log/$app/$app.log"
 # if using yunohost version 3.2 or more in the 'manifest.json', a description can be added
-yunohost service add $app-jitsi-videobridge --description "$app jitsi-videobridge for jitsi" --log "/var/log/$app/$app-jitsi-videobridge.log"
-yunohost service add $app-jitsi-jicofo --description "$app jitsi-jicofo for jitsi" --log "/var/log/$app/$app-jitsi-jicofo.log"
+yunohost service add $app-videobridge --description "$app jitsi-videobridge for jitsi" --log "/var/log/$app/$app-videobridge.log"
+yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi" --log "/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -216,8 +248,8 @@ yunohost service add $app-jitsi-jicofo --description "$app jitsi-jicofo for jits
 ynh_script_progression --message="Starting a systemd service..." --time --weight=1
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app-jitsi-videobridge --action="start" --log_path="/var/log/$app/$app-jitsi-videobridge.log"
-ynh_systemd_action --service_name=$app-jitsi-jicofo --action="start" --log_path="/var/log/$app/$app-jitsi-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # SETUP SSOWAT

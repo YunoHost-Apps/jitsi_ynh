@@ -23,6 +23,7 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 focus_password=$(ynh_app_setting_get --app=$app --key=$focus_password)
 videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
 focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
+port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
 
 #=================================================
 # CHECK VERSION
@@ -62,8 +63,8 @@ ynh_abort_if_errors
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..." --time --weight=1
 
-ynh_systemd_action --service_name=$app-jitsi-videobridge --action="stop" --log_path="/var/log/$app/$app-jitsi-videobridge.log"
-ynh_systemd_action --service_name=$app-jitsi-jicofo --action="stop" --log_path="/var/log/$app/$app-jitsi-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -111,7 +112,7 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 
 pushd "$final_path/jitsi-videobridge"
-    mvn compile exec:exec -Dexec.executable=java -Dexec.args="-cp %classpath org.jitsi.videobridge.Main --domain=\"$domain\" --host=\"localhost \" --port=\"5347\" --secret=\"$videobridge_secret\" -Djava.library.path=$JVB_HOME/lib/native/linux-64 -Djava.util.logging.config.file=$JVB_HOME/lib/logging.properties -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=.jitsi-videobridge "
+    mvn compile exec:exec -Dexec.executable=java -Dexec.args="-cp %classpath org.jitsi.videobridge.Main --domain=\"$domain\" --host=\"localhost \" --port=\"$port_videobridge\" --secret=\"$videobridge_secret\" -Djava.library.path=$JVB_HOME/lib/native/linux-64 -Djava.util.logging.config.file=$JVB_HOME/lib/logging.properties -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=.jitsi-videobridge "
 popd
 
 #=================================================
@@ -160,12 +161,12 @@ ynh_script_progression --message="Upgrading systemd configuration..." --time --w
 # Create a dedicated systemd config
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="../conf/jitsi-videobridge.service"
-ynh_add_systemd_config --service=$app-jitsi-videobridge --template=jitsi-videobridge
+ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
 
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
-ynh_add_systemd_config --service=$app-jitsi-jicofo --template=jitsi-jicofo
+ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -189,8 +190,8 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 #=================================================
 ynh_script_progression --message="Starting a systemd service..." --time --weight=1
 
-ynh_systemd_action --service_name=$app-jitsi-videobridge --action="start" --log_path="/var/log/$app/$app-jitsi-videobridge.log"
-ynh_systemd_action --service_name=$app-jitsi-jicofo --action="start" --log_path="/var/log/$app/$app-jitsi-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # RELOAD NGINX

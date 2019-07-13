@@ -7,7 +7,7 @@ Type=simple
 User=__APP__
 Group=__APP__
 WorkingDirectory=__FINALPATH__/jitsi-videobridge/
-ExecStart=__FINALPATH__/jitsi-videobridge/jvb.sh --host=localhost --domain=__DOMAIN__ --port=5347 --secret=__VIDEOBRIDGE_SECRET__ & >> /var/log/__APP__/__APP__-jitsi-videobridge.log 2>&1
+ExecStart=/bin/bash -c "exec __FINALPATH__/jitsi-videobridge/jvb.sh --host=127.0.0.1 --domain=__DOMAIN__ --port=__PORT_VIDEOBRIDGE__ --secret=__VIDEOBRIDGE_SECRET__  < /dev/null >> ${LOGFILE} 2>&1"
 
 [Install]
 WantedBy=multi-user.target

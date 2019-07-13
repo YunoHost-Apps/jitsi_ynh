@@ -1,5 +1,5 @@
-SOURCE_URL=https://github.com/jitsi/jitsi-meet/archive/3426.tar.gz
-SOURCE_SUM=b37b50b784c76df56c3a3d5b7d403eeaa2829d17f69c3c22fbe6e2e4bd31a8b8
+SOURCE_URL=https://github.com/jitsi/jitsi-meet/archive/f8a049759db966a35daba3fcff1fd4d4fd206381.tar.gz
+SOURCE_SUM=4ed8fa519e0de417d4ddbd13658d372b0217d8f569cd352c85fb72c0e8e6c0f7
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
