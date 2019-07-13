@@ -100,7 +100,7 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
 ynh_setup_source --dest_dir="$final_path/jitsi-jicofo-build" --source_id=jitsi-jicofo
-ynh_setup_source --dest_dir="$final_path/jitsi-meet" --source_id=jitsi-meet
+ynh_setup_source --dest_dir="$final_path/jitsi-meet_temp" --source_id=jitsi-meet
 
 #=================================================
 # NGINX CONFIGURATION
@@ -182,11 +182,14 @@ mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
 #=================================================
 ynh_script_progression --message="Building Jitsi-Meet..." --time --weight=1
 
-pushd "$final_path/jitsi-meet"
-    ynh_use_nodejs
-    npm install
-    make
+pushd "$final_path/jitsi-meet_temp"
+	ar x jitsi-meet-web.deb data.tar.xz
+	tar xf data.tar.xz
 popd
+
+mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
+ynh_secure_remove --file="$final_path/jitsi-meet_temp"
+
 
 config="$final_path/jitsi-meet/config.js"
 cp ../conf/config.js "$config"
