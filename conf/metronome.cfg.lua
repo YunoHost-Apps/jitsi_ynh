@@ -22,7 +22,7 @@
 admins = { "focus__APP__@auth.__DOMAIN__" }
 daemonize = true
 cross_domain_bosh = true;
-component_ports = { __PORT_VIDEOBRIDGE__ }
+component_ports = { __PORT_COMPONENT__ }
 --component_interface = "192.168.0.10"
 
 -- Enable use of libevent for better performance under high load
@@ -186,7 +186,16 @@ VirtualHost "auth.__DOMAIN__"
 		key = "/etc/yunohost/certs/auth.__DOMAIN__/key.pem";
 		certificate = "/etc/yunohost/certs/auth.__DOMAIN__/crt.pem";
 	}
-	authentication = "internal_plain"
+	authentication = "ldap2"
+	ldap = {
+		hostname      = "localhost",
+		user = {
+			basedn        = "ou=users,dc=yunohost,dc=org",
+			filter        = "(&(objectClass=posixAccount)(mail=*@auth.__DOMAIN__))",
+			usernamefield = "mail",
+			namefield     = "cn",
+		},
+	}
 
 ------ Components ------
 -- You can specify components to add hosts that provide special services,

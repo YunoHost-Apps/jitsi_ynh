@@ -19,6 +19,7 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 port=$(ynh_app_setting_get --app=$app --key=port)
 port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
+port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 
@@ -97,14 +98,21 @@ fi
 if yunohost firewall list | grep -q "\- $port_videobridge$"
 then
 	ynh_script_progression --message="Closing port $port_videobridge..."
-	ynh_exec_warn_less yunohost firewall disallow TCP $port_videobridge
+	ynh_exec_warn_less yunohost firewall disallow UDP $port_videobridge
+fi
+
+if yunohost firewall list | grep -q "\- $port_component$"
+then
+	ynh_script_progression --message="Closing port $port_component..."
+	ynh_exec_warn_less yunohost firewall disallow TCP $port_component
 fi
 
 #=================================================
 # SPECIFIC REMOVE
 #=================================================
-# REMOVE METRONOME
+# RECONFIGURE METRONOME
 #=================================================
+ynh_script_progression --message="Reconfiguring Metronome..." --time --weight=1
 
 # Reconfigure metronome
 ynh_secure_remove --file="/etc/metronome/conf.d/$domain.cfg.lua"
@@ -125,6 +133,9 @@ yunohost user delete $focus_user --purge
 
 # Removing additional domains
 #yunohost domain remove auth.$domain
+#yunohost domain remove conference.$domain
+#yunohost domain remove jitsi-videobridge.$domain
+#yunohost domain remove focus.$domain
 
 #=================================================
 # REMOVE THE CRON FILE

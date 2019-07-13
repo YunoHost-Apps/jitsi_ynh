@@ -36,7 +36,7 @@ videobridge_secret=$(ynh_string_random --length=8)
 #YOURSECRET2
 focus_secret=$(ynh_string_random --length=8)
 
-focus_user=${app}focus
+focus_user="svc${app}focus"
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -77,10 +77,16 @@ ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set --app=$app --key=port --value=$port
 
 # Find a free port
-port_videobridge=$(ynh_find_port --port=5347)
+port_videobridge=$(ynh_find_port --port=10000)
 # Open this port
-ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
+ynh_exec_warn_less yunohost firewall allow --no-upnp UDP $port_videobridge
 ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
+
+# Find a free port
+port_component=$(ynh_find_port --port=5347)
+# Open this port
+ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
+ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -127,6 +133,13 @@ ynh_script_progression --message="Configuring metronome..." --time --weight=1
 
 # Create additional domains
 #yunohost domain add auth.$domain
+#yunohost domain add conference.$domain
+#yunohost domain add jitsi-videobridge.$domain
+#yunohost domain add focus.$domain
+#yunohost domain cert-install auth.$domain
+#yunohost domain cert-install conference.$domain
+#yunohost domain cert-install jitsi-videobridge.$domain
+#yunohost domain cert-install focus.$domain
 
 # Create focus user
 yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
@@ -144,14 +157,12 @@ ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --targ
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome"
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome"
-ynh_replace_string --match_string="__PORT_VIDEOBRIDGE__" --replace_string="$port_videobridge" --target_file="$metronome"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome"
 chown -R metronome:metronome "/etc/metronome/conf.d/"
 
 cp ../conf/mod_carbons.lua /usr/lib/metronome/modules/mod_carbons.lua
 cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
 #cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
-
-#metronomectl adduser focusjitsi auth.test31.yh.yalh.net OCL1sd7d
 
 ynh_systemd_action --service_name=metronome --action=restart
 
@@ -177,6 +188,8 @@ unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d
 
 mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
 
+ynh_secure_remove --file="$final_path/jitsi-jicofo-build"
+
 #=================================================
 # BUILD JITSI-MEET
 #=================================================
@@ -190,7 +203,6 @@ popd
 mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
 ynh_secure_remove --file="$final_path/jitsi-meet_temp"
 
-
 config="$final_path/jitsi-meet/config.js"
 cp ../conf/config.js "$config"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
@@ -203,7 +215,7 @@ ynh_script_progression --message="Configuring a systemd service..." --time --wei
 # Create a dedicated systemd config
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="../conf/jitsi-videobridge.service"
-ynh_replace_string --match_string="__PORT_VIDEOBRIDGE__" --replace_string="$port_videobridge" --target_file="../conf/jitsi-videobridge.service"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="../conf/jitsi-videobridge.service"
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
 
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"

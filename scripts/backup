@@ -64,6 +64,17 @@ ynh_script_progression --message="Backing up logrotate configuration..." --time 
 ynh_backup --src_path="/etc/logrotate.d/$app"
 
 #=================================================
+# BACKUP METRONOME CONFIG
+#=================================================
+ynh_script_progression --message="Backing up Metronome configuration..." --time --weight=1
+
+ynh_backup --src_path="/etc/metronome/conf.d/$domain.cfg.lua"
+
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_carbons.lua"
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
+# ynh_backup --src_path="/usr/lib/metronome/modules/mod_smacks.lua"
+
+#=================================================
 # BACKUP SYSTEMD
 #=================================================
 ynh_script_progression --message="Backing up systemd configuration..." --time --weight=1

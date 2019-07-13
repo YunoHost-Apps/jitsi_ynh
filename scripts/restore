@@ -31,6 +31,13 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
+focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
+focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
+
+port=$(ynh_app_setting_get --app=$app --key=port)
+port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
+port_component=$(ynh_app_setting_get --app=$app --key=port_component)
+
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
@@ -82,6 +89,50 @@ ynh_script_progression --message="Reinstalling dependencies..." --time --weight=
 ynh_install_app_dependencies $pkg_dependencies
 
 ynh_install_nodejs --nodejs_version=10
+
+#=================================================
+# CONFIGURE FIREWALL
+#=================================================
+ynh_script_progression --message="Configuring firewall..." --time --weight=1
+
+# Open this port
+ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
+ynh_exec_warn_less yunohost firewall allow --no-upnp UDP $port_videobridge
+ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
+
+#=================================================
+# CONFIGURE METRONOME
+#=================================================
+ynh_script_progression --message="Configuring metronome..." --time --weight=1
+
+# Create additional domains
+#yunohost domain add auth.$domain
+#yunohost domain add conference.$domain
+#yunohost domain add jitsi-videobridge.$domain
+#yunohost domain add focus.$domain
+#yunohost domain cert-install auth.$domain
+#yunohost domain cert-install conference.$domain
+#yunohost domain cert-install jitsi-videobridge.$domain
+#yunohost domain cert-install focus.$domain
+
+# Create focus user
+yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
+
+# Configure metronome
+mv /etc/metronome/conf.d/$domain.cfg.lua /etc/metronome/conf.d/$domain.cfg.lua.back
+mv /etc/metronome/conf.d/auth.$domain.cfg.lua /etc/metronome/conf.d/auth.$domain.cfg.lua.back
+mv /etc/metronome/conf.d/conference.$domain.cfg.lua /etc/metronome/conf.d/conference.$domain.cfg.lua.back
+mv /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua.back
+mv /etc/metronome/conf.d/focus.$domain.cfg.lua /etc/metronome/conf.d/focus.$domain.cfg.lua.back
+
+ynh_restore_file --origin_path="/etc/metronome/conf.d/$domain.cfg.lua"
+chown -R metronome:metronome "/etc/metronome/conf.d/"
+
+ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_carbons.lua"
+ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
+# ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_smacks.lua"
+
+ynh_systemd_action --service_name=metronome --action=restart
 
 #=================================================
 # RESTORE SYSTEMD

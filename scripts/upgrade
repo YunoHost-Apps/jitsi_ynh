@@ -20,10 +20,12 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-focus_password=$(ynh_app_setting_get --app=$app --key=$focus_password)
 videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
 focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
-port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
+port_component=$(ynh_app_setting_get --app=$app --key=port_component)
+
+focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
+focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
 
 #=================================================
 # CHECK VERSION
@@ -76,8 +78,8 @@ then
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
-	ynh_setup_source --dest_dir="$final_path/jitsi-jicofo" --source_id=jitsi-jicofo
-	ynh_setup_source --dest_dir="$final_path/jitsi-meet" --source_id=jitsi-meet
+	ynh_setup_source --dest_dir="$final_path/jitsi-jicofo-build" --source_id=jitsi-jicofo
+	ynh_setup_source --dest_dir="$final_path/jitsi-meet_temp" --source_id=jitsi-meet
 fi
 
 #=================================================
@@ -110,40 +112,59 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # BUILD JITSI-VIDEOBRIDGE
 #=================================================
+ynh_script_progression --message="Building Jitsi-Videobridge..." --time --weight=1
 
-pushd "$final_path/jitsi-videobridge"
-    mvn compile exec:exec -Dexec.executable=java -Dexec.args="-cp %classpath org.jitsi.videobridge.Main --domain=\"$domain\" --host=\"localhost \" --port=\"$port_videobridge\" --secret=\"$videobridge_secret\" -Djava.library.path=$JVB_HOME/lib/native/linux-64 -Djava.util.logging.config.file=$JVB_HOME/lib/logging.properties -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=.jitsi-videobridge "
-popd
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+
+fi
 
 #=================================================
 # BUILD JITSI-JICOFO
 #=================================================
+ynh_script_progression --message="Building Jitsi-Jicofo..." --time --weight=1
 
-pushd "$final_path/jitsi-jicofo"
-    mvn package -DskipTests -Dassembly.skipAssembly=false
-popd
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	pushd "$final_path/jitsi-jicofo-build"
+		mvn package -DskipTests -Dassembly.skipAssembly=false
+	popd
+
+	unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d $final_path
+
+	ynh_secure_remove --file="$final_path/jitsi-jicofo/"
+
+	mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
+
+	ynh_secure_remove --file="$final_path/jitsi-jicofo-build"
+fi
 
 #=================================================
 # BUILD JITSI-MEET
 #=================================================
+ynh_script_progression --message="Building Jitsi-Meet..." --time --weight=1
 
-pushd "$final_path/jitsi-meet"
-    ynh_use_nodejs
-    npm install
-    make
-popd
 
-config="$final_path/jitsi-meet/config.js"
-cp ../conf/config.js "$config"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	pushd "$final_path/jitsi-meet_temp"
+		ar x jitsi-meet-web.deb data.tar.xz
+		tar xf data.tar.xz
+	popd
 
-#=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
+	ynh_secure_remove --file="$final_path/jitsi-meet/"
 
-ynh_backup_if_checksum_is_different --file="$final_path/CONFIG_FILE"
-# Recalculate and store the checksum of the file for the next upgrade.
-ynh_store_file_checksum --file="$config"
+	mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
+	ynh_secure_remove --file="$final_path/jitsi-meet_temp"
+
+	config="$final_path/jitsi-meet/config.js"
+	ynh_backup_if_checksum_is_different --file="$config"
+	cp ../conf/config.js "$config"
+	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
+
+	# Recalculate and store the checksum of the file for the next upgrade.
+	ynh_store_file_checksum --file="$config"
+fi
 
 #=================================================
 # SETUP LOGROTATE
@@ -161,10 +182,12 @@ ynh_script_progression --message="Upgrading systemd configuration..." --time --w
 # Create a dedicated systemd config
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="../conf/jitsi-videobridge.service"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="../conf/jitsi-videobridge.service"
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
 
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
+ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
 ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
