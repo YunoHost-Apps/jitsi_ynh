@@ -132,10 +132,10 @@ ynh_systemd_action --service_name=metronome --action=restart
 yunohost user delete $focus_user --purge
 
 # Removing additional domains
-#yunohost domain remove auth.$domain
-#yunohost domain remove conference.$domain
-#yunohost domain remove jitsi-videobridge.$domain
-#yunohost domain remove focus.$domain
+yunohost domain remove auth.$domain
+yunohost domain remove conference.$domain
+yunohost domain remove jitsi-videobridge.$domain
+yunohost domain remove focus.$domain
 
 #=================================================
 # REMOVE THE CRON FILE

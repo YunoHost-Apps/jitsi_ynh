@@ -106,14 +106,14 @@ ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
 ynh_script_progression --message="Configuring metronome..." --time --weight=1
 
 # Create additional domains
-#yunohost domain add auth.$domain
-#yunohost domain add conference.$domain
-#yunohost domain add jitsi-videobridge.$domain
-#yunohost domain add focus.$domain
-#yunohost domain cert-install auth.$domain
-#yunohost domain cert-install conference.$domain
-#yunohost domain cert-install jitsi-videobridge.$domain
-#yunohost domain cert-install focus.$domain
+yunohost domain add auth.$domain
+yunohost domain add conference.$domain
+yunohost domain add jitsi-videobridge.$domain
+yunohost domain add focus.$domain
+yunohost domain cert-install auth.$domain
+yunohost domain cert-install conference.$domain
+yunohost domain cert-install jitsi-videobridge.$domain
+yunohost domain cert-install focus.$domain
 
 # Create focus user
 yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
