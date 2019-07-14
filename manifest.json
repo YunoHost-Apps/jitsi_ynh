@@ -6,7 +6,7 @@
     "en": "Video conferencing web application",
     "fr": "Application web de conférence vidéo"
   },
-    "version": "1.0.3775~ynh1",
+    "version": "1.0.3387~ynh1",
   "url": "https://jitsi.org/Projects/JitMeet",
     "license": "Apache-2.0",
   "maintainer": {
@@ -16,11 +16,9 @@
     "requirements": {
         "yunohost": ">= 3.5"
     },
-  "multi_instance": "false",
+  "multi_instance": false,
     "services": [
-        "nginx",
-        "php7.0-fpm",
-        "mysql"
+        "nginx"
     ],
   "arguments": {
     "install": [
