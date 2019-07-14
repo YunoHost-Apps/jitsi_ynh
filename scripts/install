@@ -131,14 +131,16 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 ynh_script_progression --message="Configuring metronome..." --time --weight=1
 
 # Create additional domains
-yunohost domain add auth.$domain
-yunohost domain add conference.$domain
-yunohost domain add jitsi-videobridge.$domain
-yunohost domain add focus.$domain
-yunohost domain cert-install auth.$domain
-yunohost domain cert-install conference.$domain
-yunohost domain cert-install jitsi-videobridge.$domain
-yunohost domain cert-install focus.$domain
+if [[ $domain == *"domain.tld"* ]]; then
+	yunohost domain add auth.$domain
+	yunohost domain add conference.$domain
+	yunohost domain add jitsi-videobridge.$domain
+	yunohost domain add focus.$domain
+fi
+#yunohost domain cert-install auth.$domain
+#yunohost domain cert-install conference.$domain
+#yunohost domain cert-install jitsi-videobridge.$domain
+#yunohost domain cert-install focus.$domain
 
 # Create focus user
 yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0

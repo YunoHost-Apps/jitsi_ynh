@@ -16,7 +16,7 @@ Jitsi Meet is an open-source (Apache) WebRTC JavaScript application that uses Ji
 ## Important points to read before installing
 
 1. **Jitsi** require a dedicated **root domain**, eg. jitsi.domain.tld
-2. **Jitsi** require your create additionals dns names in your dns that goes to your YunoHost
+2. **Jitsi** require you create additionals domains in your dns and in your YunoHost
   * auth.jitsi.domain.tld
   * conference.jitsi.domain.tld
   * jitsi-videobridge.jitsi.domain.tld
