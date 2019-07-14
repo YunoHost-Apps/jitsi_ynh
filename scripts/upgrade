@@ -116,7 +116,9 @@ ynh_script_progression --message="Building Jitsi-Videobridge..." --time --weight
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-
+	mkdir -p "$final_path/.sip-communicator"
+	cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
+	chown -R $app: $final_path
 fi
 
 #=================================================
