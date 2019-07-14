@@ -72,7 +72,7 @@ ynh_backup --src_path="/etc/metronome/conf.d/$domain.cfg.lua"
 
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-# ynh_backup --src_path="/usr/lib/metronome/modules/mod_smacks.lua"
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_smacks.lua"
 
 #=================================================
 # BACKUP SYSTEMD

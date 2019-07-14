@@ -162,7 +162,7 @@ chown -R metronome:metronome "/etc/metronome/conf.d/"
 
 cp ../conf/mod_carbons.lua /usr/lib/metronome/modules/mod_carbons.lua
 cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
-#cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
+cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
 
 ynh_systemd_action --service_name=metronome --action=restart
 
@@ -172,7 +172,7 @@ ynh_systemd_action --service_name=metronome --action=restart
 ynh_script_progression --message="Building Jitsi-Videobridge..." --time --weight=1
 
 mkdir -p "$final_path/.sip-communicator"
-cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.propertie"
+cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
 chown -R $app: $final_path
 
 #=================================================

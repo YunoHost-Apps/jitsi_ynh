@@ -124,7 +124,7 @@ mv /etc/metronome/conf.d/focus.$domain.cfg.lua.back /etc/metronome/conf.d/focus.
 
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-#ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
+ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
 
 ynh_systemd_action --service_name=metronome --action=restart
 
