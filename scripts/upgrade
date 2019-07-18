@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --time --weight=1
+ynh_print_info --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -36,7 +36,7 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..." --time --weight=1
+ynh_print_info --message="Ensuring downward compatibility..."
 
 # If final_path doesn't exist, create it
 if [ -z "$final_path" ]; then
@@ -47,7 +47,7 @@ fi
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --time --weight=1
+ynh_print_info --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -63,7 +63,7 @@ ynh_abort_if_errors
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping a systemd service..." --time --weight=1
+ynh_print_info --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
@@ -74,7 +74,7 @@ ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/l
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_script_progression --message="Upgrading source files..." --time --weight=1
+	ynh_print_info --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
@@ -85,7 +85,7 @@ fi
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..." --time --weight=1
+ynh_print_info --message="Upgrading nginx web server configuration..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -93,7 +93,7 @@ ynh_add_nginx_config
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..." --time --weight=1
+ynh_print_info --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
@@ -102,7 +102,7 @@ ynh_install_nodejs --nodejs_version=10
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..." --time --weight=1
+ynh_print_info --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir=$final_path
@@ -112,7 +112,7 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # BUILD JITSI-VIDEOBRIDGE
 #=================================================
-ynh_script_progression --message="Building Jitsi-Videobridge..." --time --weight=1
+ynh_print_info --message="Building Jitsi-Videobridge..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
@@ -124,7 +124,7 @@ fi
 #=================================================
 # BUILD JITSI-JICOFO
 #=================================================
-ynh_script_progression --message="Building Jitsi-Jicofo..." --time --weight=1
+ynh_print_info --message="Building Jitsi-Jicofo..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
@@ -144,7 +144,7 @@ fi
 #=================================================
 # BUILD JITSI-MEET
 #=================================================
-ynh_script_progression --message="Building Jitsi-Meet..." --time --weight=1
+ynh_print_info --message="Building Jitsi-Meet..."
 
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
@@ -171,7 +171,7 @@ fi
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Upgrading logrotate configuration..." --time --weight=1
+ynh_print_info --message="Upgrading logrotate configuration..."
 
 # Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
@@ -179,7 +179,7 @@ ynh_use_logrotate --non-append
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Upgrading systemd configuration..." --time --weight=1
+ynh_print_info --message="Upgrading systemd configuration..."
 
 # Create a dedicated systemd config
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
@@ -205,7 +205,7 @@ chown -R root: $final_path
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..." --time --weight=1
+ynh_print_info --message="Upgrading SSOwat configuration..."
 
 # Make app public
 ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
@@ -213,7 +213,7 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --time --weight=1
+ynh_print_info --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
@@ -221,7 +221,7 @@ ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..." --time --weight=1
+ynh_print_info --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -229,4 +229,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed" --time --last
+ynh_print_info --message="Upgrade of $app completed"

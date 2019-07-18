@@ -23,7 +23,7 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading settings..." --time --weight=1
+ynh_print_info --message="Loading settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -41,7 +41,7 @@ port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
-ynh_script_progression --message="Validating restoration parameters..." --time --weight=1
+ynh_print_info --message="Validating restoration parameters..."
 
 ynh_webpath_available --domain=$domain --path_url=$path_url \
 	|| ynh_die --message="Path not available: ${domain}${path_url}"
@@ -59,14 +59,14 @@ ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Restoring the app main directory..." --time --weight=1
+ynh_print_info --message="Restoring the app main directory..."
 
 ynh_restore_file --origin_path="$final_path"
 
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Recreating the dedicated system user..." --time --weight=1
+ynh_print_info --message="Recreating the dedicated system user..."
 
 # Create the dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir=$final_path
@@ -83,7 +83,7 @@ chown -R root: $final_path
 #=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Reinstalling dependencies..." --time --weight=1
+ynh_print_info --message="Reinstalling dependencies..."
 
 # Define and install dependencies
 ynh_install_app_dependencies $pkg_dependencies
@@ -93,7 +93,7 @@ ynh_install_nodejs --nodejs_version=10
 #=================================================
 # CONFIGURE FIREWALL
 #=================================================
-ynh_script_progression --message="Configuring firewall..." --time --weight=1
+ynh_print_info --message="Configuring firewall..."
 
 # Open this port
 ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
@@ -103,7 +103,7 @@ ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
 #=================================================
 # CONFIGURE METRONOME
 #=================================================
-ynh_script_progression --message="Configuring metronome..." --time --weight=1
+ynh_print_info --message="Configuring metronome..."
 
 # Create additional domains
 if [[ $domain == *"domain.tld"* ]]; then
@@ -135,7 +135,7 @@ ynh_systemd_action --service_name=metronome --action=restart
 #=================================================
 # RESTORE SYSTEMD
 #=================================================
-ynh_script_progression --message="Restoring the systemd configuration..." --time --weight=1
+ynh_print_info --message="Restoring the systemd configuration..."
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app-videobridge.service"
 systemctl enable $app-videobridge.service
@@ -152,7 +152,7 @@ yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --time --weight=1
+ynh_print_info --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
@@ -168,7 +168,7 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 # RELOAD NGINX AND PHP-FPM
 #=================================================
-ynh_script_progression --message="Reloading nginx web server and php-fpm..." --time --weight=1
+ynh_print_info --message="Reloading nginx web server and php-fpm..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -176,4 +176,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Restoration completed for $app" --time --last
+ynh_print_info --message="Restoration completed for $app"
