@@ -106,7 +106,7 @@ ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
 ynh_print_info --message="Configuring metronome..."
 
 # Create additional domains
-if [[ $domain == *"domain.tld"* ]]; then
+if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
 	yunohost domain add auth.$domain
 	yunohost domain add conference.$domain
 	yunohost domain add jitsi-videobridge.$domain
