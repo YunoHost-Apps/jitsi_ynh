@@ -250,7 +250,6 @@ ynh_use_logrotate
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-#yunohost service add $app --log "/var/log/$app/$app.log"
 # if using yunohost version 3.2 or more in the 'manifest.json', a description can be added
 yunohost service add $app-videobridge --description "$app jitsi-videobridge for jitsi" --log "/var/log/$app/$app-videobridge.log"
 yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi" --log "/var/log/$app/$app-jicofo.log"
