@@ -1,36 +1,36 @@
 {
-  "name": "Jitsi Meet",
-  "id": "jitsi",
+    "name": "Jitsi Meet",
+    "id": "jitsi",
     "packaging_format": 1,
-  "description": {
-    "en": "Video conferencing web application",
-    "fr": "Application web de conférence vidéo"
-  },
+    "description": {
+        "en": "Video conferencing web application",
+        "fr": "Application web de conférence vidéo"
+    },
     "version": "1.0.3387~ynh1",
-  "url": "https://jitsi.org/Projects/JitMeet",
+    "url": "https://jitsi.org/Projects/JitMeet",
     "license": "Apache-2.0",
-  "maintainer": {
-    "name": "ju",
-    "email": "julien.malik@paraiso.me"
-  },
+    "maintainer": {
+        "name": "ju",
+        "email": "julien.malik@paraiso.me"
+    },
     "requirements": {
         "yunohost": ">= 3.5"
-    },
-  "multi_instance": false,
+      },
+    "multi_instance": false,
     "services": [
         "nginx"
     ],
-  "arguments": {
-    "install": [
-      {
-        "name": "domain",
-        "type": "domain",
-        "ask": {
-          "en": "Choose a domain for Jitsi Meet",
-          "fr": "Choisissez un domaine pour Jitsi Meet"
-        },
-        "example": "domain.org"
-      }
-    ]
-  }
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+                "type": "domain",
+                "ask": {
+                    "en": "Choose a domain for Jitsi Meet",
+                    "fr": "Choisissez un domaine pour Jitsi Meet"
+                },
+                "example": "domain.org"
+            }
+        ]
+    }
 }
