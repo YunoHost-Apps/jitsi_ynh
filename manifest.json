@@ -1,37 +1,36 @@
 {
-  "name": "Jitsi Meet",
-  "id": "jitsi",
-  "description": {
-    "en": "Video conferencing web application",
-    "fr": "Application web de conférence vidéo"
-  },
-  "url": "https://jitsi.org/Projects/JitMeet",
-  "maintainer": {
-    "name": "ju",
-    "email": "julien.malik@paraiso.me"
-  },
-  "multi_instance": "false",
-  "arguments": {
-    "install": [
-      {
-        "name": "domain",
-        "type": "domain",
-        "ask": {
-          "en": "Choose a domain for Jitsi Meet",
-          "fr": "Choisissez un domaine pour Jitsi Meet"
-        },
-        "example": "domain.org"
+    "name": "Jitsi Meet",
+    "id": "jitsi",
+    "packaging_format": 1,
+    "description": {
+        "en": "Video conferencing web application",
+        "fr": "Application web de conférence vidéo"
+    },
+    "version": "1.0.3387~ynh1",
+    "url": "https://jitsi.org/Projects/JitMeet",
+    "license": "Apache-2.0",
+    "maintainer": {
+        "name": "ju",
+        "email": "julien.malik@paraiso.me"
+    },
+    "requirements": {
+        "yunohost": ">= 3.6"
       },
-      {
-        "name": "path",
-        "type": "path",
-        "ask": {
-          "en": "Choose a path for Jitsi Meet",
-          "fr": "Choisissez un chemin pour Jitsi Meet"
-        },
-        "example": "/",
-        "default": "/"
-      }
-    ]
-  }
+    "multi_instance": false,
+    "services": [
+        "nginx"
+    ],
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+                "type": "domain",
+                "ask": {
+                    "en": "Choose a domain for Jitsi Meet",
+                    "fr": "Choisissez un domaine pour Jitsi Meet"
+                },
+                "example": "domain.org"
+            }
+        ]
+    }
 }
