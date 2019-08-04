@@ -14,7 +14,7 @@
         "email": "julien.malik@paraiso.me"
     },
     "requirements": {
-        "yunohost": ">= 3.5"
+        "yunohost": ">= 3.6"
       },
     "multi_instance": false,
     "services": [
