@@ -115,8 +115,7 @@ fi
 ynh_print_info --message="Reconfiguring Metronome..."
 
 # Reconfigure metronome
-ynh_secure_remove --file="/etc/metronome/conf.d/$domain.cfg.lua"
-mv /etc/metronome/conf.d/$domain.cfg.lua.back /etc/metronome/conf.d/$domain.cfg.lua
+mv -f /etc/metronome/conf.d/$domain.cfg.lua.back /etc/metronome/conf.d/$domain.cfg.lua
 mv /etc/metronome/conf.d/auth.$domain.cfg.lua.back /etc/metronome/conf.d/auth.$domain.cfg.lua
 mv /etc/metronome/conf.d/conference.$domain.cfg.lua.back /etc/metronome/conf.d/conference.$domain.cfg.lua
 mv /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua.back /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua
