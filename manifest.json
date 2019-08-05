@@ -23,6 +23,15 @@
     "arguments": {
         "install" : [
             {
+                "name": "warning",
+                "type": "boolean",
+                "ask": {
+                    "en": "\nHave you created the required sub domains: auth.jitsi.domain.tld; conference.jitsi.domain.tld; jitsi-videobridge.jitsi.domain.tld; focus.jitsi.domain.tld on you DNS registrar, added them to YunoHost and installed the certificate for each domain?\n\n",
+                    "fr": "\nAvez vous créé les sous-domaines requis: auth.jitsi.domain.tld; conference.jitsi.domain.tld; jitsi-videobridge.jitsi.domain.tld; focus.jitsi.domain.tld dans les DNS de votre registrar, ajouté à votre YunoHost et installé les certificats pour chaque domaine?\n\n"
+                },
+                "default": false
+            },
+            {
                 "name": "domain",
                 "type": "domain",
                 "ask": {

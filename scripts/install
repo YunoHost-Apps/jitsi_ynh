@@ -23,6 +23,7 @@ ynh_abort_if_errors
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
+warning=$YNH_APP_ARG_WARNING
 domain=$YNH_APP_ARG_DOMAIN
 path_url="/"
 
@@ -44,6 +45,22 @@ ynh_print_info --message="Validating installation parameters..."
 
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
+
+# Don't install Jitsi if sub-domains not created
+if [ $warning -eq 0 ]
+then
+    ynh_die --message="Before installing Jitsi, you must create several domains in your DNS registrar, add them to YunoHost and create the certificates \n\
+So as you choose $domain for your jitsi instance, create auth.$domain; conference.$domain; jitsi-videobridge.$domain; focus.$domain in your DNS registrar \n\
+When working execute: \n\
+yunohost domain add auth.$domain \n\
+yunohost domain add conference.$domain \n\
+yunohost domain add jitsi-videobridge.$domain \n\
+yunohost domain add focus.$domain \n\
+yunohost domain cert-install auth.$domain \n\
+yunohost domain cert-install conference.$domain \n\
+yunohost domain cert-install jitsi-videobridge.$domain \n\
+yunohost domain cert-install focus.$domain \n"
+fi
 
 # Register (book) web path
 ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url

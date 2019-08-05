@@ -5,6 +5,7 @@
 
 ;; Test complet
 	; Manifest
+		warning=1
 		domain="domain.tld"	(DOMAIN)
 	; Checks
 		pkg_linter=1
