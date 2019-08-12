@@ -124,6 +124,12 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # SPECIFIC SETUP
 #=================================================
+# SET UP CONF_REGEN HOOK
+#=================================================
+
+cp ../conf/metronome_regenconf_hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
+
+#=================================================
 # CONFIGURE METRONOME
 #=================================================
 ynh_print_info --message="Configuring metronome..."

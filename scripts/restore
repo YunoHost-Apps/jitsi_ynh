@@ -81,6 +81,12 @@ chown -R root: $final_path
 #=================================================
 # SPECIFIC RESTORATION
 #=================================================
+# RESTORE CONF_REGEN HOOK
+#=================================================
+
+ynh_restore_file --origin_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
+
+#=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
 ynh_print_info --message="Reinstalling dependencies..."

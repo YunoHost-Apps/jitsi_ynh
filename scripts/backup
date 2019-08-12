@@ -57,6 +57,12 @@ ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 #=================================================
 # SPECIFIC BACKUP
 #=================================================
+# BACKUP CONF_REGEN HOOK
+#=================================================
+
+ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
+
+#=================================================
 # BACKUP LOGROTATE
 #=================================================
 ynh_print_info --message="Backing up logrotate configuration..."

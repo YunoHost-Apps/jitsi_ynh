@@ -111,6 +111,12 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
+# UPGRADE CONF_REGEN HOOK
+#=================================================
+
+cp -f ../conf/metronome_regenconf_hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
+
+#=================================================
 # BUILD JITSI-VIDEOBRIDGE
 #=================================================
 ynh_print_info --message="Building Jitsi-Videobridge..."

@@ -110,6 +110,12 @@ fi
 #=================================================
 # SPECIFIC REMOVE
 #=================================================
+# REMOVE CONF_REGEN HOOK
+#=================================================
+
+ynh_secure_remove --file="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
+
+#=================================================
 # RECONFIGURE METRONOME
 #=================================================
 ynh_print_info --message="Reconfiguring Metronome..."
