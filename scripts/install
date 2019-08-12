@@ -136,6 +136,7 @@ ynh_print_info --message="Configuring metronome..."
 
 # Create additional domains
 if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
+	ynh_print_info --message="Creating additional domains for package_check..."
 	yunohost domain add auth.$domain
 	yunohost domain add conference.$domain
 	yunohost domain add jitsi-videobridge.$domain
