@@ -81,12 +81,6 @@ chown -R root: $final_path
 #=================================================
 # SPECIFIC RESTORATION
 #=================================================
-# RESTORE CONF_REGEN HOOK
-#=================================================
-
-ynh_restore_file --origin_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
-
-#=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
 ynh_print_info --message="Reinstalling dependencies..."
@@ -137,6 +131,12 @@ ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_http_altconnect.l
 ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_smacks.lua"
 
 ynh_systemd_action --service_name=metronome --action=restart
+
+#=================================================
+# RESTORE CONF_REGEN HOOK
+#=================================================
+
+ynh_restore_file --origin_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 
 #=================================================
 # RESTORE SYSTEMD
