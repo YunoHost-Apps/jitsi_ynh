@@ -124,12 +124,6 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# SET UP CONF_REGEN HOOK
-#=================================================
-
-cp ../conf/metronome_regenconf_hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
-
-#=================================================
 # CONFIGURE METRONOME
 #=================================================
 ynh_print_info --message="Configuring metronome..."
@@ -167,6 +161,12 @@ cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnec
 cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
 
 ynh_systemd_action --service_name=metronome --action=restart
+
+#=================================================
+# SET UP CONF_REGEN HOOK
+#=================================================
+
+cp ../conf/metronome_regenconf_hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
 
 #=================================================
 # BUILD JITSI-VIDEOBRIDGE
