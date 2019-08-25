@@ -15,7 +15,6 @@ source /usr/share/yunohost/helpers
 
 ynh_clean_setup () {
 	ynh_clean_check_starting
-	read -p "key"
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -166,8 +165,6 @@ cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnec
 cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
 
 ynh_systemd_action --service_name=metronome --action=restart
-
-read -p "key"
 
 #=================================================
 # BUILD JITSI-VIDEOBRIDGE
