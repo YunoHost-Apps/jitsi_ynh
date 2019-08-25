@@ -1,5 +1,5 @@
--- XEP-0280: Message Carbons implementation for Prosody
--- Copyright (C) 2011 Kim Alvefur
+-- XEP-0280: Message Carbons implementation for metronome
+-- Copyright (C) 2011-2016 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 
@@ -9,14 +9,15 @@ local xmlns_carbons = "urn:xmpp:carbons:2";
 local xmlns_carbons_old = "urn:xmpp:carbons:1";
 local xmlns_carbons_really_old = "urn:xmpp:carbons:0";
 local xmlns_forward = "urn:xmpp:forward:0";
-local full_sessions, bare_sessions = full_sessions, bare_sessions;
+local full_sessions, bare_sessions = metronome.full_sessions, metronome.bare_sessions;
 
 local function toggle_carbons(event)
 	local origin, stanza = event.origin, event.stanza;
 	local state = stanza.tags[1].attr.mode or stanza.tags[1].name;
 	module:log("debug", "%s %sd carbons", origin.full_jid, state);
 	origin.want_carbons = state == "enable" and stanza.tags[1].attr.xmlns;
-	return origin.send(st.reply(stanza));
+	origin.send(st.reply(stanza));
+	return true;
 end
 module:hook("iq-set/self/"..xmlns_carbons..":disable", toggle_carbons);
 module:hook("iq-set/self/"..xmlns_carbons..":enable", toggle_carbons);
@@ -28,14 +29,12 @@ module:hook("iq-set/self/"..xmlns_carbons_really_old..":carbons", toggle_carbons
 
 local function message_handler(event, c2s)
 	local origin, stanza = event.origin, event.stanza;
-	local orig_type = stanza.attr.type;
+	local orig_type = stanza.attr.type or "normal";
 	local orig_from = stanza.attr.from;
 	local orig_to = stanza.attr.to;
 
-	if not (orig_type == nil
-			or orig_type == "normal"
-			or orig_type == "chat") then
-		return -- No carbons for messages of type error or headline
+	if not(orig_type == "chat" or (orig_type == "normal" and stanza:get_child("body"))) then
+		return -- Only chat type messages
 	end
 
 	-- Stanza sent by a local client
@@ -75,7 +74,7 @@ local function message_handler(event, c2s)
 	elseif stanza:get_child("no-copy", "urn:xmpp:hints") then
 		module:log("debug", "Message has no-copy hint, ignoring");
 		return
-	elseif stanza:get_child("x", "http://jabber.org/protocol/muc#user") then
+	elseif not c2s and bare_jid == orig_from and stanza:get_child("x", "http://jabber.org/protocol/muc#user") then
 		module:log("debug", "MUC PM, ignoring");
 		return
 	end
@@ -123,12 +122,12 @@ local function c2s_message_handler(event)
 end
 
 -- Stanzas sent by local clients
-module:hook("pre-message/host", c2s_message_handler, 1);
-module:hook("pre-message/bare", c2s_message_handler, 1);
-module:hook("pre-message/full", c2s_message_handler, 1);
+module:hook("pre-message/host", c2s_message_handler, 0.05); -- priority between mod_message (0 in 0.9) and mod_firewall (0.1)
+module:hook("pre-message/bare", c2s_message_handler, 0.05);
+module:hook("pre-message/full", c2s_message_handler, 0.05);
 -- Stanzas to local clients
-module:hook("message/bare", message_handler, 1);
-module:hook("message/full", message_handler, 1);
+module:hook("message/bare", message_handler, 0.05);
+module:hook("message/full", message_handler, 0.05);
 
 module:add_feature(xmlns_carbons);
 module:add_feature(xmlns_carbons_old);
