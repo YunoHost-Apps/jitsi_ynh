@@ -155,7 +155,7 @@ then
 		tar xf data.tar.xz
 	popd
 
-	ynh_secure_remove --file="$final_path/jitsi-meet/"
+	ynh_secure_remove --file="$final_path/jitsi-meet"
 
 	mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
 	ynh_secure_remove --file="$final_path/jitsi-meet_temp"
