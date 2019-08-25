@@ -160,8 +160,6 @@ then
 	mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
 	ynh_secure_remove --file="$final_path/jitsi-meet_temp"
 
-	config="$final_path/jitsi-meet/config.js"
-	ynh_backup_if_checksum_is_different --file="$config"
 	cp ../conf/config.js "$config"
 	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
 
