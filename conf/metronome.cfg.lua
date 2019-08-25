@@ -188,7 +188,7 @@ VirtualHost "auth.__DOMAIN__"
 	}
 	authentication = "ldap2"
 	ldap = {
-		hostname      = "localhost",
+		hostname      = "127.0.0.1",
 		user = {
 			basedn        = "ou=users,dc=yunohost,dc=org",
 			filter        = "(&(objectClass=posixAccount)(mail=*@auth.__DOMAIN__))",
