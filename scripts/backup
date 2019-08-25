@@ -60,6 +60,11 @@ ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 # BACKUP CONF_REGEN HOOK
 #=================================================
 
+ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
+ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
+ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
+ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
+ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 
 #=================================================
@@ -75,6 +80,10 @@ ynh_backup --src_path="/etc/logrotate.d/$app"
 ynh_print_info --message="Backing up Metronome configuration..."
 
 ynh_backup --src_path="/etc/metronome/conf.d/$domain.cfg.lua"
+ynh_backup --src_path="/etc/metronome/conf.d/auth.$domain.cfg.lua"
+ynh_backup --src_path="/etc/metronome/conf.d/conference.$domain.cfg.lua"
+ynh_backup --src_path="/etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua"
+ynh_backup --src_path="/etc/metronome/conf.d/focus.$domain.cfg.lua"
 
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"

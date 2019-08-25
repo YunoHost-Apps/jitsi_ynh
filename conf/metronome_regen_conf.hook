@@ -1,0 +1,41 @@
+#!/bin/bash
+
+force=${2:-0}  # 0/1 --force argument
+dryrun=${3:-0}  # 0/1 --dry-run argument
+pending_conf=$4 # Path of the pending conf file
+
+do_pre_regen() {
+  metronome_conf_dir="/home/yunohost.conf/pending/metronome/etc/metronome/conf.d"
+  domain="$(yunohost app setting jitsi domain)"
+
+  # Delete pending metronome config
+  rm "${metronome_conf_dir}/$domain.cfg.lua"
+  rm "${metronome_conf_dir}/auth.$domain.cfg.lua"
+  rm "${metronome_conf_dir}/conference.$domain.cfg.lua"
+  rm "${metronome_conf_dir}/jitsi-videobridge.$domain.cfg.lua"
+  rm "${metronome_conf_dir}/focus.$domain.cfg.lua"
+
+  # Add specific domain metronome conf
+  cp -f "/usr/share/yunohost/templates/jitsi/." "$metronome_conf_dir/"
+}
+
+do_post_regen() {
+  # Put your code here for post regen conf.
+  # Be careful, this part will be executed only if the configuration has been modified.
+  sudo chown -R metronome: /etc/metronome/conf.d/
+}
+
+case "$1" in
+  pre)
+    do_pre_regen
+    ;;
+  post)
+    do_post_regen
+    ;;
+  *)
+    echo "Hook called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
