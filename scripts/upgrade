@@ -46,12 +46,6 @@ if [ -z "$final_path" ]; then
 fi
 
 if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
-    ynh_secure_remove --file="/etc/metronome/conf.d/$domain.cfg.lua.back"
-    ynh_secure_remove --file="/etc/metronome/conf.d/auth.$domain.cfg.lua.back"
-    ynh_secure_remove --file="/etc/metronome/conf.d/conference.$domain.cfg.lua.back"
-    ynh_secure_remove --file="/etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua.back"
-    ynh_secure_remove --file="/etc/metronome/conf.d/focus.$domain.cfg.lua.back"
-
     # Add Metronome domain conf template
     metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
     mkdir -p /usr/share/yunohost/templates/jitsi/
@@ -66,6 +60,10 @@ if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
     touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
     touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
     touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+
+    # Add Metronome hook 
+    cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
+    yunohost tools regen-conf metronome
 fi
 
 #=================================================

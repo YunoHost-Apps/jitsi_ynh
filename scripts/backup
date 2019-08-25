@@ -57,15 +57,24 @@ ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 #=================================================
 # SPECIFIC BACKUP
 #=================================================
-# BACKUP CONF_REGEN HOOK
+# BACKUP METRONOME
 #=================================================
+ynh_print_info --message="Backing up Metronome..."
 
+# Backup Metronome domain conf template
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+
+# Backup Metronome Hook
 ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
+
+# Backup Metronome Module
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_carbons.lua"
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_smacks.lua"
 
 #=================================================
 # BACKUP LOGROTATE
@@ -73,21 +82,6 @@ ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 ynh_print_info --message="Backing up logrotate configuration..."
 
 ynh_backup --src_path="/etc/logrotate.d/$app"
-
-#=================================================
-# BACKUP METRONOME CONFIG
-#=================================================
-ynh_print_info --message="Backing up Metronome configuration..."
-
-ynh_backup --src_path="/etc/metronome/conf.d/$domain.cfg.lua"
-ynh_backup --src_path="/etc/metronome/conf.d/auth.$domain.cfg.lua"
-ynh_backup --src_path="/etc/metronome/conf.d/conference.$domain.cfg.lua"
-ynh_backup --src_path="/etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua"
-ynh_backup --src_path="/etc/metronome/conf.d/focus.$domain.cfg.lua"
-
-ynh_backup --src_path="/usr/lib/metronome/modules/mod_carbons.lua"
-ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-ynh_backup --src_path="/usr/lib/metronome/modules/mod_smacks.lua"
 
 #=================================================
 # BACKUP SYSTEMD
