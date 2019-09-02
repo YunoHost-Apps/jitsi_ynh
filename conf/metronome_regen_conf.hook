@@ -6,8 +6,7 @@ pending_conf=$4 # Path of the pending conf file
 
 do_pre_regen() {
   # Add specific domain metronome conf
-  metronome_conf_dir="/home/yunohost.conf/pending/metronome/etc/metronome/conf.d"
-  cp -af "/usr/share/yunohost/templates/jitsi/." "$metronome_conf_dir/"
+  cp -af "/usr/share/yunohost/templates/jitsi/." "${pending_conf}/../metronome/etc/metronome/conf.d/"
 }
 
 do_post_regen() {
