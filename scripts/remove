@@ -130,7 +130,7 @@ ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.
 
 # Remove Jitsi template directory
 if [ -z "$(ls -A /usr/share/yunohost/templates/jitsi)" ]; then
-   rm /usr/share/yunohost/templates/jitsi
+   ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi"
 fi
 
 # Remove Metronome Hook
