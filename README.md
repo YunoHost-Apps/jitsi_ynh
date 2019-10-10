@@ -9,7 +9,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 ## Overview
 Jitsi Meet is an open-source (Apache) WebRTC JavaScript application that uses Jitsi Videobridge to provide high quality, secure and scalable video conferences.
 
-**Shipped version:** 1.0.3387
+**Shipped version:** 1.0.3577
 
 ## Important points to read before installing
 
