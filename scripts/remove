@@ -114,18 +114,28 @@ fi
 #=================================================
 ynh_print_info --message="Reconfiguring Metronome..."
 
-# Reconfigure metronome
-mv -f /etc/metronome/conf.d/$domain.cfg.lua.back /etc/metronome/conf.d/$domain.cfg.lua
-mv /etc/metronome/conf.d/auth.$domain.cfg.lua.back /etc/metronome/conf.d/auth.$domain.cfg.lua
-mv /etc/metronome/conf.d/conference.$domain.cfg.lua.back /etc/metronome/conf.d/conference.$domain.cfg.lua
-mv /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua.back /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua
-mv /etc/metronome/conf.d/focus.$domain.cfg.lua.back /etc/metronome/conf.d/focus.$domain.cfg.lua
-
+# Remove Metronome modules
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
 
 ynh_systemd_action --service_name=metronome --action=restart
+
+# Remove domain conf template
+ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
+ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
+ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
+ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
+ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+
+# Remove Jitsi template directory
+if [ -z "$(ls -A /usr/share/yunohost/templates/jitsi)" ]; then
+   ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi"
+fi
+
+# Remove Metronome Hook
+ynh_secure_remove --file="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
+yunohost tools regen-conf metronome
 
 # Delete focus user
 yunohost user delete $focus_user --purge

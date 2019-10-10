@@ -32,6 +32,7 @@ focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
 #=================================================
 
 upgrade_type=$(ynh_check_app_version_changed)
+current_version=$(ynh_read_manifest --manifest="/etc/yunohost/apps/$app/manifest.json" --manifest_key="version" || echo 1.0)
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
@@ -42,6 +43,27 @@ ynh_print_info --message="Ensuring downward compatibility..."
 if [ -z "$final_path" ]; then
 	final_path=/var/www/$app
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
+if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
+    # Add Metronome domain conf template
+    metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
+    mkdir -p /usr/share/yunohost/templates/jitsi/
+    cp ../conf/metronome.cfg.lua $metronome_conf
+    ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
+    ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
+    ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
+    ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
+    ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
+
+    touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
+    touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
+    touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
+    touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+
+    # Add Metronome hook 
+    cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
+    yunohost tools regen-conf metronome
 fi
 
 #=================================================
