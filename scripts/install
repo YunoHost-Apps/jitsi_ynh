@@ -130,6 +130,7 @@ ynh_print_info --message="Configuring metronome..."
 
 # Create additional domains
 if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
+	ynh_print_info --message="Creating additional domains for package_check..."
 	yunohost domain add auth.$domain
 	yunohost domain add conference.$domain
 	yunohost domain add jitsi-videobridge.$domain
@@ -139,22 +140,26 @@ fi
 # Create focus user
 yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
 
-# Configure metronome
-mv /etc/metronome/conf.d/$domain.cfg.lua /etc/metronome/conf.d/$domain.cfg.lua.back
-mv /etc/metronome/conf.d/auth.$domain.cfg.lua /etc/metronome/conf.d/auth.$domain.cfg.lua.back
-mv /etc/metronome/conf.d/conference.$domain.cfg.lua /etc/metronome/conf.d/conference.$domain.cfg.lua.back
-mv /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua /etc/metronome/conf.d/jitsi-videobridge.$domain.cfg.lua.back
-mv /etc/metronome/conf.d/focus.$domain.cfg.lua /etc/metronome/conf.d/focus.$domain.cfg.lua.back
+# Add Metronome domain conf template
+metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
+mkdir -p /usr/share/yunohost/templates/jitsi/
+cp ../conf/metronome.cfg.lua $metronome_conf
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
 
-metronome="/etc/metronome/conf.d/$domain.cfg.lua"
-cp ../conf/metronome.cfg.lua "$metronome"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome"
-ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome"
-ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome"
-chown -R metronome:metronome "/etc/metronome/conf.d/"
+touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
+touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
+touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
+touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
 
+# Add Metronome hook 
+cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
+yunohost tools regen-conf metronome
+
+# Add Metronome modules
 cp ../conf/mod_carbons.lua /usr/lib/metronome/modules/mod_carbons.lua
 cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
 cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua

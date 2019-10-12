@@ -11,6 +11,11 @@ pkg_dependencies="openjdk-8-jdk openjdk-8-jre maven"
 # PERSONAL HELPERS
 #=================================================
 
+ynh_version_gt ()
+{
+    dpkg --compare-versions "$1" gt "$2"
+}
+
 #=================================================
 # EXPERIMENTAL HELPERS
 #=================================================
