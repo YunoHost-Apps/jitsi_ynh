@@ -1,5 +1,5 @@
-SOURCE_URL=https://download.jitsi.org/jitsi-videobridge/linux/jitsi-videobridge-linux-x64-1120.zip
-SOURCE_SUM=6f00ce479d7f010b42fef3f262b1ecd42d11e6a5872c164231ea38db7216d680
+SOURCE_URL=https://download.jitsi.org/jitsi-videobridge/linux/jitsi-videobridge-linux-x64-1130.zip
+SOURCE_SUM=792db05e61e36d8811e7b132581b95b1022a8bf5689189e6206bc05888b54ec4
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=zip
 SOURCE_IN_SUBDIR=true
