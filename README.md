@@ -43,7 +43,6 @@ How to configure this app: Via the admin panel, a plain file with SSH, or any ot
 
 * x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/jitsi/)
 * ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/jitsi/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/jitsi/)
 
 ## Links
 
@@ -57,9 +56,9 @@ How to configure this app: Via the admin panel, a plain file with SSH, or any ot
 Developer info
 ----------------
 
-Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing).
+Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing).
 
-To try the testing branch, do this:
+To try the testing branch, please proceed like that.
 ```
 sudo yunohost app install https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing --debug
 or
