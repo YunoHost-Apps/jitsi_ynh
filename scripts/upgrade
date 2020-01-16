@@ -221,6 +221,7 @@ ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
+ynh_print_info --message="Securing files and directories..."
 
 # Set permissions on app files
 chown -R root: $final_path

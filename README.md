@@ -4,22 +4,22 @@
 [![Install Jitsi Meet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
 
 > *This package allow you to install Jitsi Meet quickly and simply on a YunoHost server.  
-If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
+[Install YunoHost](https://yunohost.org/#/install) to be able to do so.*
 
 ## Overview
-Jitsi Meet is an open-source (Apache) WebRTC JavaScript application that uses Jitsi Videobridge to provide high quality, secure and scalable video conferences.
+Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Videobridge to provide high quality, secure, and scalable video conferences.
 
 **Shipped version:** 1.0.3577
 
-## Important points to read before installing
+## Important points before installing
 
-1. **Jitsi** require a dedicated **root domain**, eg. jitsi.domain.tld
-2. **Jitsi** require you create additionals domains in your dns and in your YunoHost
+1. **Jitsi** requires a dedicated **root domain**, eg. jitsi.domain.tld
+2. **Jitsi** requires you create additionals domains in your DNS and in your YunoHost
   * auth.jitsi.domain.tld
   * conference.jitsi.domain.tld
   * jitsi-videobridge.jitsi.domain.tld
   * focus.jitsi.domain.tld
-3. **Jitsi** require the ports TCP/4443 and UDP/10000 been redirected to your YunoHost
+3. **Jitsi** requires the ports TCP/4443 and UDP/10000 to be redirected to your YunoHost
 
 ## Screenshots
 
@@ -31,19 +31,18 @@ Jitsi Meet is an open-source (Apache) WebRTC JavaScript application that uses Ji
 
 ## Configuration
 
-How to configure this app: by an admin panel, a plain file with SSH, or any other way.
+How to configure this app: Via the admin panel, a plain file with SSH, or any other way.
 
 ## Documentation
 
  * Official documentation: https://jitsi.org/user-faq/
 
-## YunoHost specific features
+## Specific YunoHost features
 
 #### Supported architectures
 
 * x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/jitsi/)
 * ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/jitsi/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/jitsi/)
 
 ## Links
 
@@ -54,7 +53,7 @@ How to configure this app: by an admin panel, a plain file with SSH, or any othe
 
 ---
 
-Developers info
+Developer info
 ----------------
 
 Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing).
