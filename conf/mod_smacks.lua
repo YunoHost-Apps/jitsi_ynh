@@ -1,11 +1,11 @@
--- XEP-0198: Stream Management for metronome IM
+-- XEP-0198: Stream Management for Prosody IM
 --
 -- Copyright (C) 2010-2015 Matthew Wild
 -- Copyright (C) 2010 Waqas Hussain
 -- Copyright (C) 2012-2015 Kim Alvefur
 -- Copyright (C) 2012 Thijs Alkemade
 -- Copyright (C) 2014 Florian Zeitz
--- Copyright (C) 2016-2017 Thilo Molitor
+-- Copyright (C) 2016-2020 Thilo Molitor
 --
 -- This project is MIT/X11 licensed. Please see the
 -- COPYING file in the source package for more information.
@@ -13,7 +13,7 @@
 
 local st = require "util.stanza";
 local dep = require "util.dependencies";
-local cache = dep.softreq("util.cache");	-- only available in metronome 0.10+
+local cache = dep.softreq("util.cache");	-- only available in prosody 0.10+
 local uuid_generate = require "util.uuid".generate;
 local jid = require "util.jid";
 
@@ -41,7 +41,7 @@ local max_unacked_stanzas = module:get_option_number("smacks_max_unacked_stanzas
 local delayed_ack_timeout = module:get_option_number("smacks_max_ack_delay", 60);
 local max_hibernated_sessions = module:get_option_number("smacks_max_hibernated_sessions", 10);
 local max_old_sessions = module:get_option_number("smacks_max_old_sessions", 10);
-local core_process_stanza = metronome.core_process_stanza;
+local core_process_stanza = prosody.core_process_stanza;
 local sessionmanager = require"core.sessionmanager";
 
 assert(max_hibernated_sessions > 0, "smacks_max_hibernated_sessions must be greater than 0");
@@ -50,7 +50,7 @@ assert(max_old_sessions > 0, "smacks_old_sessions must be greater than 0");
 local c2s_sessions = module:shared("/*/c2s/sessions");
 
 local function init_session_cache(max_entries, evict_callback)
-	-- old metronome version < 0.10 (no limiting at all!)
+	-- old prosody version < 0.10 (no limiting at all!)
 	if not cache then
 		local store = {};
 		return {
@@ -67,7 +67,7 @@ local function init_session_cache(max_entries, evict_callback)
 		};
 	end
 
-	-- use per user limited cache for metronome >= 0.10
+	-- use per user limited cache for prosody >= 0.10
 	local stores = {};
 	return {
 			get = function(user, key)
@@ -108,7 +108,7 @@ local function stoppable_timer(delay, callback)
 		if stopped then return; end
 		return callback(t);
 	end);
-	if timer and timer.stop then return timer; end		-- new metronome api includes stop() function
+	if timer and timer.stop then return timer; end		-- new prosody api includes stop() function
 	return {
 		stop = function () stopped = true end;
 		timer;
@@ -116,7 +116,7 @@ local function stoppable_timer(delay, callback)
 end
 
 local function delayed_ack_function(session)
-	-- fire event only if configured to do so and our session is not hibernated or destroyed
+	-- fire event only if configured to do so and our session is not already hibernated or destroyed
 	if delayed_ack_timeout > 0 and session.awaiting_ack
 	and not session.hibernating and not session.destroyed then
 		session.log("debug", "Firing event 'smacks-ack-delayed', queue = %d",
@@ -159,16 +159,26 @@ module:hook("s2s-stream-features",
 
 local function request_ack_if_needed(session, force, reason)
 	local queue = session.outgoing_stanza_queue;
+	local expected_h = session.last_acknowledged_stanza + #queue;
+	-- session.log("debug", "*** SMACKS(1) ***: awaiting_ack=%s, hibernating=%s", tostring(session.awaiting_ack), tostring(session.hibernating));
 	if session.awaiting_ack == nil and not session.hibernating then
-		if (#queue > max_unacked_stanzas and session.last_queue_count ~= #queue) or force then
+		-- this check of last_requested_h prevents ack-loops if missbehaving clients report wrong
+		-- stanza counts. it is set when an <r> is really sent (e.g. inside timer), preventing any
+		-- further requests until a higher h-value would be expected.
+		-- session.log("debug", "*** SMACKS(2) ***: #queue=%s, max_unacked_stanzas=%s, expected_h=%s, last_requested_h=%s", tostring(#queue), tostring(max_unacked_stanzas), tostring(expected_h), tostring(session.last_requested_h));
+		if (#queue > max_unacked_stanzas and expected_h ~= session.last_requested_h) or force then
 			session.log("debug", "Queuing <r> (in a moment) from %s - #queue=%d", reason, #queue);
 			session.awaiting_ack = false;
 			session.awaiting_ack_timer = stoppable_timer(1e-06, function ()
-				if not session.awaiting_ack and not session.hibernating then
-					session.log("debug", "Sending <r> (inside timer, before send)");
+				-- session.log("debug", "*** SMACKS(3) ***: awaiting_ack=%s, hibernating=%s", tostring(session.awaiting_ack), tostring(session.hibernating));
+				-- only request ack if needed and our session is not already hibernated or destroyed
+				if not session.awaiting_ack and not session.hibernating and not session.destroyed then
+					session.log("debug", "Sending <r> (inside timer, before send) from %s - #queue=%d", reason, #queue);
 					(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
-					session.log("debug", "Sending <r> (inside timer, after send)");
 					session.awaiting_ack = true;
+					-- expected_h could be lower than this expression e.g. more stanzas added to the queue meanwhile)
+					session.last_requested_h = session.last_acknowledged_stanza + #queue;
+					session.log("debug", "Sending <r> (inside timer, after send) from %s - #queue=%d", reason, #queue);
 					if not session.delayed_ack_timer then
 						session.delayed_ack_timer = stoppable_timer(delayed_ack_timeout, function()
 							delayed_ack_function(session);
@@ -187,8 +197,6 @@ local function request_ack_if_needed(session, force, reason)
 		session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
 		delayed_ack_function(session);
 	end
-
-	session.last_queue_count = #queue;
 end
 
 local function outgoing_stanza_filter(stanza, session)
@@ -329,8 +337,9 @@ function handle_r(origin, stanza, xmlns_sm)
 	module:log("debug", "Received ack request, acking for %d", origin.handled_stanza_count);
 	-- Reply with <a>
 	(origin.sends2s or origin.send)(st.stanza("a", { xmlns = xmlns_sm, h = string.format("%d", origin.handled_stanza_count) }));
-	-- piggyback our own ack request
-	if #origin.outgoing_stanza_queue > 0 and origin.last_queue_count ~= #origin.outgoing_stanza_queue then
+	-- piggyback our own ack request if needed (see request_ack_if_needed() for explanation of last_requested_h)
+	local expected_h = origin.last_acknowledged_stanza + #origin.outgoing_stanza_queue;
+	if #origin.outgoing_stanza_queue > 0 and expected_h ~= origin.last_requested_h then
 		request_ack_if_needed(origin, true, "piggybacked by handle_r");
 	end
 	return true;
@@ -549,12 +558,14 @@ function handle_resume(session, stanza, xmlns_sm)
 
 		-- Ok, we need to re-send any stanzas that the client didn't see
 		-- ...they are what is now left in the outgoing stanza queue
+		-- We have to use the send of "session" because we don't want to add our resent stanzas
+		-- to the outgoing queue again
 		local queue = original_session.outgoing_stanza_queue;
-		original_session.log("debug", "#queue = %d", #queue);
+		session.log("debug", "resending all unacked stanzas that are still queued after resume, #queue = %d", #queue);
 		for i=1,#queue do
-			original_session.send(queue[i]);
+			session.send(queue[i]);
 		end
-		original_session.log("debug", "#queue = %d -- after send", #queue);
+		session.log("debug", "all stanzas resent, now disabling send() in this session, #queue = %d", #queue);
 		function session.send(stanza)
 			session.log("warn", "Tried to send stanza on old session migrated by smacks resume (maybe there is a bug?): %s", tostring(stanza));
 			return false;
@@ -587,7 +598,6 @@ local function handle_read_timeout(event)
 			return false; -- Kick the session
 		end
 		session.log("debug", "Sending <r> (read timeout)");
-		session.awaiting_ack = false;
 		(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }));
 		session.awaiting_ack = true;
 		if not session.delayed_ack_timer then
