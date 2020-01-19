@@ -19,7 +19,7 @@ Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Vi
   * conference.jitsi.domain.tld
   * jitsi-videobridge.jitsi.domain.tld
   * focus.jitsi.domain.tld
-3. **Jitsi** requires the ports TCP/4443 and UDP/10000 to be redirected to your YunoHost
+3. **Jitsi** requires the ports TCP/4443 and UDP/10000 to be forwareded to your YunoHost (The same way you forwarded 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
 
 ## Screenshots
 
