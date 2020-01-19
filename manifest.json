@@ -6,7 +6,7 @@
         "en": "Video conferencing web application",
         "fr": "Application web de conférence vidéo"
     },
-    "version": "1.0.3387~ynh2",
+    "version": "1.0.3729~ynh1",
     "url": "https://jitsi.org/Projects/JitMeet",
     "license": "Apache-2.0",
     "maintainer": {

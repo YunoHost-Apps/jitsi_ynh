@@ -3,18 +3,17 @@
 
 module:depends"http";
 
+local mm = require "core.modulemanager";
 local json = require"util.json";
 local st = require"util.stanza";
 local array = require"util.array";
 
-local host_modules = hosts[module.host].modules;
-
 local function get_supported()
 	local uris = array();
-	if host_modules["bosh"] then
+	if mm.is_loaded(module.host, "bosh") or  mm.is_loaded("*", "bosh") then
 		uris:push({ rel = "urn:xmpp:alt-connections:xbosh", href = module:http_url("bosh", "/http-bind") });
 	end
-	if host_modules["websocket"] then
+	if mm.is_loaded(module.host, "websocket") or  mm.is_loaded("*", "websocket") then
 		uris:push({ rel = "urn:xmpp:alt-connections:websocket", href = module:http_url("websocket", "xmpp-websocket"):gsub("^http", "ws") });
 	end
 	return uris;
