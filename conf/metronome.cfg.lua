@@ -74,8 +74,8 @@ modules_enabled = {
 		--"motd"; -- Send a message to users when they log in
 		--"legacyauth"; -- Legacy authentication. Only used by some old clients and bots.
 	-- jitsi
-		"smacks";
-		"carbons";
+		"stream_management";
+		"message_carbons";
 		"mam";
 		"lastactivity";
 		"offline";

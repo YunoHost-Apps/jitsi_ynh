@@ -22,6 +22,7 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
 videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
 focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
+port=$(ynh_app_setting_get --app=$app --key=port)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
@@ -141,6 +142,7 @@ if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
 	mkdir -p "$final_path/.sip-communicator"
 	cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
+	ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
 	chown -R $app: $final_path
 fi
 
@@ -157,7 +159,7 @@ then
 
 	unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d $final_path
 
-	ynh_secure_remove --file="$final_path/jitsi-jicofo/"
+	ynh_secure_remove --file="$final_path/jitsi-jicofo"
 
 	mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
 
@@ -177,13 +179,13 @@ then
 		tar xf data.tar.xz
 	popd
 
-	ynh_secure_remove --file="$final_path/jitsi-meet/"
+	config="$final_path/jitsi-meet/config.js"
+	ynh_backup_if_checksum_is_different --file="$config"
+
+	ynh_secure_remove --file="$final_path/jitsi-meet"
 
 	mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
 	ynh_secure_remove --file="$final_path/jitsi-meet_temp"
-
-	config="$final_path/jitsi-meet/config.js"
-	ynh_backup_if_checksum_is_different --file="$config"
 	cp ../conf/config.js "$config"
 	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
 
