@@ -1,5 +1,5 @@
-SOURCE_URL=https://github.com/jitsi/jicofo/archive/517.tar.gz
-SOURCE_SUM=5239a8a4c8519a9362cabf151a1bb34138ba5083d652bc2c44a397484d6ffe08
+SOURCE_URL=https://github.com/jitsi/jicofo/archive/539.tar.gz
+SOURCE_SUM=117b15b871118186512a15c1ca3f42615db680d7155a1876f2ef3a7028cb4616
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true

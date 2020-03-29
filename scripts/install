@@ -39,6 +39,8 @@ focus_secret=$(ynh_string_random --length=8)
 
 focus_user="svc${app}focus"
 
+coturn_pwd=$(ynh_string_random --length=30)
+
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
@@ -61,6 +63,7 @@ ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
 ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
+ynh_app_setting_set --app=$app --key=coturn_pwd --value=$coturn_pwd
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -86,6 +89,24 @@ port_component=$(ynh_find_port --port=5347)
 # Open this port
 ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
 ynh_app_setting_set --app=$app --key=port_component --value=$port_component
+
+# Find an available port
+port_coturn=$(ynh_find_port --port=3478)
+# Open this port
+ynh_exec_warn_less yunohost firewall allow UDP $port_coturn
+ynh_app_setting_set --app=$app --key=port_coturn --value=$port_coturn
+
+# Find an available port
+port_coturn_tls=$(ynh_find_port --port=5349)
+# Open this port
+ynh_exec_warn_less yunohost firewall allow Both $port_coturn_tls
+ynh_app_setting_set --app=$app --key=port_coturn_tls --value=$port_coturn_tls
+
+# Find an available port
+port_coturn_alt_tls=$(ynh_find_port --port=$((port_coturn_tls+1)))
+# Open this port
+ynh_exec_warn_less yunohost firewall allow Both $port_coturn_alt_tls
+ynh_app_setting_set --app=$app --key=port_coturn_alt_tls --value=$port_coturn_alt_tls
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -126,6 +147,47 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # SPECIFIC SETUP
 #=================================================
+# CONFIGURE COTURN
+#=================================================
+ynh_print_info --message="Configuring coturn..."
+
+cp ../conf/default_coturn /etc/default/$app-coturn
+
+coturn_config="$final_path/coturn.conf"
+
+cp ../conf/coturn.conf "$coturn_config"
+
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$coturn_config"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$coturn_config"
+ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$coturn_config"
+ynh_replace_string --match_string="__PORT_COTURN_TLS__" --replace_string="$port_coturn_tls" --target_file="$coturn_config"
+ynh_replace_string --match_string="__PORT_COTURN_ALT_TLS__" --replace_string="$port_coturn_alt_tls" --target_file="$coturn_config"
+ynh_replace_string --match_string="__COTURN_PWD__" --replace_string="$coturn_pwd" --target_file="$coturn_config"
+
+# Get public IP and set as external IP for coturn
+# note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
+public_ipv4="$(curl ip.yunohost.org)" || true
+public_ip6="$(curl ipv6.yunohost.org)" || true
+
+if [ -n "$public_ipv4" ] && ynh_validate_ip4 --ip_address="$public_ipv4"
+then
+    ynh_replace_string --match_string='__IPV4__' --replace_string="$public_ipv4" --target_file="$coturn_config"
+else
+    ynh_replace_string --match_string='__IPV4__,' --replace_string="" --target_file="$coturn_config"
+fi
+
+if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
+then
+    ynh_replace_string --match_string='__IPV6__' --replace_string="$public_ip6" --target_file="$coturn_config"
+else
+    ynh_replace_string --match_string=',__IPV6__' --replace_string="" --target_file="$coturn_config"
+fi
+
+ynh_store_file_checksum --file="$coturn_config"
+
+mkdir -p /var/log/$app
+
+#=================================================
 # CONFIGURE METRONOME
 #=================================================
 ynh_print_info --message="Configuring metronome..."
@@ -137,6 +199,7 @@ if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
 	yunohost domain add conference.$domain
 	yunohost domain add jitsi-videobridge.$domain
 	yunohost domain add focus.$domain
+	yunohost domain add coturn.$domain
 fi
 
 # Create focus user
@@ -151,11 +214,14 @@ ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_fil
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__CORTURN_PWD__" --replace_string="$coturn_pwd" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$metronome_conf"
 
 touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
 touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
 touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+touch "/usr/share/yunohost/templates/jitsi/coturn.$domain.cfg.lua"
 
 # Add Metronome hook 
 cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
@@ -165,6 +231,7 @@ yunohost tools regen-conf metronome
 cp ../conf/mod_carbons.lua /usr/lib/metronome/modules/mod_carbons.lua
 cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
 cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
+cp ../conf/mod_turncredentials.lua /usr/lib/metronome/modules/mod_turncredentials.lua
 
 ynh_systemd_action --service_name=metronome --action=restart
 
@@ -173,9 +240,13 @@ ynh_systemd_action --service_name=metronome --action=restart
 #=================================================
 ynh_print_info --message="Building Jitsi-Videobridge..."
 
+private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
+
 mkdir -p "$final_path/.sip-communicator"
 cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
 ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+ynh_replace_string --match_string="__PUBLIC_IPV4__" --replace_string="$public_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+ynh_replace_string --match_string="__PRIVATE_IPV4__" --replace_string="$private_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
 chown -R $app: $final_path
 
 #=================================================
@@ -187,9 +258,9 @@ pushd "$final_path/jitsi-jicofo-build"
     mvn package -DskipTests -Dassembly.skipAssembly=false
 popd
 
-unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d $final_path
+unzip $final_path/jitsi-jicofo-build/target/jicofo-1.1-SNAPSHOT-archive.zip -d $final_path
 
-mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
+mv $final_path/jicofo-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
 
 ynh_secure_remove --file="$final_path/jitsi-jicofo-build"
 
@@ -209,6 +280,7 @@ ynh_secure_remove --file="$final_path/jitsi-meet_temp"
 config="$final_path/jitsi-meet/config.js"
 cp ../conf/config.js "$config"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
+ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$config"
 
 #=================================================
 # SETUP SYSTEMD
@@ -227,6 +299,8 @@ ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user
 ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
 ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
+ynh_add_systemd_config --service=$app-coturn --template="jitsi-coturn.service"
+
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
@@ -244,6 +318,7 @@ ynh_print_info --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app: $final_path
+chown -R $app: /var/log/$app
 
 #=================================================
 # SETUP LOGROTATE
@@ -260,6 +335,7 @@ ynh_print_info --message="Integrating service in YunoHost..."
 
 yunohost service add $app-videobridge --description "$app jitsi-videobridge for jitsi" --log "/var/log/$app/$app-videobridge.log"
 yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi" --log "/var/log/$app/$app-jicofo.log"
+yunohost service add $app-coturn --description "$app jitsi-coturn for jitsi" --log "/var/log/$app/$app-coturn.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -269,6 +345,7 @@ ynh_print_info --message="Starting a systemd service..."
 # Start a systemd service
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="/var/log/$app/$app-coturn.log"
 
 #=================================================
 # SETUP SSOWAT

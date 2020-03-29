@@ -104,6 +104,13 @@ ynh_exec_warn_less yunohost firewall allow --no-upnp UDP $port_videobridge
 ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
 
 #=================================================
+# CONFIGURE COTURN
+#=================================================
+ynh_print_info --message="Configuring coturn..."
+
+ynh_restore_file --origin_path="/etc/default/$app-coturn"
+
+#=================================================
 # CONFIGURE METRONOME
 #=================================================
 ynh_print_info --message="Configuring metronome..."
@@ -126,6 +133,7 @@ ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/auth.$domain
 ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
 ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
 ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/coturn.$domain.cfg.lua"
 
 # Restore Metronome Hook
 ynh_restore_file --origin_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
@@ -135,6 +143,7 @@ yunohost tools regen-conf metronome
 ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
 ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_smacks.lua"
+ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_turncredentials.lua"
 
 ynh_systemd_action --service_name=metronome --action=restart
 
@@ -147,6 +156,8 @@ ynh_restore_file --origin_path="/etc/systemd/system/$app-videobridge.service"
 systemctl enable $app-videobridge.service
 ynh_restore_file --origin_path="/etc/systemd/system/$app-jicofo.service"
 systemctl enable $app-jicofo.service
+ynh_restore_file --origin_path="/etc/systemd/system/$app-coturn.service"
+systemctl enable $app-coturn.service
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
@@ -155,6 +166,7 @@ ynh_print_info --message="Integrating service in YunoHost..."
 
 yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log"
 yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
+yunohost service add $app-coturn --log "/var/log/$app/$app-coturn.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -163,6 +175,8 @@ ynh_print_info --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="/var/log/$app/$app-coturn.log"
+
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION

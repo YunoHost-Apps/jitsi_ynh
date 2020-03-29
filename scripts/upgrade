@@ -24,6 +24,8 @@ videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
 focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
 port=$(ynh_app_setting_get --app=$app --key=port)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)
+port_coturn=$(ynh_app_setting_get --app=$app --key=port_coturn)
+coturn_pwd=$(ynh_app_setting_get --app=$app --key=coturn_pwd)
 
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
@@ -56,11 +58,14 @@ if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
     ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
     ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
     ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
+    ynh_replace_string --match_string="__CORTURN_PWD__" --replace_string="$coturn_pwd" --target_file="$metronome_conf"
+    ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$metronome_conf"
 
     touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
     touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
     touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
     touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+    touch "/usr/share/yunohost/templates/jitsi/coturn.$domain.cfg.lua"
 
     # Add Metronome hook 
     cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
@@ -91,6 +96,7 @@ ynh_print_info --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-coturn --action="stop" --log_path="/var/log/$app/$app-coturn.log"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -133,6 +139,47 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 
 #=================================================
 # SPECIFIC UPGRADE
+#=================================================
+# CONFIGURE COTURN
+#=================================================
+ynh_print_info --message="Configuring coturn..."
+
+cp -f ../conf/default_coturn /etc/default/$app-coturn
+
+coturn_config="$final_path/coturn.conf"
+
+cp -f ../conf/coturn.conf "$coturn_config"
+
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$coturn_config"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$coturn_config"
+ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$coturn_config"
+ynh_replace_string --match_string="__PORT_COTURN_TLS__" --replace_string="$port_coturn_tls" --target_file="$coturn_config"
+ynh_replace_string --match_string="__PORT_COTURN_ALT_TLS__" --replace_string="$port_coturn_alt_tls" --target_file="$coturn_config"
+ynh_replace_string --match_string="__COTURN_PWD__" --replace_string="$coturn_pwd" --target_file="$coturn_config"
+
+# Get public IP and set as external IP for coturn
+# note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
+public_ipv4="$(curl ip.yunohost.org)" || true
+public_ip6="$(curl ipv6.yunohost.org)" || true
+
+if [ -n "$public_ipv4" ] && ynh_validate_ip4 --ip_address="$public_ipv4"
+then
+    ynh_replace_string --match_string='__IPV4__' --replace_string="$public_ipv4" --target_file="$coturn_config"
+else
+    ynh_replace_string --match_string='__IPV4__,' --replace_string="" --target_file="$coturn_config"
+fi
+
+if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
+then
+    ynh_replace_string --match_string='__IPV6__' --replace_string="$public_ip6" --target_file="$coturn_config"
+else
+    ynh_replace_string --match_string=',__IPV6__' --replace_string="" --target_file="$coturn_config"
+fi
+
+ynh_store_file_checksum --file="$coturn_config"
+
+mkdir -p /var/log/$app
+
 #=================================================
 # BUILD JITSI-VIDEOBRIDGE
 #=================================================
@@ -218,6 +265,8 @@ ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user
 ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
 ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
+ynh_add_systemd_config --service=$app-coturn --template="jitsi-coturn.service"
+
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
@@ -243,6 +292,7 @@ ynh_print_info --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="/var/log/$app/$app-coturn.log"
 
 #=================================================
 # RELOAD NGINX
