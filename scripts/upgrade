@@ -25,6 +25,8 @@ focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
 port=$(ynh_app_setting_get --app=$app --key=port)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 port_coturn=$(ynh_app_setting_get --app=$app --key=port_coturn)
+port_coturn_tls=$(ynh_app_setting_get --app=$app --key=port_coturn_tls)
+port_coturn_alt_tls=$(ynh_app_setting_get --app=$app --key=port_coturn_alt_tls)
 coturn_pwd=$(ynh_app_setting_get --app=$app --key=coturn_pwd)
 
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
