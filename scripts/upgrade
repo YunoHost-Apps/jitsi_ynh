@@ -206,11 +206,11 @@ then
 		mvn package -DskipTests -Dassembly.skipAssembly=false
 	popd
 
-	unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d $final_path
+	unzip $final_path/jitsi-jicofo-build/target/jicofo-1.1-SNAPSHOT-archive.zip -d $final_path
 
 	ynh_secure_remove --file="$final_path/jitsi-jicofo"
 
-	mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
+	mv $final_path/jicofo-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
 
 	ynh_secure_remove --file="$final_path/jitsi-jicofo-build"
 fi
