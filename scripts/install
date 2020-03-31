@@ -185,8 +185,6 @@ fi
 
 ynh_store_file_checksum --file="$coturn_config"
 
-mkdir -p /var/log/$app
-
 #=================================================
 # CONFIGURE METRONOME
 #=================================================
@@ -318,7 +316,6 @@ ynh_print_info --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app: $final_path
-chown -R $app: /var/log/$app
 
 #=================================================
 # SETUP LOGROTATE
@@ -333,9 +330,9 @@ ynh_use_logrotate
 #=================================================
 ynh_print_info --message="Integrating service in YunoHost..."
 
-yunohost service add $app-videobridge --description "$app jitsi-videobridge for jitsi" --log "/var/log/$app/$app-videobridge.log"
-yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi" --log "/var/log/$app/$app-jicofo.log"
-yunohost service add $app-coturn --description "$app jitsi-coturn for jitsi" --log "/var/log/$app/$app-coturn.log"
+yunohost service add $app-videobridge --description "$app jitsi-videobridge for jitsi" --log_type "systemd"
+yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi"  --log_type "systemd"
+yunohost service add $app-coturn --description "$app jitsi-coturn for jitsi"  --log_type "systemd"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -343,9 +340,9 @@ yunohost service add $app-coturn --description "$app jitsi-coturn for jitsi" --l
 ynh_print_info --message="Starting a systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
-ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="/var/log/$app/$app-coturn.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="systemd" --line_match="Started $app-videobridge"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="systemd" --line_match="Started $app-jicofo"
+ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="systemd" --line_match="Started coturn"
 
 #=================================================
 # SETUP SSOWAT

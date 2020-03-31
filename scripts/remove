@@ -167,13 +167,6 @@ if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
 fi
 
 #=================================================
-# REMOVE THE LOG FILES
-#=================================================
-
-# Remove the log files
-ynh_secure_remove --file="/var/log/$app"
-
-#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # REMOVE DEDICATED USER

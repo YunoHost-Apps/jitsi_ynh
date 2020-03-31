@@ -164,18 +164,18 @@ systemctl enable $app-coturn.service
 #=================================================
 ynh_print_info --message="Integrating service in YunoHost..."
 
-yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log"
-yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
-yunohost service add $app-coturn --log "/var/log/$app/$app-coturn.log"
+yunohost service add $app-videobridge --log_type "systemd"
+yunohost service add $app-jicofo --log_type "systemd"
+yunohost service add $app-coturn --log_type "systemd"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_print_info --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
-ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="/var/log/$app/$app-coturn.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="systemd" --line_match="Started $app-videobridge"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="systemd" --line_match="Started $app-jicofo"
+ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="systemd" --line_match="Started coturn"
 
 
 #=================================================

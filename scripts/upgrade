@@ -96,9 +96,9 @@ ynh_abort_if_errors
 #=================================================
 ynh_print_info --message="Stopping a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
-ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name=$app-coturn --action="stop" --log_path="/var/log/$app/$app-coturn.log"
+ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="systemd" --line_match="Stopped $app-videobridge"
+ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="systemd" --line_match="Stopped $app-jicofo"
+ynh_systemd_action --service_name=$app-coturn --action="stop" --log_path="systemd" --line_match="Stopped coturn"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -179,8 +179,6 @@ else
 fi
 
 ynh_store_file_checksum --file="$coturn_config"
-
-mkdir -p /var/log/$app
 
 #=================================================
 # BUILD JITSI-VIDEOBRIDGE
@@ -292,9 +290,9 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 #=================================================
 ynh_print_info --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
-ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="/var/log/$app/$app-coturn.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="systemd" --line_match="Started $app-videobridge"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="systemd" --line_match="Started $app-jicofo"
+ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="systemd" --line_match="Started coturn"
 
 #=================================================
 # RELOAD NGINX
