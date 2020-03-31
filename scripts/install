@@ -83,8 +83,6 @@ ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
 
 # Find an available port
 port_component=$(ynh_find_port --port=5347)
-# Open this port
-ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
 ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 
 #=================================================

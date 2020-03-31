@@ -67,6 +67,13 @@ if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
     yunohost tools regen-conf metronome
 fi
 
+# Closing port_component
+if yunohost firewall list | grep -q "\- $port_component$"
+then
+	ynh_print_info --message="Closing port $port_component..."
+	ynh_exec_warn_less yunohost firewall disallow TCP $port_component
+fi
+
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
