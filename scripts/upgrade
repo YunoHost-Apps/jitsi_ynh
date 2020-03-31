@@ -147,9 +147,14 @@ ynh_print_info --message="Building Jitsi-Videobridge..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
+	public_ipv4="$(curl ip.yunohost.org)" || true
+	private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
+	
 	mkdir -p "$final_path/.sip-communicator"
 	cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
 	ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+	ynh_replace_string --match_string="__PRIVATE_IPV4__" --replace_string="$private_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+	ynh_replace_string --match_string="__PUBLIC_IPV4__" --replace_string="$public_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
 	chown -R $app: $final_path
 fi
 
