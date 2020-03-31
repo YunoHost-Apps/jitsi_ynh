@@ -38,6 +38,8 @@ focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
 port=$(ynh_app_setting_get --app=$app --key=port)
 port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)
+port_coturn_tls=$(ynh_app_setting_get --app=$app --key=port_coturn_tls)
+port_coturn_alt_tls=$(ynh_app_setting_get --app=$app --key=port_coturn_alt_tls)
 
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
@@ -101,7 +103,8 @@ ynh_print_info --message="Configuring firewall..."
 # Open this port
 ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
 ynh_exec_warn_less yunohost firewall allow --no-upnp UDP $port_videobridge
-ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
+ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_coturn_tls
+ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_coturn_alt_tls
 
 #=================================================
 # CONFIGURE COTURN

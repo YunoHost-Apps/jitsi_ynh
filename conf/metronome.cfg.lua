@@ -230,11 +230,8 @@ Component "focus.__DOMAIN__"
 
 ------ COTURN configuration ------
 turncredentials_secret = "__CORTURN_PWD__";
-turncredentials_port = __PORT_COTURN__;
-turncredentials_ttl = 86400;
 turncredentials = {
-  { type = "stun", host = "coturn.__DOMAIN__", port = "__PORT_COTURN__" },
-  { type = "turn", host = "coturn.__DOMAIN__", port = "__PORT_COTURN__", transport = "udp" },
-  { type = "turns", host = "coturn.__DOMAIN__", port = "__PORT_COTURN__", transport = "tcp" }
+  { type = "turns", host = "coturn.__DOMAIN__", port = "__PORT_COTURN_TLS__", transport = "tcp" },
+  { type = "turns", host = "coturn.__DOMAIN__", port = "__PORT_COTURN_ALT_TLS__", transport = "tcp" }
 };
 

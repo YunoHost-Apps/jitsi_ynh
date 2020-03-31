@@ -86,26 +86,18 @@ ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
 
 # Find an available port
 port_component=$(ynh_find_port --port=5347)
-# Open this port
-ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port_component
 ynh_app_setting_set --app=$app --key=port_component --value=$port_component
-
-# Find an available port
-port_coturn=$(ynh_find_port --port=3478)
-# Open this port
-ynh_exec_warn_less yunohost firewall allow UDP $port_coturn
-ynh_app_setting_set --app=$app --key=port_coturn --value=$port_coturn
 
 # Find an available port
 port_coturn_tls=$(ynh_find_port --port=5349)
 # Open this port
-ynh_exec_warn_less yunohost firewall allow Both $port_coturn_tls
+ynh_exec_warn_less yunohost firewall allow TCP $port_coturn_tls
 ynh_app_setting_set --app=$app --key=port_coturn_tls --value=$port_coturn_tls
 
 # Find an available port
 port_coturn_alt_tls=$(ynh_find_port --port=$((port_coturn_tls+1)))
 # Open this port
-ynh_exec_warn_less yunohost firewall allow Both $port_coturn_alt_tls
+ynh_exec_warn_less yunohost firewall allow TCP $port_coturn_alt_tls
 ynh_app_setting_set --app=$app --key=port_coturn_alt_tls --value=$port_coturn_alt_tls
 
 #=================================================
@@ -159,28 +151,35 @@ cp ../conf/coturn.conf "$coturn_config"
 
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$coturn_config"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$coturn_config"
-ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$coturn_config"
 ynh_replace_string --match_string="__PORT_COTURN_TLS__" --replace_string="$port_coturn_tls" --target_file="$coturn_config"
 ynh_replace_string --match_string="__PORT_COTURN_ALT_TLS__" --replace_string="$port_coturn_alt_tls" --target_file="$coturn_config"
 ynh_replace_string --match_string="__COTURN_PWD__" --replace_string="$coturn_pwd" --target_file="$coturn_config"
 
-# Get public IP and set as external IP for coturn
+# Get public and private IP and set as external IP for coturn
 # note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
 public_ipv4="$(curl ip.yunohost.org)" || true
 public_ip6="$(curl ipv6.yunohost.org)" || true
+private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
 if [ -n "$public_ipv4" ] && ynh_validate_ip4 --ip_address="$public_ipv4"
 then
-    ynh_replace_string --match_string='__IPV4__' --replace_string="$public_ipv4" --target_file="$coturn_config"
+    ynh_replace_string --match_string='__PUBLIC_IPV4__' --replace_string="$public_ipv4" --target_file="$coturn_config"
 else
-    ynh_replace_string --match_string='__IPV4__,' --replace_string="" --target_file="$coturn_config"
+    ynh_replace_string --match_string='__PUBLIC_IPV4__,' --replace_string="" --target_file="$coturn_config"
 fi
 
 if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
 then
-    ynh_replace_string --match_string='__IPV6__' --replace_string="$public_ip6" --target_file="$coturn_config"
+    ynh_replace_string --match_string='__PUBLIC_IPV6__' --replace_string="$public_ip6" --target_file="$coturn_config"
 else
-    ynh_replace_string --match_string=',__IPV6__' --replace_string="" --target_file="$coturn_config"
+    ynh_replace_string --match_string=',__PUBLIC_IPV6__' --replace_string="" --target_file="$coturn_config"
+fi
+
+if [ -n "$private_ipv4" ] && ynh_validate_ip4 --ip_address="$private_ipv4"
+then
+    ynh_replace_string --match_string='__PRIVATE_IPV4__' --replace_string="/$private_ipv4" --target_file="$coturn_config"
+else
+    ynh_replace_string --match_string='__PRIVATE_IPV4__,' --replace_string="" --target_file="$coturn_config"
 fi
 
 ynh_store_file_checksum --file="$coturn_config"
@@ -213,7 +212,8 @@ ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$vi
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__CORTURN_PWD__" --replace_string="$coturn_pwd" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__PORT_COTURN_TLS__" --replace_string="$port_coturn_tls" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__PORT_COTURN_ALT_TLS__" --replace_string="$port_coturn_alt_tls" --target_file="$metronome_conf"
 
 touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
@@ -237,8 +237,6 @@ ynh_systemd_action --service_name=metronome --action=restart
 # BUILD JITSI-VIDEOBRIDGE
 #=================================================
 ynh_print_info --message="Building Jitsi-Videobridge..."
-
-private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
 mkdir -p "$final_path/.sip-communicator"
 cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
@@ -278,7 +276,8 @@ ynh_secure_remove --file="$final_path/jitsi-meet_temp"
 config="$final_path/jitsi-meet/config.js"
 cp ../conf/config.js "$config"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="__PORT_COTURN__" --replace_string="$port_coturn" --target_file="$config"
+ynh_replace_string --match_string="__PORT_COTURN_TLS__" --replace_string="$port_coturn_tls" --target_file="$config"
+ynh_replace_string --match_string="__PORT_COTURN_ALT_TLS__" --replace_string="$port_coturn_alt_tls" --target_file="$config"
 
 #=================================================
 # SETUP SYSTEMD
