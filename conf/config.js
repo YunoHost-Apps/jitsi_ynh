@@ -350,7 +350,7 @@ var config = {
         // The STUN servers that will be used in the peer to peer connections
         stunServers: [
 
-            { urls: 'stun:coturn.__DOMAIN__:__PORT_COTURN_TLS__' }
+            { urls: 'stun:coturn.__DOMAIN__:__PORT_COTURN_TLS__' },
             { urls: 'stun:coturn.__DOMAIN__:__PORT_COTURN_ALT_TLS__' }
             // { urls: 'stun:stun.l.google.com:19302' },
             // { urls: 'stun:stun1.l.google.com:19302' },
