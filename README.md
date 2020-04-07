@@ -4,6 +4,7 @@
 **Jitsi** for YunoHost for now as some limitations:
   * Can only be used using Chrome/Chromium
   * Is limited to two participants
+
 Those limitations come from the packaging of the upstream app. Have to be improved.
 
  [![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
