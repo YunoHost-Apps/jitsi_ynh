@@ -43,6 +43,12 @@ then
 	yunohost service remove $app-jicofo
 fi
 
+if ynh_exec_warn_less yunohost service status $app-coturn >/dev/null
+then
+	ynh_print_info --message="Removing $app-coturn service..."
+	yunohost service remove $app-coturn
+fi
+
 #=================================================
 # STOP AND REMOVE SERVICE
 #=================================================
@@ -51,6 +57,7 @@ ynh_print_info --message="Stopping and removing the systemd service..."
 # Remove the dedicated systemd config
 ynh_remove_systemd_config --service=$app-videobridge
 ynh_remove_systemd_config --service=$app-jicofo
+ynh_remove_systemd_config --service=$app-coturn
 
 #=================================================
 # REMOVE DEPENDENCIES
@@ -112,6 +119,13 @@ fi
 #=================================================
 # SPECIFIC REMOVE
 #=================================================
+# REMOVE COTURN CONFIGURATION
+#=================================================
+ynh_print_info --message="Removing courn configuration..."
+
+ynh_secure_remove --file="/etc/default/$app-coturn"
+
+#=================================================
 # RECONFIGURE METRONOME
 #=================================================
 ynh_print_info --message="Reconfiguring Metronome..."
@@ -120,6 +134,7 @@ ynh_print_info --message="Reconfiguring Metronome..."
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
+ynh_secure_remove --file="/usr/lib/metronome/modules/mod_turncredentials.lua"
 
 ynh_systemd_action --service_name=metronome --action=restart
 
@@ -148,14 +163,8 @@ if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
 	yunohost domain remove conference.$domain
 	yunohost domain remove jitsi-videobridge.$domain
 	yunohost domain remove focus.$domain
+	yunohost domain remove coturn.$domain
 fi
-
-#=================================================
-# REMOVE THE LOG FILES
-#=================================================
-
-# Remove the log files
-ynh_secure_remove --file="/var/log/$app"
 
 #=================================================
 # GENERIC FINALIZATION

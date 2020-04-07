@@ -38,8 +38,9 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 #=================================================
 ynh_print_info --message="Stopping a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
-ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="systemd" --line_match="Stopped $app-videobridge"
+ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="systemd" --line_match="Stopped $app-jicofo"
+ynh_systemd_action --service_name=$app-coturn --action="stop" --log_path="systemd" --line_match="Stopped coturn"
 
 #=================================================
 # BACKUP THE APP MAIN DIR
@@ -58,6 +59,13 @@ ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 #=================================================
 # SPECIFIC BACKUP
 #=================================================
+# BACKUP COTURN
+#=================================================
+ynh_print_info --message="Backing up coturn..."
+
+ynh_backup --src_path="/etc/default/$app-coturn"
+
+#=================================================
 # BACKUP METRONOME
 #=================================================
 ynh_print_info --message="Backing up Metronome..."
@@ -68,6 +76,8 @@ ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
+ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/coturn.$domain.cfg.lua"
+
 
 # Backup Metronome Hook
 ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
@@ -76,6 +86,7 @@ ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_smacks.lua"
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_turncredentials.lua"
 
 #=================================================
 # SPECIFIC BACKUP
@@ -93,14 +104,16 @@ ynh_print_info --message="Backing up systemd configuration..."
 
 ynh_backup --src_path="/etc/systemd/system/$app-videobridge.service"
 ynh_backup --src_path="/etc/systemd/system/$app-jicofo.service"
+ynh_backup --src_path="/etc/systemd/system/$app-coturn.service"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_print_info --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
-ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="systemd" --line_match="Started $app-videobridge"
+ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="systemd" --line_match="Started $app-jicofo"
+ynh_systemd_action --service_name=$app-coturn --action="start" --log_path="systemd" --line_match="Started coturn"
 
 #=================================================
 # END OF SCRIPT

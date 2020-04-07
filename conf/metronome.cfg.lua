@@ -83,6 +83,7 @@ modules_enabled = {
 		"adhoc";
 		"websocket";
 		"http_altconnect";
+		"turncredentials";
 }
 
 -- These modules are auto-loaded, but should you want
@@ -178,7 +179,10 @@ VirtualHost "__DOMAIN__"
 		key = "/etc/yunohost/certs/__DOMAIN__/key.pem";
 		certificate = "/etc/yunohost/certs/__DOMAIN__/crt.pem";
 	}
-
+    modules_enabled = {
+        "bosh";
+        "pubsub";
+    }
 	c2s_require_encryption = false
 
 VirtualHost "auth.__DOMAIN__"
@@ -223,3 +227,11 @@ Component "jitsi-videobridge.__DOMAIN__"
     component_secret = "__VIDEOBRIDGE_SECRET__"
 Component "focus.__DOMAIN__"
     component_secret = "__FOCUS_SECRET__"
+
+------ COTURN configuration ------
+turncredentials_secret = "__CORTURN_PWD__";
+turncredentials = {
+  { type = "turns", host = "coturn.__DOMAIN__", port = "__PORT_COTURN_TLS__", transport = "tcp" },
+  { type = "turns", host = "coturn.__DOMAIN__", port = "__PORT_COTURN_ALT_TLS__", transport = "tcp" }
+};
+

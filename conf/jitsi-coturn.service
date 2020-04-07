@@ -1,0 +1,17 @@
+[Unit]
+Description=coturn
+Documentation=man:coturn(1) man:turnadmin(1) man:turnserver(1)
+After=syslog.target network.target
+
+[Service]
+User=turnserver
+Group=turnserver
+Type=forking
+RuntimeDirectory=__APP__-coturn
+ExecStart=/usr/bin/turnserver -o -c __FINALPATH__/coturn.conf
+ExecStartPost=/bin/sleep 2
+Restart=on-failure
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
