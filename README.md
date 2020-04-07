@@ -1,6 +1,13 @@
 # Jitsi Meet for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
+## Disclaimer
+**Jitsi** for YunoHost for now as some limitations:
+  * Can only be used using Chrome/Chromium
+  * Is limited to two participants
+
+Those limitations come from the packaging of the upstream app. Have to be improved.
+
+ [![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
 [![Install Jitsi Meet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
 
 > *This package allow you to install Jitsi Meet quickly and simply on a YunoHost server.  
@@ -21,9 +28,6 @@ Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Vi
   * focus.jitsi.domain.tld
   * jitsi-videobridge.jitsi.domain.tld
 3. **Jitsi** requires the ports TCP/5349 UDP/5349 TCP/5350 UDP/5350 TCP/4443 and UDP/10000 to be forwarded to your YunoHost (The same way you forwarded 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
-4. **Jitsi** for YunoHost for now as some limitations:
-  * Can only be used using Chrome/Chromium
-  * Is limited to two participants
 
 ## Screenshots
 
