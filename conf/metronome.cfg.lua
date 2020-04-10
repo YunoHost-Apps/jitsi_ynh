@@ -19,10 +19,19 @@
 -- for the server. Note that you must create the accounts separately
 -- (see http://prosody.im/doc/creating_accounts for info)
 -- Example: admins = { "user1@example.com", "user2@example.net" }
-admins = { "svc__APP__focus@auth.__DOMAIN__" }
 daemonize = true
-cross_domain_bosh = true;
 component_ports = { __PORT_COMPONENT__ }
+plugin_paths = { "__FINAL_PATH__/jitsi-meet-prosody/" }
+muc_mapper_domain_base = "__DOMAIN__";
+turncredentials_secret = "__TURN_SECRET__";
+turncredentials = {
+  { type = "stun", host = "__DOMAIN__", port = "443" },
+  { type = "turn", host = "__DOMAIN__", port = "443", transport = "udp" },
+  { type = "turns", host = "__DOMAIN__", port = "443", transport = "tcp" }
+};
+
+cross_domain_bosh = false;
+consider_bosh_secure = true;
 --component_interface = "192.168.0.10"
 
 -- Enable use of libevent for better performance under high load
@@ -63,26 +72,17 @@ modules_enabled = {
 		--"admin_telnet"; -- Opens telnet console interface on localhost port 5582
 
 	-- HTTP modules
-		"bosh"; -- Enable BOSH clients, aka "Jabber over HTTP"
+		--"bosh"; -- Enable BOSH clients, aka "Jabber over HTTP"
 		--"http_files"; -- Serve static files from a directory over HTTP
 
 	-- Other specific functionality
+		"posix"; -- POSIX functionality, sends server to background, enables syslog, etc.
 		--"groups"; -- Shared roster support
 		--"announce"; -- Send announcement to all online users
 		--"welcome"; -- Welcome users who register accounts
 		--"watchregistrations"; -- Alert admins of registrations
 		--"motd"; -- Send a message to users when they log in
 		--"legacyauth"; -- Legacy authentication. Only used by some old clients and bots.
-	-- jitsi
-		"stream_management";
-		"message_carbons";
-		"mam";
-		"lastactivity";
-		"offline";
-		"pubsub";
-		"adhoc";
-		"websocket";
-		"http_altconnect";
 }
 
 -- These modules are auto-loaded, but should you want
@@ -139,7 +139,6 @@ allow_registration = false
 -- for information about using the hashed backend.
 
 -- authentication = "internal_plain"
-authentication = "internal_hashed"
 
 -- Select the storage backend to use. By default Prosody uses flat files
 -- in its configured data directory, but it also supports more backends
@@ -178,8 +177,25 @@ VirtualHost "__DOMAIN__"
 		key = "/etc/yunohost/certs/__DOMAIN__/key.pem";
 		certificate = "/etc/yunohost/certs/__DOMAIN__/crt.pem";
 	}
+    speakerstats_component = "speakerstats.__DOMAIN__"
+    conference_duration_component = "conferenceduration.__DOMAIN__"
+    -- we need bosh
+    modules_enabled = {
+        "bosh";
+        "pubsub";
+        "ping"; -- Enable mod_ping
+        "speakerstats";
+        "turncredentials";
+        "conference_duration";
+    }
+    c2s_require_encryption = false
 
-	c2s_require_encryption = false
+Component "internal.auth.__DOMAIN__" "muc"
+    storage = "null"
+    modules_enabled = {
+      "ping";
+    }
+    admins = { "__FOCUS_USER__@auth.__DOMAIN__", "__JVB_USER__@auth.__DOMAIN__" }
 
 VirtualHost "auth.__DOMAIN__"
 	ssl = {
@@ -218,8 +234,24 @@ VirtualHost "auth.__DOMAIN__"
 --	component_secret = "password"
 
 Component "conference.__DOMAIN__" "muc"
+    storage = "null"
+    modules_enabled = {
+        -- "muc_meeting_id";
+        -- "muc_domain_mapper";
+        -- "token_verification";
+    }
+    admins = { "__FOCUS_USER__@auth.__DOMAIN__" }
+    -- muc_room_locking = false
+    -- muc_room_default_public_jids = true
 
 Component "jitsi-videobridge.__DOMAIN__"
     component_secret = "__VIDEOBRIDGE_SECRET__"
+
 Component "focus.__DOMAIN__"
     component_secret = "__FOCUS_SECRET__"
+
+Component "speakerstats.__DOMAIN__" "speakerstats_component"
+    muc_component = "conference.__DOMAIN__"
+
+Component "conferenceduration.__DOMAIN__" "conference_duration_component"
+    muc_component = "conference.__DOMAIN__"

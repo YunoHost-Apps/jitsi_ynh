@@ -22,6 +22,7 @@ port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
+jvb_user=$(ynh_app_setting_get --app=$app --key=jvb_user)
 
 #=================================================
 # STANDARD REMOVE
@@ -60,7 +61,7 @@ ynh_print_info --message="Removing dependencies..."
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
 
-ynh_remove_nodejs
+#ynh_remove_nodejs
 
 #=================================================
 # REMOVE APP MAIN DIR
@@ -116,19 +117,9 @@ fi
 #=================================================
 ynh_print_info --message="Reconfiguring Metronome..."
 
-# Remove Metronome modules
-ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
-ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
-
-ynh_systemd_action --service_name=metronome --action=restart
-
 # Remove domain conf template
 ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
 ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
-ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
-ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
-ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
 
 # Remove Jitsi template directory
 if [ -z "$(ls -A /usr/share/yunohost/templates/jitsi)" ]; then
@@ -141,14 +132,8 @@ yunohost tools regen-conf metronome
 
 # Delete focus user
 yunohost user delete $focus_user --purge
-
-# Removing additional domains
-if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
-	yunohost domain remove auth.$domain
-	yunohost domain remove conference.$domain
-	yunohost domain remove jitsi-videobridge.$domain
-	yunohost domain remove focus.$domain
-fi
+yunohost user delete $jvb_user --purge
+yunohost domain remove auth.$domain
 
 #=================================================
 # REMOVE THE LOG FILES

@@ -15,6 +15,7 @@ source /usr/share/yunohost/helpers
 ynh_print_info --message="Managing script failure..."
 
 ynh_clean_setup () {
+	read -p "key"
 	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
@@ -39,6 +40,12 @@ focus_secret=$(ynh_string_random --length=8)
 
 focus_user="svc${app}focus"
 
+jvb_user="svc${app}jvb"
+
+jvb_password=$(ynh_string_random --length=8)
+
+muc_nickname=$(ynh_string_random --length=32)
+
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
@@ -61,6 +68,9 @@ ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
 ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
+ynh_app_setting_set --app=$app --key=jvb_user --value=$jvb_user
+ynh_app_setting_set --app=$app --key=jvb_password --value=$jvb_password
+ynh_app_setting_set --app=$app --key=muc_nickname --value=$muc_nickname
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -92,7 +102,7 @@ ynh_print_info --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
-ynh_install_nodejs --nodejs_version=10
+#ynh_install_nodejs --nodejs_version=10
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -100,10 +110,25 @@ ynh_install_nodejs --nodejs_version=10
 ynh_print_info --message="Setting up source files..."
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
-ynh_setup_source --dest_dir="$final_path/jitsi-jicofo-build" --source_id=jitsi-jicofo
-ynh_setup_source --dest_dir="$final_path/jitsi-meet_temp" --source_id=jitsi-meet
+declare -A packages
+packages[jicofo]="jicofo"
+packages[jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
+packages[jitsi-meet-web]="jitsi-meet"
+packages[jitsi-videobridge]="jitsi-videobridge"
+
+for package in "${!packages[@]}"
+do
+	ynh_setup_source --dest_dir="$final_path/${package}_temp" --source_id=$package
+	pushd "$final_path/${package}_temp"
+		ar x $package.deb data.tar.xz
+		tar xf data.tar.xz
+	popd
+
+	mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
+	ynh_secure_remove --file="$final_path/${package}_temp"
+done
 
 #=================================================
 # NGINX CONFIGURATION
@@ -128,48 +153,39 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 ynh_print_info --message="Configuring metronome..."
 
-# Create additional domains
-if [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]; then
-	ynh_print_info --message="Creating additional domains for package_check..."
-	yunohost domain add auth.$domain
-	yunohost domain add conference.$domain
-	yunohost domain add jitsi-videobridge.$domain
-	yunohost domain add focus.$domain
-fi
+# Adapt prosody module to metronome
+ynh_replace_string --match_string="prosody" --replace_string="metronome" --target_file="$final_path/jitsi-meet-prosody/mod_muc_domain_mapper.lua"
 
 # Create focus user
+yunohost domain add auth.$domain
 yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
+yunohost user create $jvb_user -f $jvb_user -l $jvb_user -m ${jvb_user}@auth.$domain -p $jvb_password -q 0
 
 # Add Metronome domain conf template
 metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
 mkdir -p /usr/share/yunohost/templates/jitsi/
 cp ../conf/metronome.cfg.lua $metronome_conf
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__FINAL_PATH__" --replace_string="$final_path" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__JVB_USER__" --replace_string="$jvb_user" --target_file="$metronome_conf"
 
 touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
-touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
-touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
-touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
 
 # Add Metronome hook 
 cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
 yunohost tools regen-conf metronome
 
-# Add Metronome modules
-cp ../conf/mod_carbons.lua /usr/lib/metronome/modules/mod_carbons.lua
-cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
-cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
-
 ynh_systemd_action --service_name=metronome --action=restart
 
 #=================================================
-# BUILD JITSI-VIDEOBRIDGE
+# CONFIGURE JITSI-VIDEOBRIDGE
 #=================================================
-ynh_print_info --message="Building Jitsi-Videobridge..."
+ynh_print_info --message="Configuring Jitsi-Videobridge..."
 
 public_ipv4="$(curl ip.yunohost.org)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
@@ -179,37 +195,18 @@ cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-commun
 ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
 ynh_replace_string --match_string="__PRIVATE_IPV4__" --replace_string="$private_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
 ynh_replace_string --match_string="__PUBLIC_IPV4__" --replace_string="$public_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+ynh_replace_string --match_string="__JVB_USER__" --replace_string="$jvb_user" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+ynh_replace_string --match_string="__JVB_PASSWORD__" --replace_string="$jvb_password" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
+ynh_replace_string --match_string="__MUC_NICKNAME__" --replace_string="$muc_nickname" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
 chown -R $app: $final_path
 
 #=================================================
-# BUILD JITSI-JICOFO
+# CONFIGURE JITSI-MEET
 #=================================================
-ynh_print_info --message="Building Jitsi-Jicofo..."
+ynh_print_info --message="Configuring Jitsi-Meet..."
 
-pushd "$final_path/jitsi-jicofo-build"
-    mvn package -DskipTests -Dassembly.skipAssembly=false
-popd
-
-unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d $final_path
-
-mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
-
-ynh_secure_remove --file="$final_path/jitsi-jicofo-build"
-
-#=================================================
-# BUILD JITSI-MEET
-#=================================================
-ynh_print_info --message="Building Jitsi-Meet..."
-
-pushd "$final_path/jitsi-meet_temp"
-	ar x jitsi-meet-web.deb data.tar.xz
-	tar xf data.tar.xz
-popd
-
-mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
-ynh_secure_remove --file="$final_path/jitsi-meet_temp"
-
-config="$final_path/jitsi-meet/config.js"
+config="$final_path/jitsi-meet-web/config.js"
 cp ../conf/config.js "$config"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
 
@@ -225,6 +222,7 @@ ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_c
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
 
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"

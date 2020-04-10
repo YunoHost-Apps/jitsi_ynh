@@ -6,8 +6,8 @@ After=network.target
 Type=simple
 User=__APP__
 Group=__APP__
-WorkingDirectory=__FINALPATH__/jitsi-jicofo/
-ExecStart=__FINALPATH__/jitsi-jicofo/jicofo.sh --host=localhost --domain=__DOMAIN__ --secret=__FOCUS_SECRET__ --user_domain=auth.__DOMAIN__ --user_name=__FOCUS_USER__ --user_password=__FOCUS_PASSWORD__ & >> /var/log/__APP__/__APP__-jitsi-jicofo.log 2>&1
+WorkingDirectory=__FINALPATH__/jicofo/
+ExecStart=__FINALPATH__/jicofo/jicofo.sh --host=localhost --domain=__DOMAIN__ --port=__PORT_COMPONENT__ --secret=__FOCUS_SECRET__ --user_domain=auth.__DOMAIN__ --user_name=__FOCUS_USER__ --user_password=__FOCUS_PASSWORD__ & >> /var/log/__APP__/__APP__-jitsi-jicofo.log 2>&1
 
 [Install]
 WantedBy=multi-user.target

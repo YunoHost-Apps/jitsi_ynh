@@ -67,12 +67,28 @@ if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
     yunohost tools regen-conf metronome
 fi
 
+if ynh_version_gt "1.0.3969~ynh1" "${current_version}" ; then
+    # Remove not needed domains
+    yunohost domain remove conference.$domain
+    yunohost domain remove jitsi-videobridge.$domain
+    yunohost domain remove focus.$domain
+	
+	# Remove Previously installed Metronome modules
+	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
+	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
+	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
+
+	# Remove nodejs
+	ynh_remove_nodejs
+fi
+
 # Closing port_component
 if yunohost firewall list | grep -q "\- $port_component$"
 then
 	ynh_print_info --message="Closing port $port_component..."
 	ynh_exec_warn_less yunohost firewall disallow TCP $port_component
 fi
+
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
@@ -108,9 +124,24 @@ then
 	ynh_print_info --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
-	ynh_setup_source --dest_dir="$final_path/jitsi-jicofo-build" --source_id=jitsi-jicofo
-	ynh_setup_source --dest_dir="$final_path/jitsi-meet_temp" --source_id=jitsi-meet
+	declare -A packages
+	packages[jicofo]="jicofo"
+	packages[jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
+	packages[jitsi-meet-web]="jitsi-meet"
+	packages[jitsi-videobridge]="jitsi-videobridge"
+
+	for package in "${!packages[@]}"
+	do
+		ynh_secure_remove --file="$final_path/${package}"
+		ynh_setup_source --dest_dir="$final_path/${package}_temp" --source_id=$package
+		pushd "$final_path/${package}_temp"
+			ar x $package.deb data.tar.xz
+			tar xf data.tar.xz
+		popd
+
+		mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
+		ynh_secure_remove --file="$final_path/${package}_temp"
+	done
 fi
 
 #=================================================
@@ -128,7 +159,7 @@ ynh_print_info --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
-ynh_install_nodejs --nodejs_version=10
+#ynh_install_nodejs --nodejs_version=10
 
 #=================================================
 # CREATE DEDICATED USER
@@ -225,6 +256,7 @@ ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_c
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
 
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="../conf/jitsi-jicofo.service"
 ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
