@@ -70,6 +70,13 @@ ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 
 #=================================================
+# BACKUP THE APP CONFIG
+#=================================================
+ynh_print_info --message="Backing up the app config..."
+
+ynh_backup --src_path="/etc/$app"
+
+#=================================================
 # SPECIFIC BACKUP
 #=================================================
 # BACKUP LOGROTATE

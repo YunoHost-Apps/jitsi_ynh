@@ -136,8 +136,17 @@ yunohost user delete $jvb_user --purge
 yunohost domain remove auth.$domain
 
 #=================================================
+# REMOVE THE CONFIG
+#=================================================
+ynh_print_info --message="Removing the config..."
+
+# Remove the log files
+ynh_secure_remove --file="/etc/$app"
+
+#=================================================
 # REMOVE THE LOG FILES
 #=================================================
+ynh_print_info --message="Removing the log files..."
 
 # Remove the log files
 ynh_secure_remove --file="/var/log/$app"

@@ -15,6 +15,7 @@ source /usr/share/yunohost/helpers
 ynh_print_info --message="Managing script failure..."
 
 ynh_clean_setup () {
+	read -p "key"
 	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
@@ -189,25 +190,68 @@ ynh_print_info --message="Configuring Jitsi-Videobridge..."
 public_ipv4="$(curl ip.yunohost.org)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
-mkdir -p "$final_path/.sip-communicator"
-cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
-ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-ynh_replace_string --match_string="__PRIVATE_IPV4__" --replace_string="$private_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-ynh_replace_string --match_string="__PUBLIC_IPV4__" --replace_string="$public_ipv4" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-ynh_replace_string --match_string="__JVB_USER__" --replace_string="$jvb_user" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-ynh_replace_string --match_string="__JVB_PASSWORD__" --replace_string="$jvb_password" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-ynh_replace_string --match_string="__MUC_NICKNAME__" --replace_string="$muc_nickname" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-chown -R $app: $final_path
+mkdir -p "/etc/$app/videobridge"
+
+jitsi_videobridge_sip_communicator_conf="/etc/$app/videobridge/sip-communicator.properties"
+cp ../conf/jitsi-videobridge-sip-communicator.properties "$jitsi_videobridge_sip_communicator_conf"
+ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$jitsi_videobridge_sip_communicator_conf"
+ynh_replace_string --match_string="__PRIVATE_IPV4__" --replace_string="$private_ipv4" --target_file="$jitsi_videobridge_sip_communicator_conf"
+ynh_replace_string --match_string="__PUBLIC_IPV4__" --replace_string="$public_ipv4" --target_file="$jitsi_videobridge_sip_communicator_conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_videobridge_sip_communicator_conf"
+ynh_replace_string --match_string="__JVB_USER__" --replace_string="$jvb_user" --target_file="$jitsi_videobridge_sip_communicator_conf"
+ynh_replace_string --match_string="__JVB_PASSWORD__" --replace_string="$jvb_password" --target_file="$jitsi_videobridge_sip_communicator_conf"
+ynh_replace_string --match_string="__MUC_NICKNAME__" --replace_string="$muc_nickname" --target_file="$jitsi_videobridge_sip_communicator_conf"
+
+jitsi_videobridge_conf="/etc/$app/videobridge/config"
+cp ../conf/jitsi-videobridge.config "$jitsi_videobridge_conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_videobridge_conf"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$jitsi_videobridge_conf"
+ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$jitsi_videobridge_conf"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_videobridge_conf"
+
+jitsi_videobridge_logging_conf="/etc/$app/videobridge/logging.properties"
+cp ../conf/jitsi-videobridge-logging.properties "$jitsi_videobridge_logging_conf"
+
+#=================================================
+# CONFIGURE JITSI-JICOFO
+#=================================================
+ynh_print_info --message="Configuring Jitsi-Jicofo..."
+
+mkdir -p "/etc/$app/jicofo"
+
+jitsi_jicofo_sip_communicator_conf="/etc/$app/jicofo/sip-communicator.properties"
+cp ../conf/jitsi-jicofo-sip-communicator.properties "$jitsi_jicofo_sip_communicator_conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_jicofo_sip_communicator_conf"
+
+jitsi_jicofo_conf="/etc/$app/jicofo/config"
+cp ../conf/jitsi-jicofo.config "$jitsi_jicofo_conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_jicofo_conf"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$jitsi_jicofo_conf"
+ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$jitsi_jicofo_conf"
+ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="$jitsi_jicofo_conf"
+ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="$jitsi_jicofo_conf"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_jicofo_conf"
+
+jitsi_jicofo_logging_conf="/etc/$app/jicofo/logging.properties"
+cp ../conf/jitsi-jicofo-logging.properties "$jitsi_jicofo_logging_conf"
 
 #=================================================
 # CONFIGURE JITSI-MEET
 #=================================================
 ynh_print_info --message="Configuring Jitsi-Meet..."
 
-config="$final_path/jitsi-meet-web/config.js"
-cp ../conf/config.js "$config"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
+mkdir -p "/etc/$app/meet"
+
+jitsi_meet_conf="/etc/$app/meet/config.js"
+cp ../conf/config.js "$jitsi_meet_conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_meet_conf"
+
+#=================================================
+# CREATE LOG DIR
+#=================================================
+ynh_print_info --message="Creating log dir..."
+
+mkdir -p "/var/log/$app"
 
 #=================================================
 # SETUP SYSTEMD
@@ -215,16 +259,7 @@ ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --targ
 ynh_print_info --message="Configuring a systemd service..."
 
 # Create a dedicated systemd config
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
-ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="../conf/jitsi-videobridge.service"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="../conf/jitsi-videobridge.service"
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
-
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="../conf/jitsi-jicofo.service"
-ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
-ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="../conf/jitsi-jicofo.service"
-ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
 ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
 #=================================================
@@ -233,7 +268,13 @@ ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 ynh_print_info --message="Storing the config file checksum..."
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$config"
+ynh_store_file_checksum --file="$jitsi_videobridge_sip_communicator_conf"
+ynh_store_file_checksum --file="$jitsi_videobridge_conf"
+ynh_store_file_checksum --file="$jitsi_videobridge_logging_conf"
+ynh_store_file_checksum --file="$jitsi_jicofo_sip_communicator_conf"
+ynh_store_file_checksum --file="$jitsi_jicofo_conf"
+ynh_store_file_checksum --file="$jitsi_jicofo_logging_conf"
+ynh_store_file_checksum --file="$jitsi_meet_conf"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -244,6 +285,8 @@ ynh_print_info --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app: $final_path
+chown -R $app: /etc/$app
+chown -R $app: /var/log/$app
 
 #=================================================
 # SETUP LOGROTATE
