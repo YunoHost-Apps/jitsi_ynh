@@ -32,7 +32,11 @@
                     "en": "Choose a domain for Jitsi Meet",
                     "fr": "Choisissez un domaine pour Jitsi Meet"
                 },
-                "example": "domain.org"
+                "example": "domain.org",
+                "help": {
+                    "en": "In addition to this domain, you need to have created beforehand 4 subdomains of this domain: auth.jitsi.domain.org, conference.jitsi.domain.org, jitsi-videobridge.jitsi.domain.org, focus.jitsi.domain.org",
+                    "fr": "En plus de ce domaine, vous devez avoir préalablement créé 4 sous-domaines de ce domaine : auth.jitsi.domain.org, conference.jitsi.domain.org, jitsi-videobridge.jitsi.domain.org, focus.jitsi.domain.org"
+                }
             }
         ]
     }
