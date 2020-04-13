@@ -53,7 +53,6 @@ if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
     cp ../conf/metronome.cfg.lua $metronome_conf
     ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
     ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
     ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
     ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
 

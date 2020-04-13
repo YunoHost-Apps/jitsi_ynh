@@ -87,6 +87,3 @@ Component "speakerstats.__DOMAIN__" "speakerstats_component"
 
 Component "conferenceduration.__DOMAIN__" "conference_duration_component"
     muc_component = "conference.__DOMAIN__"
-    
-Component "jitsi-videobridge.__DOMAIN__"
-    component_secret = "__VIDEOBRIDGE_SECRET__"
