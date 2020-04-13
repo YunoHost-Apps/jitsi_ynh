@@ -73,7 +73,7 @@ VirtualHost "auth.__DOMAIN__"
 		hostname      = "localhost",
 		user = {
 			basedn        = "ou=users,dc=yunohost,dc=org",
-			filter        = "(&(objectClass=posixAccount)(mail=*@auth.__DOMAIN__))",
+            filter        = "(&(objectClass=posixAccount)(mail=*@auth.__DOMAIN__)(permission=cn=xmpp.main,ou=permission,dc=yunohost,dc=org))",
 			usernamefield = "mail",
 			namefield     = "cn",
 		},

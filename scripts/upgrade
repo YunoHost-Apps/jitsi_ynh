@@ -142,6 +142,21 @@ then
 		mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
 		ynh_secure_remove --file="$final_path/${package}_temp"
 	done
+
+	# Adapt prosody module to metronome
+	for file in $final_path/jitsi-meet-prosody/*.lua
+	do
+		ynh_replace_string --match_string="prosody" --replace_string="metronome" --target_file="$file"
+		ynh_replace_string --match_string="Prosody" --replace_string="Metronome" --target_file="$file"
+	done
+
+	for directory in $final_path/jitsi-meet-prosody/*/; do
+    	for file in $directory/*.lua
+    	do
+			ynh_replace_string --match_string="prosody" --replace_string="metronome" --target_file="$file"
+			ynh_replace_string --match_string="Prosody" --replace_string="Metronome" --target_file="$file"
+		done
+	done
 fi
 
 #=================================================
