@@ -22,7 +22,7 @@ port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
-jvb_user=$(ynh_app_setting_get --app=$app --key=jvb_user)
+videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
 
 #=================================================
 # STANDARD REMOVE
@@ -128,11 +128,11 @@ fi
 
 # Remove Metronome Hook
 ynh_secure_remove --file="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
-yunohost tools regen-conf metronome
+yunohost tools regen-conf metronome --force
 
 # Delete focus user
 yunohost user delete $focus_user --purge
-yunohost user delete $jvb_user --purge
+yunohost user delete $videobridge_user --purge
 yunohost domain remove auth.$domain
 
 #=================================================

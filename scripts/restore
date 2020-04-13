@@ -112,7 +112,7 @@ yunohost domain add auth.$domain
 
 # Create focus user
 yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
-yunohost user create $jvb_user -f $jvb_user -l $jvb_user -m ${jvb_user}@auth.$domain -p $jvb_password -q 0
+yunohost user create $videobridge_user -f $videobridge_user -l $videobridge_user -m ${videobridge_user}@auth.$domain -p $videobridge_secret -q 0
 
 # Restore Metronome domain conf template
 mkdir -p /usr/share/yunohost/templates/jitsi/
@@ -121,7 +121,7 @@ ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/auth.$domain
 
 # Restore Metronome Hook
 ynh_restore_file --origin_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
-yunohost tools regen-conf metronome
+yunohost tools regen-conf metronome --force
 
 ynh_systemd_action --service_name=metronome --action=restart
 

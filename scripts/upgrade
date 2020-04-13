@@ -64,7 +64,7 @@ if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
 
     # Add Metronome hook 
     cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
-    yunohost tools regen-conf metronome
+    yunohost tools regen-conf metronome --force
 fi
 
 if ynh_version_gt "1.0.3969~ynh1" "${current_version}" ; then
@@ -188,8 +188,8 @@ then
 	ynh_replace_string --match_string="__PRIVATE_IPV4__" --replace_string="$private_ipv4" --target_file="$jitsi_videobridge_sip_communicator_conf"
 	ynh_replace_string --match_string="__PUBLIC_IPV4__" --replace_string="$public_ipv4" --target_file="$jitsi_videobridge_sip_communicator_conf"
 	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_videobridge_sip_communicator_conf"
-	ynh_replace_string --match_string="__JVB_USER__" --replace_string="$jvb_user" --target_file="$jitsi_videobridge_sip_communicator_conf"
-	ynh_replace_string --match_string="__JVB_PASSWORD__" --replace_string="$jvb_password" --target_file="$jitsi_videobridge_sip_communicator_conf"
+	ynh_replace_string --match_string="__VIDEOBRIDGE_USER__" --replace_string="$videobridge_user" --target_file="$jitsi_videobridge_sip_communicator_conf"
+	ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$jitsi_videobridge_sip_communicator_conf"
 	ynh_replace_string --match_string="__MUC_NICKNAME__" --replace_string="$muc_nickname" --target_file="$jitsi_videobridge_sip_communicator_conf"
 	ynh_store_file_checksum --file="$jitsi_videobridge_sip_communicator_conf"
 

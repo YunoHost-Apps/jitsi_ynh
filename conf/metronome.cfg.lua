@@ -1,4 +1,5 @@
 component_ports = { __PORT_COMPONENT__ }
+
 plugin_paths = { "__FINAL_PATH__/jitsi-meet-prosody/" }
 
 -- domain mapper options, must at least have domain base set to use the mapper
@@ -60,7 +61,7 @@ Component "internal.auth.__DOMAIN__" "muc"
     modules_enabled = {
       "ping";
     }
-    admins = { "__FOCUS_USER__@auth.__DOMAIN__", "__JVB_USER__@auth.__DOMAIN__" }
+    admins = { "__FOCUS_USER__@auth.__DOMAIN__", "__VIDEOBRIDGE_USER__@auth.__DOMAIN__" }
 
 VirtualHost "auth.__DOMAIN__"
 	ssl = {
@@ -87,5 +88,5 @@ Component "speakerstats.__DOMAIN__" "speakerstats_component"
 Component "conferenceduration.__DOMAIN__" "conference_duration_component"
     muc_component = "conference.__DOMAIN__"
     
---Component "jitsi-videobridge.__DOMAIN__"
---    component_secret = "__VIDEOBRIDGE_SECRET__"
+Component "jitsi-videobridge.__DOMAIN__"
+    component_secret = "__VIDEOBRIDGE_SECRET__"
