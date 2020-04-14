@@ -1,4 +1,6 @@
 component_ports = { __PORT_COMPONENT__ }
+c2s_require_encryption = false
+s2s_secure_auth = false
 
 plugin_paths = { "__FINAL_PATH__/jitsi-meet-prosody/" }
 
