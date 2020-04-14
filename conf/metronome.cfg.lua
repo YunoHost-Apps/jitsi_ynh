@@ -50,7 +50,7 @@ Component "conference.__DOMAIN__" "muc"
     storage = "null"
     modules_enabled = {
         "muc_meeting_id";
-        -- "muc_domain_mapper";
+        "muc_domain_mapper";
         -- "token_verification";
     }
     admins = { "__FOCUS_USER__@auth.__DOMAIN__" }
