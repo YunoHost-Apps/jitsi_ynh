@@ -167,8 +167,8 @@ ynh_print_info --message="Configuring metronome..."
 
 # Create focus user
 yunohost domain add auth.$domain
-yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
-yunohost user create $videobridge_user -f $videobridge_user -l $videobridge_user -m ${videobridge_user}@auth.$domain -p $videobridge_secret -q 0
+# yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
+# yunohost user create $videobridge_user -f $videobridge_user -l $videobridge_user -m ${videobridge_user}@auth.$domain -p $videobridge_secret -q 0
 
 # Add Metronome domain conf template
 metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
@@ -189,6 +189,9 @@ cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-
 yunohost tools regen-conf metronome --force
 
 ynh_systemd_action --service_name=metronome --action=restart
+
+metronomectl adduser $focus_user@auth.$domain $focus_password || true
+metronomectl adduser $videobridge_user@auth.$domain $videobridge_secret || true
 
 #=================================================
 # CONFIGURE JITSI-VIDEOBRIDGE
@@ -220,6 +223,17 @@ ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_fil
 jitsi_videobridge_logging_conf="/etc/$app/videobridge/logging.properties"
 cp ../conf/jitsi-videobridge-logging.properties "$jitsi_videobridge_logging_conf"
 
+jitsi_videobridge_callstats_java_sdk_conf="/etc/$app/videobridge/callstats-java-sdk.properties"
+cp ../conf/jitsi-videobridge-callstats-java-sdk.properties "$jitsi_videobridge_callstats_java_sdk_conf"
+
+jitsi_videobridge_log4j2_conf="/etc/$app/videobridge/log4j2.xml"
+cp ../conf/jitsi-videobridge-log4j2.xml "$jitsi_videobridge_log4j2_conf"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_videobridge_log4j2_conf"
+
+jitsi_videobridge_20_jvb_udp_buffers_conf="/etc/sysctl.d/20-jvb-udp-buffers.conf"
+cp ../conf/jitsi-videobridge-20-jvb-udp-buffers.conf "$jitsi_videobridge_20_jvb_udp_buffers_conf"
+sysctl --system || true
+
 #=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
@@ -250,7 +264,7 @@ ynh_print_info --message="Configuring Jitsi-Meet..."
 
 mkdir -p "/etc/$app/meet"
 
-jitsi_meet_conf="/etc/$app/meet/config.js"
+jitsi_meet_conf="/etc/$app/meet/$domain-config.js"
 cp ../conf/config.js "$jitsi_meet_conf"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_meet_conf"
 
@@ -295,6 +309,7 @@ ynh_print_info --message="Securing files and directories..."
 chown -R $app: $final_path
 chown -R $app: /etc/$app
 chown -R $app: /var/log/$app
+chmod -R 770 /var/log/$app
 
 #=================================================
 # SETUP LOGROTATE

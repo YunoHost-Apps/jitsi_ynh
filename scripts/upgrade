@@ -220,6 +220,17 @@ then
 	ynh_backup_if_checksum_is_different --file="$jitsi_videobridge_logging_conf"
 	cp ../conf/jitsi-videobridge-logging.properties "$jitsi_videobridge_logging_conf"
 	ynh_store_file_checksum --file="$jitsi_videobridge_logging_conf"
+
+	jitsi_videobridge_callstats_java_sdk_conf="/etc/$app/videobridge/callstats-java-sdk.properties"
+	cp ../conf/jitsi-videobridge-callstats-java-sdk.properties "$jitsi_videobridge_callstats_java_sdk_conf"
+
+	jitsi_videobridge_log4j2_conf="/etc/$app/videobridge/log4j2.xml"
+	cp ../conf/jitsi-videobridge-log4j2.xml "$jitsi_videobridge_log4j2_conf"
+	ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_videobridge_log4j2_conf"
+
+	jitsi_videobridge_20_jvb_udp_buffers_conf="/etc/sysctl.d/videobridge/20-jvb-udp-buffers.conf"
+	cp ../conf/jitsi-videobridge-20-jvb-udp-buffers.conf "$jitsi_videobridge_20_jvb_udp_buffers_conf"
+	sysctl --system || true
 fi
 
 #=================================================
@@ -295,6 +306,8 @@ ynh_print_info --message="Securing files and directories..."
 # Set permissions on app files
 chown -R root: $final_path
 chown -R $app: /etc/$app
+chown -R $app: /var/log/$app
+chmod -R 770 /var/log/$app
 
 #=================================================
 # SETUP SSOWAT
