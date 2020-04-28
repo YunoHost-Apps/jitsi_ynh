@@ -1,7 +1,5 @@
 # Jitsi Meet pour YunoHost
 
-*[Read this readme in english.](./README.md)* 
-
 ## Avertissements
 
 **Jitsi** pour YunoHost est limité actuellement :
@@ -14,6 +12,9 @@ Ces limitations viennent de la manière dont l'application a été empaquetée p
 [![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
 [![Install Jitsi Meet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
 
+
+
+*[Read this readme in english.](./README.md)*
 > *Ce paquet vous permet d'installer Jistsi Meet rapidement et simplement sur un serveur YunoHost. 
 Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
 
