@@ -2,17 +2,14 @@
 
 ## Avertissements
 
-**Jitsi** pour YunoHost est limité actuellement :
-
+**Jitsi-meet** pour YunoHost est limité actuellement :
   * Il ne peut être utilisé qu'avec Chrome ou un navigateur basé sur Chromium
   * Il est limité à 2 participants par réunion
 
 Ces limitations viennent de la manière dont l'application a été empaquetée pour YunoHost. À améliorer.
 
-[![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
-[![Install Jitsi Meet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
-
-
+[![Niveau d'intégration](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
+[![Installer Jitsi Meet avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
 
 *[Read this readme in english.](./README.md)*
 > *Ce paquet vous permet d'installer Jistsi Meet rapidement et simplement sur un serveur YunoHost. 
@@ -38,13 +35,12 @@ Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Ja
 
 ![](https://jitsi.org/wp-content/uploads/2018/08/brady-bunch-stand-up-1024x632.jpg)
 
-## Démonstration
+## Démo
 
-* [Démonstration officielle](https://meet.jit.si/)
+* [Démo officielle](https://meet.jit.si/)
 
 ## Configuration
 
-Comment configurer cette application : Via l'interface d'administration, un fichier texte en SSH ou un autre moyen.
 
 ## Documentation
 
