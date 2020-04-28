@@ -1,5 +1,7 @@
 # Jitsi Meet pour YunoHost
 
+*[Read this readme in english.](./README.md)* 
+
 ## Avertissements
 
 **Jitsi** pour YunoHost est limité actuellement :
@@ -24,14 +26,11 @@ Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Ja
 ## Points importants à préparer avant l'installation
 
 1. **Jitsi** a besoin d'un **domaine racine** dédié, par exemple : jitsi.domain.tld
-
 2. **Jitsi** nécessite des domaines supplémentaires au niveau du DNS et de votre YunoHost
-
   * auth.jitsi.domain.tld
   * conference.jitsi.domain.tld
   * jitsi-videobridge.jitsi.domain.tld
   * focus.jitsi.domain.tld
-
 3. **Jitsi** demande que les ports TCP/4443 et UDP/10000 soient routés vers votre YunoHost (De la même manière que le sont les ports 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
 
 ## Captures d'écran
@@ -65,14 +64,10 @@ Comment configurer cette application : Via l'interface d'administration, un fich
  * Site web de YunoHost : https://yunohost.org/
 
 ---
-
 Informations pour les développeurs 
 ----------------
 
-
-
 Merci de faire votre « pull request » sur la [branche de test](https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing).
-
 Pour tester la branche de test, faites comme ceci.
 ```
 sudo yunohost app install https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing --debug
