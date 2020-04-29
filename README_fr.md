@@ -41,6 +41,7 @@ Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Ja
 
 ## Configuration
 
+Comment configurer cette application: via le panneau d'administration, un fichier brut en SSH ou tout autre moyen.
 
 ## Documentation
 
