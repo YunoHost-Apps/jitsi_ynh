@@ -10,6 +10,8 @@ Those limitations come from the packaging of the upstream app. Have to be improv
  [![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
 [![Install Jitsi Meet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
 
+*[Lire ce readme en français.](./README_fr.md)*
+
 > *This package allow you to install Jitsi Meet quickly and simply on a YunoHost server.  
 [Install YunoHost](https://yunohost.org/#/install) to be able to do so.*
 
