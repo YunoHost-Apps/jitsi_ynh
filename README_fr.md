@@ -58,7 +58,7 @@ Comment configurer cette application: via le panneau d'administration, un fichie
 
  * Rapporter un bug : https://github.com/YunoHost-Apps/jitsi_ynh/issues
  * Site de l'application : https://jitsi.org/
- * Répertoire de l'application de base : https://github.com/jitsi/jitsi-meet
+ * Dépôt de l'application de base : https://github.com/jitsi/jitsi-meet
  * Site web de YunoHost : https://yunohost.org/
 
 ---
