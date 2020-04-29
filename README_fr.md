@@ -1,7 +1,6 @@
 # Jitsi Meet pour YunoHost
 
 ## Avertissements
-
 **Jitsi-meet** pour YunoHost est limité actuellement :
   * Il ne peut être utilisé qu'avec Chrome ou un navigateur basé sur Chromium
   * Il est limité à 2 participants par réunion
@@ -12,11 +11,11 @@ Ces limitations viennent de la manière dont l'application a été empaquetée p
 [![Installer Jitsi Meet avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
 
 *[Read this readme in english.](./README.md)*
+
 > *Ce paquet vous permet d'installer Jistsi Meet rapidement et simplement sur un serveur YunoHost. 
 Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
 
 ## Vue d'ensemble
-
 Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Javascript, propose des vidéos-conférences de haute qualité, sécurisées et évolutives.
 
 **Version actuelle :** 1.0.3729
@@ -47,7 +46,7 @@ Comment configurer cette application: via le panneau d'administration, un fichie
 
  * Documentation officielle : https://jitsi.org/user-faq/
 
-## Fonctionnalités spécifiques à YunoHost
+## Caractéristiques spécifiques YunoHost
 
 #### Architectures supportées
 
@@ -56,17 +55,19 @@ Comment configurer cette application: via le panneau d'administration, un fichie
 
 ## Liens
 
- * Rapporter un bug : https://github.com/YunoHost-Apps/jitsi_ynh/issues
- * Site de l'application : https://jitsi.org/
- * Dépôt de l'application de base : https://github.com/jitsi/jitsi-meet
- * Site web de YunoHost : https://yunohost.org/
+ * Signaler un bug: https://github.com/YunoHost-Apps/jitsi_ynh/issues
+ * Site de l'application: https://jitsi.org/
+ * Dépôt de l'application principale: https://github.com/jitsi/jitsi-meet
+ * Site web YunoHost: https://yunohost.org/
 
 ---
-Informations pour les développeurs 
+
+Informations pour les développeurs
 ----------------
 
-Merci de faire votre « pull request » sur la [branche de test](https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing).
-Pour tester la branche de test, faites comme ceci.
+Merci de faire vos pull request sur la [branche testing](https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing).
+
+Pour essayer la branche testing, procédez comme suit.
 ```
 sudo yunohost app install https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing --debug
 ou
