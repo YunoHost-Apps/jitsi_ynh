@@ -69,6 +69,6 @@ Merci de faire votre « pull request » sur la [branche de test](https://github.
 Pour tester la branche de test, faites comme ceci.
 ```
 sudo yunohost app install https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing --debug
-or
+ou
 sudo yunohost app upgrade jitsi -u https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing --debug
 ```
