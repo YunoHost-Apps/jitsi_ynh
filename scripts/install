@@ -41,7 +41,7 @@ focus_user="focus"
 
 videobridge_user="jvb"
 
-muc_nickname=$(ynh_string_random --length=32)
+muc_nickname=$(uuidgen)
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
