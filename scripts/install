@@ -41,8 +41,6 @@ focus_user="focus"
 
 videobridge_user="jvb"
 
-muc_nickname=$(uuidgen)
-
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
@@ -66,7 +64,6 @@ ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_sec
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
 ynh_app_setting_set --app=$app --key=videobridge_user --value=$videobridge_user
-ynh_app_setting_set --app=$app --key=muc_nickname --value=$muc_nickname
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -200,6 +197,9 @@ ynh_print_info --message="Configuring Jitsi-Videobridge..."
 
 public_ipv4="$(curl ip.yunohost.org)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
+
+muc_nickname=$(uuidgen)
+ynh_app_setting_set --app=$app --key=muc_nickname --value=$muc_nickname
 
 mkdir -p "/etc/$app/videobridge"
 
