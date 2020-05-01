@@ -84,7 +84,6 @@ VirtualHost "__DOMAIN__"
         "pubsub";
         "ping"; -- Enable mod_ping
         "speakerstats";
-        "turncredentials";
         "conference_duration";
 	"extdisco";
     }
