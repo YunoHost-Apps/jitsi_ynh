@@ -63,7 +63,6 @@ cross_domain_bosh = false;
 consider_bosh_secure = true;
 
 VirtualHost "__DOMAIN__"
-    -- enabled = false -- Remove this line to enable this host
     authentication = "anonymous"
         -- Properties below are modified by jitsi-meet-tokens package config
         -- and authentication above is switched to "token"
@@ -86,6 +85,7 @@ VirtualHost "__DOMAIN__"
         "speakerstats";
         "turncredentials";
         "conference_duration";
+	"extdisco";
     }
     c2s_require_encryption = false
     external_services = {
@@ -98,25 +98,25 @@ VirtualHost "__DOMAIN__"
     }
 
 Component "conference.__DOMAIN__" "muc"
-    storage = "null"
     modules_enabled = {
         "muc_meeting_id";
         "muc_domain_mapper";
         -- "token_verification";
     }
     admins = { "__FOCUS_USER__@auth.__DOMAIN__" }
-    muc_room_locking = false
-    muc_room_default_public_jids = true
+    allow_anonymous_creation = true
+    instant_room_on_creation = true
+    room_default_whois = "anyone"
 
 -- internal muc component
 Component "internal.auth.__DOMAIN__" "muc"
-    storage = "null"
-    modules_enabled = {
+
+modules_enabled = {
       "ping";
     }
     admins = { "__FOCUS_USER__@auth.__DOMAIN__", "__VIDEOBRIDGE_USER__@auth.__DOMAIN__" }
-    muc_room_locking = false
-    muc_room_default_public_jids = true
+    instant_room_on_creation = true
+    room_default_whois = "anyone"
 
 VirtualHost "auth.__DOMAIN__"
     ssl = {
