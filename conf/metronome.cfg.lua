@@ -63,7 +63,7 @@ VirtualHost "__DOMAIN__"
 		certificate = "/etc/yunohost/certs/__DOMAIN__/crt.pem";
 	}
 
-	c2s_require_encryption = false
+	--c2s_require_encryption = false --why?
 
 VirtualHost "auth.__DOMAIN__"
 	ssl = {
@@ -82,7 +82,6 @@ VirtualHost "auth.__DOMAIN__"
 	}
 
 Component "conference.__DOMAIN__" "muc"
-	allow_anonymous_creation = true
 
 Component "jitsi-videobridge.__DOMAIN__"
     component_secret = "__VIDEOBRIDGE_SECRET__"
