@@ -54,10 +54,11 @@ modules_enabled = {
 		"http_altconnect";
 }
 
+-- Make the focus user a global administrator
+admins = { "__FOCUS_USER__@auth.__DOMAIN__" }
+
 -- domain mapper options, must at least have domain base set to use the mapper
 muc_mapper_domain_base = "__DOMAIN__";
-
-turn_secret = "__TURN_SECRET__";
 
 cross_domain_bosh = false;
 consider_bosh_secure = true;
@@ -110,8 +111,7 @@ Component "conference.__DOMAIN__" "muc"
 
 -- internal muc component
 Component "internal.auth.__DOMAIN__" "muc"
-
-modules_enabled = {
+    modules_enabled = {
       "ping";
     }
     admins = { "__FOCUS_USER__@auth.__DOMAIN__", "__VIDEOBRIDGE_USER__@auth.__DOMAIN__" }
