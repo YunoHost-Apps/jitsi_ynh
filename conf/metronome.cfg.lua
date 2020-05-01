@@ -82,6 +82,7 @@ VirtualHost "auth.__DOMAIN__"
 	}
 
 Component "conference.__DOMAIN__" "muc"
+	allow_anonymous_creation = true
 
 Component "jitsi-videobridge.__DOMAIN__"
     component_secret = "__VIDEOBRIDGE_SECRET__"
