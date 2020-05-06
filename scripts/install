@@ -162,9 +162,7 @@ cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-
 yunohost tools regen-conf metronome
 
 # Add Metronome modules
-cp ../conf/mod_carbons.lua /usr/lib/metronome/modules/mod_carbons.lua
 cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
-cp ../conf/mod_smacks.lua /usr/lib/metronome/modules/mod_smacks.lua
 
 ynh_systemd_action --service_name=metronome --action=restart
 
