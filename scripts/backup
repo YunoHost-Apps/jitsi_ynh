@@ -73,9 +73,7 @@ ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua
 ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 
 # Backup Metronome Module
-ynh_backup --src_path="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-ynh_backup --src_path="/usr/lib/metronome/modules/mod_smacks.lua"
 
 #=================================================
 # SPECIFIC BACKUP
