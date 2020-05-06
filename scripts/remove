@@ -117,9 +117,7 @@ fi
 ynh_print_info --message="Reconfiguring Metronome..."
 
 # Remove Metronome modules
-ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
 ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
 
 ynh_systemd_action --service_name=metronome --action=restart
 
