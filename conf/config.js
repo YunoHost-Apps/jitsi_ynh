@@ -46,7 +46,7 @@ var config = {
     testing: {
         // P2P test mode disables automatic switching to P2P when there are 2
         // participants in the conference.
-        p2pTestMode: false
+        // p2pTestMode: false
 
         // Enables the test specific features consumed by jitsi-meet-torture
         // testMode: false
@@ -379,7 +379,7 @@ var config = {
 
             // { urls: 'stun:__DOMAIN__:4446' },
             { urls: 'stun:meet-jit-si-turnrelay.jitsi.net:443' }
-        ]
+        ],
 
         // Sets the ICE transport policy for the p2p connection. At the time
         // of this writing the list of possible values are 'all' and 'relay',

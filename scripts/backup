@@ -60,6 +60,9 @@ ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 # Backup Metronome Hook
 ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 
+# Backup Metronome Module
+ynh_backup --src_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
+
 #=================================================
 # BACKUP THE APP CONFIG
 #=================================================
