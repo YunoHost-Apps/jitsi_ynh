@@ -182,7 +182,7 @@ touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 # Add Metronome hook 
 cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
 
-yunohost tools regen-conf metronome
+yunohost tools regen-conf metronome --force
 
 metronomectl adduser $focus_user@auth.$domain $focus_password || true
 metronomectl adduser $videobridge_user@auth.$domain $videobridge_secret || true

@@ -125,7 +125,7 @@ ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/auth.$domain
 # Restore Metronome Hook
 ynh_restore_file --origin_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 
-yunohost tools regen-conf metronome
+yunohost tools regen-conf metronome --force
 
 #=================================================
 # RESTORE THE APP CONFIG

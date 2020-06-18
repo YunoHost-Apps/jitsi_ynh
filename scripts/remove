@@ -129,7 +129,8 @@ fi
 
 # Remove Metronome Hook
 ynh_secure_remove --file="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
-yunohost tools regen-conf metronome
+
+yunohost tools regen-conf metronome --force
 
 # Delete focus user
 # yunohost user delete $focus_user --purge
