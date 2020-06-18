@@ -50,7 +50,7 @@ VirtualHost "__DOMAIN__"
 Component "conference.__DOMAIN__" "muc"
     modules_enabled = {
         "muc_meeting_id";
-        "muc_domain_mapper";
+        -- "muc_domain_mapper"; # Disable because it make p2p failed
         -- "token_verification";
     }
     admins = { "__FOCUS_USER__@auth.__DOMAIN__" }
