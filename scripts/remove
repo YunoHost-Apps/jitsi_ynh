@@ -115,11 +115,6 @@ fi
 #=================================================
 ynh_script_progression --message="Reconfiguring Metronome..."
 
-# Remove Metronome modules
-ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-
-ynh_systemd_action --service_name=metronome --action=restart
-
 metronomectl deluser $focus_user@auth.$domain || true
 metronomectl deluser $videobridge_user@auth.$domain || true
 

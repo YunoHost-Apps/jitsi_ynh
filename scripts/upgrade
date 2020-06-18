@@ -78,6 +78,7 @@ if ynh_version_gt "1.0.3969~ynh1" "${current_version}" ; then
 	
 	# Remove Previously installed Metronome modules
 	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
+	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
 	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
 
 	# Remove nodejs

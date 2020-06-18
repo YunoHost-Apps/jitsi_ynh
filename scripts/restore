@@ -125,9 +125,6 @@ ynh_restore_file --origin_path="/usr/share/yunohost/templates/jitsi/auth.$domain
 # Restore Metronome Hook
 ynh_restore_file --origin_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
 
-# Restore Metronome modules
-ynh_restore_file --origin_path="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-
 yunohost tools regen-conf metronome
 
 #=================================================

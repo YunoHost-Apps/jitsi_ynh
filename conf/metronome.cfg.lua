@@ -4,11 +4,6 @@ component_ports = { __PORT_COMPONENT__ }
 
 plugin_paths = { "__FINAL_PATH__/jitsi-meet-prosody/" }
 
-modules_enabled = {
-		-- For Jitsi Meet
-		"http_altconnect";
-}
-
 -- Make the focus user a global administrator
 admins = { "__FOCUS_USER__@auth.__DOMAIN__" }
 

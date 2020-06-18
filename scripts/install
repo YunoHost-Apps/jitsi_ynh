@@ -182,9 +182,6 @@ touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 # Add Metronome hook 
 cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
 
-# Add Metronome modules
-cp ../conf/mod_http_altconnect.lua /usr/lib/metronome/modules/mod_http_altconnect.lua
-
 yunohost tools regen-conf metronome
 
 metronomectl adduser $focus_user@auth.$domain $focus_password || true
