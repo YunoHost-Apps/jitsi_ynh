@@ -118,7 +118,7 @@ do
 	popd
 
 	mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
-	# ynh_secure_remove --file="$final_path/${package}_temp"
+	ynh_secure_remove --file="$final_path/${package}_temp"
 done
 
 # Adapt prosody module to metronome
