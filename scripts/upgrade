@@ -20,13 +20,16 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
-focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
-port=$(ynh_app_setting_get --app=$app --key=port)
-port_component=$(ynh_app_setting_get --app=$app --key=port_component)
-
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
+focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
+
+videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
+videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
+
+port=$(ynh_app_setting_get --app=$app --key=port)
+port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
+port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 
 #=================================================
 # CHECK VERSION
