@@ -91,9 +91,9 @@ VirtualHost "__DOMAIN__"
     external_services = {
         ["__DOMAIN__"] = {
             { type = "stun", port = "4446", trasport = "udp" },
-            { type = "stun", port = "4446", trasport = "tcp" }
+            { type = "stun", port = "4446", trasport = "tcp" },
             { type = "turn", port = "4446", transport = "udp", turn_secret = "__TURN_SECRET__", turn_ttl = "86400" },
-            { type = "turns", port = "443", transport = "tcp", turn_secret = "__TURN_SECRET__", turn_ttl = "86400" },
+            { type = "turns", port = "443", transport = "tcp", turn_secret = "__TURN_SECRET__", turn_ttl = "86400" }
         }
     }
 
