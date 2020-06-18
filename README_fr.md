@@ -7,18 +7,18 @@
 
 Ces limitations viennent de la manière dont l'application a été empaquetée pour YunoHost. À améliorer.
 
-[![Niveau d'intégration](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi)  
+[![Niveau d'intégration](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi) ![](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)  
 [![Installer Jitsi Meet avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jitsi)
 
 *[Read this readme in english.](./README.md)*
 
-> *Ce paquet vous permet d'installer Jistsi Meet rapidement et simplement sur un serveur YunoHost. 
-Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
+> *Ce package vous permet d'installer Jitsi Meet rapidement et simplement sur un serveur YunoHost.  
+Si vous n'avez pas YunoHost, consultez [le guide](https://yunohost.org/#/install) pour apprendre comment l'installer.*
 
 ## Vue d'ensemble
 Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Javascript, propose des vidéos-conférences de haute qualité, sécurisées et évolutives.
 
-**Version actuelle :** 1.0.4025
+**Version actuelle :** 1.0.4127
 
 ## Points importants à préparer avant l'installation
 
@@ -50,8 +50,8 @@ Comment configurer cette application: via le panneau d'administration, un fichie
 
 #### Architectures supportées
 
-* x86-64b - [![Status des compilations](https://ci-apps.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/jitsi/)
-* ARMv8-A - [![Status des compilations](https://ci-apps-arm.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/jitsi/)
+* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/jitsi/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/jitsi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/jitsi/)
 
 ## Liens
 

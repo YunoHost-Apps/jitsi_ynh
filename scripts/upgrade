@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -31,6 +31,7 @@ focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
 #=================================================
 # CHECK VERSION
 #=================================================
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 current_version=$(ynh_read_manifest --manifest="/etc/yunohost/apps/$app/manifest.json" --manifest_key="version" || echo 1.0)
@@ -38,7 +39,7 @@ current_version=$(ynh_read_manifest --manifest="/etc/yunohost/apps/$app/manifest
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_print_info --message="Ensuring downward compatibility..."
+ynh_script_progression --message="Ensuring downward compatibility..."
 
 # If final_path doesn't exist, create it
 if [ -z "$final_path" ]; then
@@ -84,7 +85,7 @@ fi
 # Closing port_component
 if yunohost firewall list | grep -q "\- $port_component$"
 then
-	ynh_print_info --message="Closing port $port_component..."
+	ynh_script_progression --message="Closing port $port_component..."
 	ynh_exec_warn_less yunohost firewall disallow TCP $port_component
 fi
 
@@ -92,7 +93,7 @@ fi
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_print_info --message="Backing up the app before upgrading (may take a while)..."
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -109,7 +110,7 @@ ynh_abort_if_errors
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Stopping a systemd service..."
+ynh_script_progression --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
@@ -120,7 +121,7 @@ ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/l
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_print_info --message="Upgrading source files..."
+	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	declare -A packages
@@ -161,7 +162,7 @@ fi
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info --message="Upgrading nginx web server configuration..."
+ynh_script_progression --message="Upgrading nginx web server configuration..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -169,7 +170,7 @@ ynh_add_nginx_config
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_print_info --message="Upgrading dependencies..."
+ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
@@ -178,7 +179,7 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_print_info --message="Making sure dedicated system user exists..."
+ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir=$final_path
@@ -188,7 +189,7 @@ ynh_system_user_create --username=$app --home_dir=$final_path
 #=================================================
 # CONFIGURE JITSI-VIDEOBRIDGE
 #=================================================
-ynh_print_info --message="Configuring Jitsi-Videobridge..."
+ynh_script_progression --message="Configuring Jitsi-Videobridge..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
@@ -236,7 +237,7 @@ fi
 #=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
-ynh_print_info --message="configuring Jitsi-Jicofo..."
+ynh_script_progression --message="configuring Jitsi-Jicofo..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
@@ -267,7 +268,7 @@ fi
 #=================================================
 # CONFIGURE JITSI-MEET
 #=================================================
-ynh_print_info --message="Configuring Jitsi-Meet..."
+ynh_script_progression --message="Configuring Jitsi-Meet..."
 
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
@@ -280,17 +281,9 @@ then
 fi
 
 #=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_print_info --message="Upgrading logrotate configuration..."
-
-# Use logrotate to manage app-specific logfile(s)
-ynh_use_logrotate --non-append
-
-#=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_print_info --message="Upgrading systemd configuration..."
+ynh_script_progression --message="Upgrading systemd configuration..."
 
 # Create a dedicated systemd config
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
@@ -301,7 +294,7 @@ ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
-ynh_print_info --message="Securing files and directories..."
+ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions on app files
 chown -R root: $final_path
@@ -310,25 +303,41 @@ chown -R $app: /var/log/$app
 chmod -R 770 /var/log/$app
 
 #=================================================
-# SETUP SSOWAT
+# SETUP LOGROTATE
 #=================================================
-ynh_print_info --message="Upgrading SSOwat configuration..."
+ynh_script_progression --message="Upgrading logrotate configuration..."
 
-# Make app public
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+# Use logrotate to manage app-specific logfile(s)
+ynh_use_logrotate --non-append
+
+#=================================================
+# INTEGRATE SERVICE IN YUNOHOST
+#=================================================
+ynh_script_progression --message="Integrating service in YunoHost..."
+
+yunohost service add $app-videobridge --description "$app jitsi-videobridge for jitsi" --log "/var/log/$app/$app-videobridge.log"
+yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi" --log "/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
+# SETUP SSOWAT
+#=================================================
+ynh_script_progression --message="Upgrading SSOwat configuration..."
+
+# Make app public
+ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+
+#=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -336,4 +345,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Upgrade of $app completed"
+ynh_script_progression --message="Upgrade of $app completed"

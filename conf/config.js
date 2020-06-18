@@ -54,6 +54,13 @@ var config = {
         // Disables the auto-play behavior of *all* newly created video element.
         // This is useful when the client runs on a host with limited resources.
         // noAutoPlayVideo: false
+
+        // Enable / disable 500 Kbps bitrate cap on desktop tracks. When enabled,
+        // simulcast is turned off for the desktop share. If presenter is turned
+        // on while screensharing is in progress, the max bitrate is automatically
+        // adjusted to 2.5 Mbps. This takes a value between 0 and 1 which determines
+        // the probability for this to be enabled.
+        // capScreenshareBitrate: 1 // 0 to disable
     },
 
     // Disables ICE/UDP by filtering out local and remote UDP candidates in
@@ -181,9 +188,9 @@ var config = {
     //     appKey: '<APP_KEY>' // Specify your app key here.
     //     // A URL to redirect the user to, after authenticating
     //     // by default uses:
-    //     // 'https://__DOMAIN__/static/oauth.html'
+    //     // 'https://jitsi-meet.example.com/static/oauth.html'
     //     redirectURI:
-    //          'https://__DOMAIN__/subfolder/static/oauth.html'
+    //          'https://jitsi-meet.example.com/subfolder/static/oauth.html'
     // },
     // When integrations like dropbox are enabled only that will be shown,
     // by enabling fileRecordingsServiceEnabled, we show both the integrations
@@ -210,6 +217,21 @@ var config = {
     // Default value for the channel "last N" attribute. -1 for unlimited.
     channelLastN: -1,
 
+    // // Options for the recording limit notification.
+    // recordingLimit: {
+    //
+    //    // The recording limit in minutes. Note: This number appears in the notification text
+    //    // but doesn't enforce the actual recording time limit. This should be configured in
+    //    // jibri!
+    //    limit: 60,
+    //
+    //    // The name of the app with unlimited recordings.
+    //    appName: 'Unlimited recordings APP',
+    //
+    //    // The URL of the app with unlimited recordings.
+    //    appURL: 'https://unlimited.recordings.app.com/'
+    // },
+
     // Disables or enables RTX (RFC 4588) (defaults to false).
     // disableRtx: false,
 
@@ -226,15 +248,26 @@ var config = {
     // disabled, then bandwidth estimations are disabled.
     // enableRemb: false,
 
+    // Enables ICE restart logic in LJM and displays the page reload overlay on
+    // ICE failure. Current disabled by default because it's causing issues with
+    // signaling when Octo is enabled. Also when we do an "ICE restart"(which is
+    // not a real ICE restart), the client maintains the TCC sequence number
+    // counter, but the bridge resets it. The bridge sends media packets with
+    // TCC sequence numbers starting from 0.
+    // enableIceRestart: false,
+
     // Defines the minimum number of participants to start a call (the default
     // is set in Jicofo and set to 2).
     // minParticipants: 2,
 
-    // Use XEP-0215 to fetch STUN and TURN servers.
+    // Use the TURN servers discovered via XEP-0215 for the jitsi-videobridge
+    // connection
     // useStunTurn: true,
 
-    // Enable IPv6 support.
-    // useIPv6: true,
+    // Use TURN/UDP servers for the jitsi-videobridge connection (by default
+    // we filter out TURN/UDP because it is usually not needed since the
+    // bridge itself is reachable via UDP)
+    // useTurnUdp: false
 
     // Enables / disables a data communication channel with the Videobridge.
     // Values can be 'datachannel', 'websocket', true (treat it as
@@ -245,9 +278,6 @@ var config = {
 
     // UI
     //
-
-    // Use display name as XMPP nickname.
-    // useNicks: false,
 
     // Require users to always specify a display name.
     // requireDisplayName: true,
@@ -288,6 +318,14 @@ var config = {
     // Enables calendar integration, depends on googleApiApplicationClientID
     // and microsoftApiApplicationClientID
     // enableCalendarIntegration: false,
+
+    // When 'true', it shows an intermediate page before joining, where the user can  configure its devices.
+    // prejoinPageEnabled: false,
+
+    // If true, shows the unsafe roon name warning label when a room name is
+    // deemed unsafe (due to the simplicity in the name) and a password is not
+    // set or the lobby is not enabled.
+    // enableInsecureRoomNameWarning: false,
 
     // Stats
     //
@@ -331,7 +369,7 @@ var config = {
         // through the JVB and use the peer to peer connection instead. When a
         // 3rd participant joins the conference will be moved back to the JVB
         // connection.
-        enabled: false,
+        enabled: true,
 
         // Use XEP-0215 to fetch STUN and TURN servers.
         // useStunTurn: true,
@@ -341,7 +379,7 @@ var config = {
 
             // { urls: 'stun:__DOMAIN__:4446' },
             { urls: 'stun:meet-jit-si-turnrelay.jitsi.net:443' }
-        ],
+        ]
 
         // Sets the ICE transport policy for the p2p connection. At the time
         // of this writing the list of possible values are 'all' and 'relay',
@@ -353,7 +391,7 @@ var config = {
 
         // If set to true, it will prefer to use H.264 for P2P calls (if H.264
         // is supported).
-        preferH264: true
+        // preferH264: true
 
         // If set to true, disable H.264 video codec by stripping it out of the
         // SDP.
@@ -367,6 +405,10 @@ var config = {
     analytics: {
         // The Google Analytics Tracking ID:
         // googleAnalyticsTrackingId: 'your-tracking-id-UA-123456-1'
+
+        // Matomo configuration:
+        // matomoEndpoint: 'https://your-matomo-endpoint/',
+        // matomoSiteID: '42',
 
         // The Amplitude APP Key:
         // amplitudeAPPKey: '<APP_KEY>'
@@ -474,6 +516,23 @@ var config = {
 
     // If set to true all muting operations of remote participants will be disabled.
     // disableRemoteMute: true,
+
+    /**
+     External API url used to receive branding specific information.
+     If there is no url set or there are missing fields, the defaults are applied.
+     None of the fieds are mandatory and the response must have the shape:
+     {
+         // The hex value for the colour used as background
+         backgroundColor: '#fff',
+         // The url for the image used as background
+         backgroundImageUrl: 'https://example.com/background-img.png',
+         // The anchor url used when clicking the logo image
+         logoClickUrl: 'https://example-company.org',
+         // The url used for the image used as logo
+         logoImageUrl: 'https://example.com/logo-img.png'
+     }
+    */
+    // brandingDataUrl: '',
 
     // List of undocumented settings used in jitsi-meet
     /**

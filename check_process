@@ -14,6 +14,8 @@
 		setup_private=0
 		setup_public=1
 		upgrade=1
+		# 1.0.3729~ynh1
+		upgrade=1	from_commit=7e81cff25dd5a85a5f9b97299b2dc251f2725d4b
 		backup_restore=1
 		multi_instance=0
 		# This test is no longer necessary since the version 2.7 (PR: https://github.com/YunoHost/yunohost/pull/304), you can still do it if your app could be installed with this version.
@@ -27,7 +29,7 @@
 Email=yalh@yahoo.com
 Notification=all
 ;;; Upgrade options
-	; commit=CommitHash
-		name=Name and date of the commit.
+	; commit=7e81cff25dd5a85a5f9b97299b2dc251f2725d4b
+		name=1.0.3729~ynh1
 		manifest_arg=domain=DOMAIN&path=PATH&admin=USER&language=fr&is_public=1&password=pass&port=666&
 
