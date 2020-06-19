@@ -35,6 +35,9 @@ videobridge_secret=$(ynh_string_random --length=8)
 #YOURSECRET2
 focus_secret=$(ynh_string_random --length=8)
 
+#OTHER SECRET
+turn_secret=$(ynh_string_random --length=8)
+
 focus_user="focus"
 
 videobridge_user="jvb"
@@ -60,6 +63,7 @@ ynh_app_setting_set --app=$app --key=path --value=$path_url
 ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
 ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
+ynh_app_setting_set --app=$app --key=turn_secret --value=$turn_secret
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
 ynh_app_setting_set --app=$app --key=videobridge_user --value=$videobridge_user
 
@@ -136,6 +140,9 @@ for directory in $final_path/jitsi-meet-prosody/*/; do
 	done
 done
 
+# workaround for mod_muc_domain_mapper
+ynh_replace_string --match_string="module:log(\"debug\"" --replace_string="-- module:log(\"debug\"" --target_file="$final_path/jitsi-meet-prosody/mod_muc_domain_mapper.lua"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -173,9 +180,11 @@ ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_c
 ynh_replace_string --match_string="__FINAL_PATH__" --replace_string="$final_path" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__TURN_SECRET__" --replace_string="$turn_secret" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="$metronome_conf"
 ynh_replace_string --match_string="__VIDEOBRIDGE_USER__" --replace_string="$videobridge_user" --target_file="$metronome_conf"
+ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
 
 touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
 
@@ -262,8 +271,8 @@ ynh_script_progression --message="Configuring Jitsi-Meet..."
 mkdir -p "/etc/$app/meet"
 
 jitsi_meet_conf="/etc/$app/meet/$domain-config.js"
-cp ../conf/config.js "$jitsi_meet_conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_meet_conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/config.js"
+cpp -undef -P ../conf/config.js -o "$jitsi_meet_conf"
 
 #=================================================
 # CREATE LOG DIR
@@ -330,8 +339,8 @@ yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi" --l
 ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # SETUP SSOWAT

@@ -274,13 +274,12 @@ fi
 #=================================================
 ynh_script_progression --message="Configuring Jitsi-Meet..."
 
-
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
 	jitsi_meet_conf="/etc/$app/meet/config.js"
 	ynh_backup_if_checksum_is_different --file="$jitsi_meet_conf"
-	cp ../conf/config.js "$jitsi_meet_conf"
-	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_meet_conf"
+	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/config.js"
+	cpp -undef -P ../conf/config.js -o "$jitsi_meet_conf"
 	ynh_store_file_checksum --file="$jitsi_meet_conf"
 fi
 
@@ -327,8 +326,8 @@ yunohost service add $app-jicofo --description "$app jitsi-jicofo for jitsi" --l
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # SETUP SSOWAT

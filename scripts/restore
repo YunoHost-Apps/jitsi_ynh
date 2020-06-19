@@ -165,8 +165,8 @@ yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
