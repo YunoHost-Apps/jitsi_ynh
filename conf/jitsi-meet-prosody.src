@@ -1,5 +1,5 @@
-SOURCE_URL=https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.4127-1_all.deb
-SOURCE_SUM=bc72563dfe0bd5c1b6516fc824a48038597a56626d78af0e19484e8283da8475
+SOURCE_URL=https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.4466-1_all.deb
+SOURCE_SUM=8fd9a721cdeca7f88c825034679514ddb9c75c81dd615966f3fc3bd09812ea05
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=deb
 SOURCE_IN_SUBDIR=true
