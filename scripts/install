@@ -243,6 +243,10 @@ jitsi_videobridge_20_jvb_udp_buffers_conf="/etc/sysctl.d/20-jvb-udp-buffers.conf
 cp ../conf/jitsi-videobridge-20-jvb-udp-buffers.conf "$jitsi_videobridge_20_jvb_udp_buffers_conf"
 sysctl --system || true
 
+jitsi_videobridge_jvb_conf="/etc/$app/videobridge/jvb.conf"
+cp ../conf/jitsi-videobridge-jvb.conf "$jitsi_videobridge_jvb_conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_videobridge_jvb_conf"
+
 #=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
@@ -254,17 +258,21 @@ jitsi_jicofo_sip_communicator_conf="/etc/$app/jicofo/sip-communicator.properties
 cp ../conf/jitsi-jicofo-sip-communicator.properties "$jitsi_jicofo_sip_communicator_conf"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_jicofo_sip_communicator_conf"
 
-jitsi_jicofo_conf="/etc/$app/jicofo/config"
-cp ../conf/jitsi-jicofo.config "$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_jicofo_conf"
+jitsi_jicofo_config="/etc/$app/jicofo/config"
+cp ../conf/jitsi-jicofo.config "$jitsi_jicofo_config"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_jicofo_config"
+ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$jitsi_jicofo_config"
+ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$jitsi_jicofo_config"
+ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="$jitsi_jicofo_config"
+ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="$jitsi_jicofo_config"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_jicofo_config"
 
 jitsi_jicofo_logging_conf="/etc/$app/jicofo/logging.properties"
 cp ../conf/jitsi-jicofo-logging.properties "$jitsi_jicofo_logging_conf"
+
+jitsi_jicofo_conf="/etc/$app/jicofo/jicofo.conf"
+cp ../conf/jitsi-jicofo-jicofo.conf "$jitsi_jicofo_conf"
+
 
 #=================================================
 # CONFIGURE JITSI-MEET
