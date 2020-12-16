@@ -140,6 +140,9 @@ for directory in $final_path/jitsi-meet-prosody/*/; do
 	done
 done
 
+# workaround for mod_turncredentials.lua
+ynh_replace_string --match_string="local hmac_sha1 = require \"util.hashes\".hmac_sha1;" --replace_string="local hmac_sha1 = require \"util.hmac\".sha1;" --target_file="$final_path/jitsi-meet-prosody/mod_turncredentials.lua"
+
 # workaround for mod_muc_domain_mapper
 ynh_replace_string --match_string="module:log(\"debug\"" --replace_string="-- module:log(\"debug\"" --target_file="$final_path/jitsi-meet-prosody/mod_muc_domain_mapper.lua"
 
