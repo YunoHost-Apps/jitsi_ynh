@@ -61,8 +61,9 @@ Component "conference.__DOMAIN__" "muc"
         -- "token_verification";
     }
     admins = { "__FOCUS_USER__@auth.__DOMAIN__" }
-    muc_room_locking = false
-    muc_room_default_public_jids = true
+    allow_anonymous_creation = true
+    instant_room_on_creation = true
+    room_default_config = { whois = "anyone" }
 
 -- internal muc component
 Component "internal.auth.__DOMAIN__" "muc"
@@ -71,8 +72,9 @@ Component "internal.auth.__DOMAIN__" "muc"
       "ping";
     }
     admins = { "__FOCUS_USER__@auth.__DOMAIN__", "__VIDEOBRIDGE_USER__@auth.__DOMAIN__" }
-    muc_room_locking = false
-    muc_room_default_public_jids = true
+    allow_anonymous_creation = true
+    instant_room_on_creation = true
+    room_default_config = { whois = "anyone" }
 
 VirtualHost "auth.__DOMAIN__"
     ssl = {
