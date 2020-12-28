@@ -93,7 +93,7 @@ Component "conferenceduration.__DOMAIN__" "conference_duration_component"
     muc_component = "conference.__DOMAIN__"
 
 Component "lobby.__DOMAIN__" "muc"
-    storage = "memory"
+    storage = "cache"
     restrict_room_creation = true
-    muc_room_locking = false
-    muc_room_default_public_jids = true
+    instant_room_on_creation = true
+    room_default_config = { whois = "anyone" }
