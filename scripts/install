@@ -72,22 +72,22 @@ ynh_app_setting_set --app=$app --key=videobridge_user --value=$videobridge_user
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Configuring firewall..."
+ynh_script_progression --message="Finding an available port..."
 
 # Find an available port
-port=$(ynh_find_port --port=4443)
+port=4443
 # Open this port
 ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set --app=$app --key=port --value=$port
 
 # Find an available port
-port_videobridge=$(ynh_find_port --port=10000)
+port_videobridge=10000
 # Open this port
 ynh_exec_warn_less yunohost firewall allow --no-upnp UDP $port_videobridge
 ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
 
 # Find an available port
-port_component=$(ynh_find_port --port=5347)
+port_component=5347
 ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 
 #=================================================
@@ -97,7 +97,18 @@ ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
-#ynh_install_nodejs --nodejs_version=10
+if ! yunohost app list | grep -q "prosody"
+then
+	yunohost app install prosody --args "domain=$domain&admin=$admin&language=$language&password=$password"
+fi
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Configuring system user..."
+
+# Create a system user
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -105,10 +116,9 @@ ynh_install_app_dependencies $pkg_dependencies
 ynh_script_progression --message="Setting up source files..."
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-
 # Download, check integrity, uncompress and patch the source from app.src
 declare -A packages
-packages[jicofo]="jicofo"
+packages[jitsi-jicofo]="jicofo"
 packages[jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
 packages[jitsi-meet-web]="jitsi-meet"
 packages[jitsi-videobridge]="jitsi-videobridge"
@@ -125,76 +135,46 @@ do
 	ynh_secure_remove --file="$final_path/${package}_temp"
 done
 
-# Adapt prosody module to metronome
-for file in $final_path/jitsi-meet-prosody/*.lua
-do
-	ynh_replace_string --match_string="prosody" --replace_string="metronome" --target_file="$file"
-	ynh_replace_string --match_string="Prosody" --replace_string="Metronome" --target_file="$file"
-done
-
-for directory in $final_path/jitsi-meet-prosody/*/; do
-   	for file in $directory/*.lua
-   	do
-		ynh_replace_string --match_string="prosody" --replace_string="metronome" --target_file="$file"
-		ynh_replace_string --match_string="Prosody" --replace_string="Metronome" --target_file="$file"
-	done
-done
-
-# workaround for mod_muc_domain_mapper
-ynh_replace_string --match_string="module:log(\"debug\"" --replace_string="-- module:log(\"debug\"" --target_file="$final_path/jitsi-meet-prosody/mod_muc_domain_mapper.lua"
+chown -R $app: $final_path
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..."
+ynh_script_progression --message="Configuring NGINX web server..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Configuring system user..."
-
-# Create a system user
-ynh_system_user_create --username=$app --home_dir=$final_path
 
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# CONFIGURE METRONOME
+# CONFIGURE PROSODY
 #=================================================
-ynh_script_progression --message="Configuring metronome..."
+ynh_script_progression --message="Configuring prosody..."
 
+ynh_add_config --template="../conf/prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
+chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
+ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
-# Create focus user
-yunohost domain add auth.$domain
-# yunohost user create $focus_user -f $focus_user -l $focus_user -m ${focus_user}@auth.$domain -p $focus_password -q 0
-# yunohost user create $videobridge_user -f $videobridge_user -l $videobridge_user -m ${videobridge_user}@auth.$domain -p $videobridge_secret -q 0
+echo | prosodyctl cert generate $domain
+ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
+ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
+ln -sf "/var/lib/prosody/$domain.crt" "/usr/local/share/ca-certificates/$domain.crt"
 
-# Add Metronome domain conf template
-metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
-mkdir -p /usr/share/yunohost/templates/jitsi/
-cp ../conf/metronome.cfg.lua $metronome_conf
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__FINAL_PATH__" --replace_string="$final_path" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__TURN_SECRET__" --replace_string="$turn_secret" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__VIDEOBRIDGE_USER__" --replace_string="$videobridge_user" --target_file="$metronome_conf"
-ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
+echo | prosodyctl cert generate "auth.$domain"
+ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
+ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
+ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
 
-touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
+update-ca-certificates -f
 
-# Add Metronome hook 
-cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
+ynh_systemd_action --service_name="prosody" --action="restart"
 
-yunohost tools regen-conf metronome --force
+prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
 
-metronomectl adduser $focus_user@auth.$domain $focus_password || true
-metronomectl adduser $videobridge_user@auth.$domain $videobridge_secret || true
+prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
+
+prosodyctl mod_roster_command subscribe $focus_user.$domain $focus_user@auth.$domain
 
 #=================================================
 # CONFIGURE JITSI-VIDEOBRIDGE
@@ -209,36 +189,15 @@ ynh_app_setting_set --app=$app --key=muc_nickname --value=$muc_nickname
 
 mkdir -p "/etc/$app/videobridge"
 
-jitsi_videobridge_sip_communicator_conf="/etc/$app/videobridge/sip-communicator.properties"
-cp ../conf/jitsi-videobridge-sip-communicator.properties "$jitsi_videobridge_sip_communicator_conf"
-ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$jitsi_videobridge_sip_communicator_conf"
-ynh_replace_string --match_string="__PRIVATE_IPV4__" --replace_string="$private_ipv4" --target_file="$jitsi_videobridge_sip_communicator_conf"
-ynh_replace_string --match_string="__PUBLIC_IPV4__" --replace_string="$public_ipv4" --target_file="$jitsi_videobridge_sip_communicator_conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_videobridge_sip_communicator_conf"
-ynh_replace_string --match_string="__VIDEOBRIDGE_USER__" --replace_string="$videobridge_user" --target_file="$jitsi_videobridge_sip_communicator_conf"
-ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$jitsi_videobridge_sip_communicator_conf"
-ynh_replace_string --match_string="__MUC_NICKNAME__" --replace_string="$muc_nickname" --target_file="$jitsi_videobridge_sip_communicator_conf"
+ynh_add_config --template="../conf/jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
 
-jitsi_videobridge_conf="/etc/$app/videobridge/config"
-cp ../conf/jitsi-videobridge.config "$jitsi_videobridge_conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_videobridge_conf"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$jitsi_videobridge_conf"
-ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$jitsi_videobridge_conf"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_videobridge_conf"
+ynh_add_config --template="../conf/jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
 
-jitsi_videobridge_logging_conf="/etc/$app/videobridge/logging.properties"
-cp ../conf/jitsi-videobridge-logging.properties "$jitsi_videobridge_logging_conf"
+ynh_add_config --template="../conf/jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
 
-jitsi_videobridge_callstats_java_sdk_conf="/etc/$app/videobridge/callstats-java-sdk.properties"
-cp ../conf/jitsi-videobridge-callstats-java-sdk.properties "$jitsi_videobridge_callstats_java_sdk_conf"
+ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
 
-jitsi_videobridge_log4j2_conf="/etc/$app/videobridge/log4j2.xml"
-cp ../conf/jitsi-videobridge-log4j2.xml "$jitsi_videobridge_log4j2_conf"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_videobridge_log4j2_conf"
-
-jitsi_videobridge_20_jvb_udp_buffers_conf="/etc/sysctl.d/20-jvb-udp-buffers.conf"
-cp ../conf/jitsi-videobridge-20-jvb-udp-buffers.conf "$jitsi_videobridge_20_jvb_udp_buffers_conf"
-sysctl --system || true
+ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 
 #=================================================
 # CONFIGURE JITSI-JICOFO
@@ -247,21 +206,11 @@ ynh_script_progression --message="Configuring Jitsi-Jicofo..."
 
 mkdir -p "/etc/$app/jicofo"
 
-jitsi_jicofo_sip_communicator_conf="/etc/$app/jicofo/sip-communicator.properties"
-cp ../conf/jitsi-jicofo-sip-communicator.properties "$jitsi_jicofo_sip_communicator_conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_jicofo_sip_communicator_conf"
+ynh_add_config --template="../conf/jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
 
-jitsi_jicofo_conf="/etc/$app/jicofo/config"
-cp ../conf/jitsi-jicofo.config "$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="$jitsi_jicofo_conf"
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_jicofo_conf"
+ynh_add_config --template="../conf/jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
 
-jitsi_jicofo_logging_conf="/etc/$app/jicofo/logging.properties"
-cp ../conf/jitsi-jicofo-logging.properties "$jitsi_jicofo_logging_conf"
+ynh_add_config --template="../conf/jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
 
 #=================================================
 # CONFIGURE JITSI-MEET
@@ -270,9 +219,8 @@ ynh_script_progression --message="Configuring Jitsi-Meet..."
 
 mkdir -p "/etc/$app/meet"
 
-jitsi_meet_conf="/etc/$app/meet/$domain-config.js"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/config.js"
-cpp -undef -P ../conf/config.js -o "$jitsi_meet_conf"
+ynh_add_config --template="../conf/jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # CREATE LOG DIR
@@ -280,6 +228,8 @@ cpp -undef -P ../conf/config.js -o "$jitsi_meet_conf"
 ynh_script_progression --message="Creating log dir..."
 
 mkdir -p "/var/log/$app"
+chown -R $app: /var/log/$app
+chmod -R 770 /var/log/$app
 
 #=================================================
 # SETUP SYSTEMD
@@ -291,20 +241,6 @@ ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.
 ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
 #=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
-ynh_script_progression --message="Storing the config file checksum..."
-
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$jitsi_videobridge_sip_communicator_conf"
-ynh_store_file_checksum --file="$jitsi_videobridge_conf"
-ynh_store_file_checksum --file="$jitsi_videobridge_logging_conf"
-ynh_store_file_checksum --file="$jitsi_jicofo_sip_communicator_conf"
-ynh_store_file_checksum --file="$jitsi_jicofo_conf"
-ynh_store_file_checksum --file="$jitsi_jicofo_logging_conf"
-ynh_store_file_checksum --file="$jitsi_meet_conf"
-
-#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SECURE FILES AND DIRECTORIES
@@ -312,11 +248,10 @@ ynh_store_file_checksum --file="$jitsi_meet_conf"
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
-chown -R $app: $final_path
 chown -R $app: /etc/$app
-chown -R $app: /var/log/$app
-chmod -R 770 /var/log/$app
 
+#=================================================
+# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
@@ -345,15 +280,15 @@ ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring permissions..."
 
 # Make app public
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+ynh_permission_update --permission="main" --add="visitors"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

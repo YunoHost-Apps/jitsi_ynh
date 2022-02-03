@@ -18,9 +18,9 @@ app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 port=$(ynh_app_setting_get --app=$app --key=port)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
 
@@ -30,7 +30,7 @@ videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
 # REMOVE SERVICE INTEGRATION IN YUNOHOST
 #=================================================
 
-# Remove the service from the list of services known by Yunohost (added from `yunohost service add`)
+# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
 if ynh_exec_warn_less yunohost service status $app-videobridge >/dev/null
 then
 	ynh_script_progression --message="Removing $app-videobridge service..."
@@ -53,14 +53,39 @@ ynh_remove_systemd_config --service=$app-videobridge
 ynh_remove_systemd_config --service=$app-jicofo
 
 #=================================================
-# REMOVE DEPENDENCIES
+# RECONFIGURE PROSODY
 #=================================================
-ynh_script_progression --message="Removing dependencies..."
+ynh_script_progression --message="Reconfiguring Prosody..."
 
-# Remove metapackage and its dependencies
-ynh_remove_app_dependencies
+prosodyctl deluser $focus_user@auth.$domain || true
+prosodyctl deluser $videobridge_user@auth.$domain || true
 
-#ynh_remove_nodejs
+# Remove domain conf template
+ynh_secure_remove --file="/etc/prosody/conf.d/$domain.cfg.lua"
+ynh_secure_remove --file="/etc/prosody/conf.avail/$domain.cfg.lua"
+ynh_secure_remove --file="/etc/prosody/certs/$domain.key"
+ynh_secure_remove --file="/etc/prosody/certs/$domain.crt"
+ynh_secure_remove --file="/var/lib/prosody/$domain.key"
+ynh_secure_remove --file="/var/lib/prosody/$domain.crt"
+ynh_secure_remove --file="/var/lib/prosody/$domain.cnf"
+ynh_secure_remove --file="/etc/prosody/certs/auth.$domain.key"
+ynh_secure_remove --file="/etc/prosody/certs/auth.$domain.crt"
+ynh_secure_remove --file="/var/lib/prosody/auth.$domain.key"
+ynh_secure_remove --file="/var/lib/prosody/auth.$domain.crt"
+ynh_secure_remove --file="/var/lib/prosody/auth.$domain.cnf"
+ynh_secure_remove --file="/usr/local/share/ca-certificates/auth.$domain.crt"
+
+update-ca-certificates -f
+
+ynh_systemd_action --service_name=prosody --action=restart
+
+#=================================================
+# REMOVE LOGROTATE CONFIGURATION
+#=================================================
+ynh_script_progression --message="Removing logrotate configuration..."
+
+# Remove the app-specific logrotate config
+ynh_remove_logrotate
 
 #=================================================
 # REMOVE APP MAIN DIR
@@ -73,18 +98,18 @@ ynh_secure_remove --file="$final_path"
 #=================================================
 # REMOVE NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Removing nginx web server configuration..."
+ynh_script_progression --message="Removing NGINX web server configuration..."
 
-# Remove the dedicated nginx config
+# Remove the dedicated NGINX config
 ynh_remove_nginx_config
 
 #=================================================
-# REMOVE LOGROTATE CONFIGURATION
+# REMOVE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Removing logrotate configuration..."
+ynh_script_progression --message="Removing dependencies..."
 
-# Remove the app-specific logrotate config
-ynh_remove_logrotate
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
 
 #=================================================
 # CLOSE A PORT
@@ -102,56 +127,15 @@ then
 	ynh_exec_warn_less yunohost firewall disallow UDP $port_videobridge
 fi
 
-if yunohost firewall list | grep -q "\- $port_component$"
-then
-	ynh_script_progression --message="Closing port $port_component..."
-	ynh_exec_warn_less yunohost firewall disallow TCP $port_component
-fi
-
 #=================================================
 # SPECIFIC REMOVE
 #=================================================
-# RECONFIGURE METRONOME
+# REMOVE VARIOUS FILES
 #=================================================
-ynh_script_progression --message="Reconfiguring Metronome..."
+ynh_script_progression --message="Removing various files..."
 
-metronomectl deluser $focus_user@auth.$domain || true
-metronomectl deluser $videobridge_user@auth.$domain || true
-
-# Remove domain conf template
-ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
-ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
-
-# Remove Jitsi template directory
-if [ -z "$(ls -A /usr/share/yunohost/templates/jitsi)" ]; then
-   ynh_secure_remove --file="/usr/share/yunohost/templates/jitsi"
-fi
-
-# Remove Metronome Hook
-ynh_secure_remove --file="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
-
-yunohost tools regen-conf metronome --force
-
-# Delete focus user
-# yunohost user delete $focus_user --purge
-# yunohost user delete $videobridge_user --purge
-yunohost domain remove auth.$domain
-
-#=================================================
-# REMOVE THE CONFIG
-#=================================================
-ynh_script_progression --message="Removing the config..."
-
-# Remove the log files
+# Remove a directory securely
 ynh_secure_remove --file="/etc/$app"
-
-ynh_secure_remove --file="/etc/sysctl.d/20-jvb-udp-buffers.conf"
-sysctl --system || true
-
-#=================================================
-# REMOVE THE LOG FILES
-#=================================================
-ynh_script_progression --message="Removing the log files..."
 
 # Remove the log files
 ynh_secure_remove --file="/var/log/$app"

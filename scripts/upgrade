@@ -40,61 +40,6 @@ upgrade_type=$(ynh_check_app_version_changed)
 current_version=$(ynh_read_manifest --manifest="/etc/yunohost/apps/$app/manifest.json" --manifest_key="version" || echo 1.0)
 
 #=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
-ynh_script_progression --message="Ensuring downward compatibility..."
-
-# If final_path doesn't exist, create it
-if [ -z "$final_path" ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-fi
-
-if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
-    # Add Metronome domain conf template
-    metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
-    mkdir -p /usr/share/yunohost/templates/jitsi/
-    cp ../conf/metronome.cfg.lua $metronome_conf
-    ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
-
-    touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
-    touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
-    touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
-    touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
-
-    # Add Metronome hook 
-    cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
-    
-    yunohost tools regen-conf metronome --force
-fi
-
-if ynh_version_gt "1.0.3969~ynh1" "${current_version}" ; then
-    # Remove not needed domains
-    yunohost domain remove conference.$domain
-    yunohost domain remove jitsi-videobridge.$domain
-    yunohost domain remove focus.$domain
-	
-	# Remove Previously installed Metronome modules
-	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_carbons.lua"
-	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_http_altconnect.lua"
-	ynh_secure_remove --file="/usr/lib/metronome/modules/mod_smacks.lua"
-
-	# Remove nodejs
-	ynh_remove_nodejs
-fi
-
-# Closing port_component
-if yunohost firewall list | grep -q "\- $port_component$"
-then
-	ynh_script_progression --message="Closing port $port_component..."
-	ynh_exec_warn_less yunohost firewall disallow TCP $port_component
-fi
-
-
-#=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
 ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
@@ -102,9 +47,9 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-	# restore it if the upgrade fails
-	ynh_restore_upgradebackup
 	ynh_clean_check_starting
+	# Restore it if the upgrade fails
+	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -120,6 +65,25 @@ ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/
 ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
 
 #=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression --message="Ensuring downward compatibility..."
+
+# If final_path doesn't exist, create it
+if [ -z "$final_path" ]; then
+	final_path=/var/www/$app
+	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..."
+
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir="$final_path"
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
@@ -129,7 +93,7 @@ then
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	declare -A packages
-	packages[jicofo]="jicofo"
+	packages[jitsi-jicofo]="jicofo"
 	packages[jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
 	packages[jitsi-meet-web]="jitsi-meet"
 	packages[jitsi-videobridge]="jitsi-videobridge"
@@ -146,29 +110,14 @@ then
 		mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
 		ynh_secure_remove --file="$final_path/${package}_temp"
 	done
-
-	# Adapt prosody module to metronome
-	for file in $final_path/jitsi-meet-prosody/*.lua
-	do
-		ynh_replace_string --match_string="prosody" --replace_string="metronome" --target_file="$file"
-		ynh_replace_string --match_string="Prosody" --replace_string="Metronome" --target_file="$file"
-	done
-
-	for directory in $final_path/jitsi-meet-prosody/*/; do
-    	for file in $directory/*.lua
-    	do
-			ynh_replace_string --match_string="prosody" --replace_string="metronome" --target_file="$file"
-			ynh_replace_string --match_string="Prosody" --replace_string="Metronome" --target_file="$file"
-		done
-	done
 fi
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..."
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
@@ -178,15 +127,12 @@ ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
-#ynh_install_nodejs --nodejs_version=10
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
-
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir=$final_path
+if ! yunohost app list | grep -q "prosody"
+then
+	yunohost app install prosody --args "domain=$domain&admin=$admin&language=$language&password=$password"
+elfi
+	yunohost app upgrade 
+fi
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -232,10 +178,6 @@ then
 	jitsi_videobridge_log4j2_conf="/etc/$app/videobridge/log4j2.xml"
 	cp ../conf/jitsi-videobridge-log4j2.xml "$jitsi_videobridge_log4j2_conf"
 	ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$jitsi_videobridge_log4j2_conf"
-
-	jitsi_videobridge_20_jvb_udp_buffers_conf="/etc/sysctl.d/videobridge/20-jvb-udp-buffers.conf"
-	cp ../conf/jitsi-videobridge-20-jvb-udp-buffers.conf "$jitsi_videobridge_20_jvb_udp_buffers_conf"
-	sysctl --system || true
 fi
 
 #=================================================
@@ -330,17 +272,9 @@ ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..."
-
-# Make app public
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
-
-#=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

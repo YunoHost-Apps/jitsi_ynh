@@ -50,25 +50,6 @@ ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 #=================================================
 # SPECIFIC BACKUP
 #=================================================
-# BACKUP METRONOME
-#=================================================
-
-# Backup Metronome domain conf template
-ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
-ynh_backup --src_path="/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
-
-# Backup Metronome Hook
-ynh_backup --src_path="/usr/share/yunohost/hooks/conf_regen/50-metronome_$app"
-
-#=================================================
-# BACKUP THE APP CONFIG
-#=================================================
-
-ynh_backup --src_path="/etc/$app"
-
-#=================================================
-# SPECIFIC BACKUP
-#=================================================
 # BACKUP LOGROTATE
 #=================================================
 
@@ -80,6 +61,14 @@ ynh_backup --src_path="/etc/logrotate.d/$app"
 
 ynh_backup --src_path="/etc/systemd/system/$app-videobridge.service"
 ynh_backup --src_path="/etc/systemd/system/$app-jicofo.service"
+
+#=================================================
+# BACKUP VARIOUS FILES
+#=================================================
+
+ynh_backup --src_path="/etc/$app/"
+
+ynh_backup --src_path="/etc/prosody/conf.avail/$domain.cfg.lua"
 
 #=================================================
 # END OF SCRIPT

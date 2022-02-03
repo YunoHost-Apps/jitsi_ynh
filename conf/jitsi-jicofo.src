@@ -1,0 +1,7 @@
+SOURCE_URL=https://download.jitsi.org/stable/jicofo_1.0-846-1_all.deb
+SOURCE_SUM=aac0143b8c83932d6f934a8b6fca54c75f541613aab8beb9e96ce5b0eb9051bf
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=deb
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=jitsi-jicofo.deb
+SOURCE_EXTRACT=false
