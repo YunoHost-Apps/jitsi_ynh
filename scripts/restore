@@ -152,9 +152,9 @@ chown -R $app: /var/log/$app
 ynh_script_progression --message="Restoring the systemd configuration..."
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app-videobridge.service"
-systemctl enable $app-videobridge.service
+systemctl enable $app-videobridge.service --quiet
 ynh_restore_file --origin_path="/etc/systemd/system/$app-jicofo.service"
-systemctl enable $app-jicofo.service
+systemctl enable $app-jicofo.service --quiet
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
