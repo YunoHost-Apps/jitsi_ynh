@@ -169,7 +169,7 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 ynh_script_progression --message="Integrating service in YunoHost..."
 
 yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
-yunohost service add $app-jicofo --log="/var/log/$app/$app-jicofo.log"
+yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # START SYSTEMD SERVICE
