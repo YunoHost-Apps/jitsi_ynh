@@ -141,7 +141,7 @@ do
 	ynh_secure_remove --file="$final_path/${package}_temp"
 done
 
-chown -R $app: $final_path
+chown -R $app: "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
