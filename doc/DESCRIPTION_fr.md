@@ -1,1 +1,1 @@
-Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Javascript, propose des vidéos-conférences de haute qualité, sécurisées et évolutives.
+Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Javascript, propose des vidÃ©os-confÃ©rences de haute qualitÃ©, sÃ©curisÃ©es et Ã©volutives.

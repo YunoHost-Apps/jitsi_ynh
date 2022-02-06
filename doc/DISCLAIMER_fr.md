@@ -1,5 +1,5 @@
-## Points importants à préparer avant l'installation
+## Points importants Ã  prÃ©parer avant l'installation
 
-1. **Jitsi** a besoin d'un **domaine racine** dédié, par exemple : jitsi.domain.tld
-2. **Jitsi** demande que les ports TCP/4443 et UDP/10000 soient routés vers votre YunoHost (De la même manière que le sont les ports 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
-3. **Jitsi** va arréter et désactiver le service XMPP Metronome.
+1. **Jitsi** a besoin d'un **domaine racine** dÃ©diÃ©, par exemple : jitsi.domain.tld
+2. **Jitsi** demande que les ports TCP/4443 et UDP/10000 soient routÃ©s vers votre YunoHost (De la mÃªme maniÃ¨re que le sont les ports 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
+3. **Jitsi** va arrÃ©ter et dÃ©sactiver le service XMPP Metronome.
