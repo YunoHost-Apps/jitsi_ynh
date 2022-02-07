@@ -28,6 +28,7 @@ videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
 videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
 
 turn_secret=$(ynh_app_setting_get --app=$app --key=turn_secret)
+muc_nickname=$(ynh_app_setting_get --app=$app --key=muc_nickname)
 
 port=$(ynh_app_setting_get --app=$app --key=port)
 port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
