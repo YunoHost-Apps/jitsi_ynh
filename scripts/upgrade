@@ -27,6 +27,8 @@ focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
 videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
 videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
 
+turn_secret=$(ynh_app_setting_get --app=$app --key=turn_secret)
+
 port=$(ynh_app_setting_get --app=$app --key=port)
 port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
 port_component=$(ynh_app_setting_get --app=$app --key=port_component)

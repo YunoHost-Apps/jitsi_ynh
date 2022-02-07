@@ -60,12 +60,12 @@ ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
-ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
-ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
-ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
-ynh_app_setting_set --app=$app --key=turn_secret --value=$turn_secret
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
+ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
+ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
 ynh_app_setting_set --app=$app --key=videobridge_user --value=$videobridge_user
+ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
+ynh_app_setting_set --app=$app --key=turn_secret --value=$turn_secret
 
 #=================================================
 # STANDARD MODIFICATIONS
