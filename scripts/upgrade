@@ -151,7 +151,6 @@ if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
 	ynh_add_config --template="../conf/prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
 	chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
-	ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 fi
 
 #=================================================
