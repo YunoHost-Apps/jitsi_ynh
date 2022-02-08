@@ -113,6 +113,7 @@ ynh_remove_app_dependencies
 
 # Remove Prosody
 ynh_app_setting_delete --app=$app --key=require_prosody
+gpasswd --delete prosody $app
 
 # List apps requiring Prosody
 installed_apps=$(yunohost app list | grep -oP 'id: \K.*$')
@@ -172,6 +173,7 @@ ynh_secure_remove --file="/var/log/$app"
 #=================================================
 ynh_script_progression --message="Removing the dedicated system user..."
 
+gpasswd --delete www-data $app
 # Delete a system user
 ynh_system_user_delete --username=$app
 

@@ -66,6 +66,8 @@ ynh_script_progression --message="Recreating the dedicated system user..."
 
 # Create the dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir="$final_path"
+gpasswd --add prosody $app
+gpasswd --add www-data $app
 
 #=================================================
 # RESTORE THE APP MAIN DIR
@@ -74,7 +76,9 @@ ynh_script_progression --message="Restoring the app main directory..."
 
 ynh_restore_file --origin_path="$final_path"
 
-chown -R root: $final_path
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:$app "$final_path"
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -112,6 +116,7 @@ ynh_exec_warn_less yunohost firewall allow --no-upnp UDP $port_videobridge
 ynh_script_progression --message="Configuring prosody..."
 
 ynh_restore_file --origin_path="/etc/prosody/conf.avail/$domain.cfg.lua"
+chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
 ln -sf /var/lib/prosody/$domain.key /etc/prosody/certs/$domain.key
@@ -137,6 +142,8 @@ prosodyctl mod_roster_command subscribe $focus_user.$domain $focus_user@auth.$do
 ynh_script_progression --message="Restoring the app config..."
 
 ynh_restore_file --origin_path="/etc/$app"
+
+chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # CREATE LOG DIR

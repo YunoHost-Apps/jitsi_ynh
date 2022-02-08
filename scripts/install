@@ -115,6 +115,8 @@ ynh_script_progression --message="Configuring system user..."
 
 # Create a system user
 ynh_system_user_create --username=$app --home_dir="$final_path"
+gpasswd --add prosody $app
+gpasswd --add www-data $app
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -141,7 +143,9 @@ do
 	ynh_secure_remove --file="$final_path/${package}_temp"
 done
 
-chown -R $app: "$final_path"
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:$app "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION

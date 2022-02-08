@@ -85,6 +85,8 @@ ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir="$final_path"
+gpasswd --add prosody $app
+gpasswd --add www-data $app
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -114,6 +116,10 @@ then
 		ynh_secure_remove --file="$final_path/${package}_temp"
 	done
 fi
+
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:$app "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
