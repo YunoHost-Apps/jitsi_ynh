@@ -85,7 +85,6 @@ ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir="$final_path"
-gpasswd --add prosody $app
 gpasswd --add www-data $app
 
 #=================================================
@@ -146,6 +145,7 @@ else
 fi
 
 ynh_app_setting_set --app=$app --key=require_prosody --value="1"
+gpasswd --add prosody $app
 
 #=================================================
 # SPECIFIC UPGRADE
