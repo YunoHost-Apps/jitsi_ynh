@@ -114,6 +114,8 @@ then
 		mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
 		ynh_secure_remove --file="$final_path/${package}_temp"
 	done
+
+	ynh_setup_source --dest_dir="$final_path/jitsi-meet-prosody" --source_id=mod_auth_ldap
 fi
 
 chmod 750 "$final_path"

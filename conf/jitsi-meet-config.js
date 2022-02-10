@@ -9,7 +9,7 @@ var config = {
         domain: '__DOMAIN__',
 
         // When using authentication, domain for guest users.
-        // anonymousdomain: 'guest.example.com',
+        anonymousdomain: 'guest.__DOMAIN__',
 
         // Domain for authenticated users. Defaults to <domain>.
         // authdomain: '__DOMAIN__',

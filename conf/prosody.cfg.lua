@@ -27,7 +27,12 @@ unlimited_jids = {
 
 VirtualHost "__DOMAIN__"
     -- enabled = false -- Remove this line to enable this host
-    authentication = "anonymous"
+    authentication = "ldap"
+    ldap_server = "localhost"
+    ldap_filter = "(uid=$user)"
+    ldap_scope = "subtree"
+    ldap_base = "ou=users,dc=yunohost,dc=org"
+    ldap_mode = "bind"
     -- Properties below are modified by jitsi-meet-tokens package config
     -- and authentication above is switched to "token"
     --app_id="example_app_id"
@@ -60,6 +65,10 @@ VirtualHost "__DOMAIN__"
     breakout_rooms_muc = "breakout.__DOMAIN__"
     main_muc = "conference.__DOMAIN__"
     -- muc_lobby_whitelist = { "recorder.__DOMAIN__" } -- Here we can whitelist jibri to enter lobby enabled rooms
+
+VirtualHost "guest.__DOMAIN__"
+    authentication = "anonymous"
+    c2s_require_encryption = false
 
 Component "conference.__DOMAIN__" "muc"
     restrict_room_creation = true

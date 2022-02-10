@@ -143,6 +143,8 @@ do
 	ynh_secure_remove --file="$final_path/${package}_temp"
 done
 
+ynh_setup_source --dest_dir="$final_path/jitsi-meet-prosody" --source_id=mod_auth_ldap
+
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
 chown -R $app:$app "$final_path"

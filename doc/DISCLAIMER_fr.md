@@ -3,3 +3,4 @@
 1. **Jitsi** a besoin d'un **domaine racine** dédié, par exemple : jitsi.domain.tld
 2. **Jitsi** demande que les ports TCP/4443 et UDP/10000 soient routés vers votre YunoHost (De la même manière que le sont les ports 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
 3. **Jitsi** va arréter et désactiver le service XMPP Metronome.
+4. L'authentification LDAP est activée, seuls les utilisateurs authentifiés peuvent créer de nouvelles salles de conférence. Chaque fois qu'une nouvelle salle est sur le point d'être créée, Jitsi Meet vous demandera un nom d'utilisateur et un mot de passe. Une fois la salle créée, d'autres personnes pourront la rejoindre à partir d'un domaine anonyme. 
