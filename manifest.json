@@ -6,8 +6,15 @@
         "en": "Video conferencing web application",
         "fr": "Application web de conférence vidéo"
     },
-    "version": "1.0.3729~ynh1",
+    "version": "1.0.4466~ynh1",
     "url": "https://jitsi.org/Projects/JitMeet",
+    "upstream": {
+        "license": "Apache-2.0",
+        "website": "https://jitsi.org/",
+        "demo": "https://meet.jit.si/",
+        "userdoc": "https://jitsi.org/user-faq/",
+        "code": "https://github.com/jitsi/jitsi-meet"
+    },
     "license": "Apache-2.0",
     "maintainer": {
         "name": ""
@@ -22,7 +29,7 @@
         }
     ],
     "requirements": {
-        "yunohost": ">= 3.6"
+        "yunohost": ">= 4.3.0"
       },
     "multi_instance": false,
     "services": [
@@ -32,12 +39,7 @@
         "install" : [
             {
                 "name": "domain",
-                "type": "domain",
-                "ask": {
-                    "en": "Choose a domain for Jitsi Meet",
-                    "fr": "Choisissez un domaine pour Jitsi Meet"
-                },
-                "example": "domain.org"
+                "type": "domain"
             }
         ]
     }
