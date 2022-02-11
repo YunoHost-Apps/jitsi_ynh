@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -20,64 +20,39 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
-focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
-port=$(ynh_app_setting_get --app=$app --key=port)
-port_component=$(ynh_app_setting_get --app=$app --key=port_component)
-
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
+focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
+
+videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
+videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
+
+turn_secret=$(ynh_app_setting_get --app=$app --key=turn_secret)
+muc_nickname=$(ynh_app_setting_get --app=$app --key=muc_nickname)
+
+port=$(ynh_app_setting_get --app=$app --key=port)
+port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
+port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 
 #=================================================
 # CHECK VERSION
 #=================================================
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 current_version=$(ynh_read_manifest --manifest="/etc/yunohost/apps/$app/manifest.json" --manifest_key="version" || echo 1.0)
 
 #=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
-ynh_print_info --message="Ensuring downward compatibility..."
-
-# If final_path doesn't exist, create it
-if [ -z "$final_path" ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-fi
-
-if ynh_version_gt "1.0.3387~ynh2" "${current_version}" ; then
-    # Add Metronome domain conf template
-    metronome_conf="/usr/share/yunohost/templates/jitsi/$domain.cfg.lua"
-    mkdir -p /usr/share/yunohost/templates/jitsi/
-    cp ../conf/metronome.cfg.lua $metronome_conf
-    ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="$metronome_conf"
-    ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="$metronome_conf"
-
-    touch "/usr/share/yunohost/templates/jitsi/auth.$domain.cfg.lua"
-    touch "/usr/share/yunohost/templates/jitsi/conference.$domain.cfg.lua"
-    touch "/usr/share/yunohost/templates/jitsi/jitsi-videobridge.$domain.cfg.lua"
-    touch "/usr/share/yunohost/templates/jitsi/focus.$domain.cfg.lua"
-
-    # Add Metronome hook 
-    cp -R ../conf/metronome_regen_conf.hook /usr/share/yunohost/hooks/conf_regen/50-metronome_$app
-    yunohost tools regen-conf metronome
-fi
-
-#=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_print_info --message="Backing up the app before upgrading (may take a while)..."
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-	# restore it if the upgrade fails
-	ynh_restore_upgradebackup
 	ynh_clean_check_starting
+	# Restore it if the upgrade fails
+	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -87,10 +62,30 @@ ynh_abort_if_errors
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Stopping a systemd service..."
+ynh_script_progression --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=$app-videobridge --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
+
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression --message="Ensuring downward compatibility..."
+
+# If final_path doesn't exist, create it
+if [ -z "$final_path" ]; then
+	final_path=/var/www/$app
+	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..."
+
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir="$final_path"
+gpasswd --add www-data $app
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -98,124 +93,137 @@ ynh_systemd_action --service_name=$app-jicofo --action="stop" --log_path="/var/l
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_print_info --message="Upgrading source files..."
+	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path/jitsi-videobridge" --source_id=jitsi-videobridge
-	ynh_setup_source --dest_dir="$final_path/jitsi-jicofo-build" --source_id=jitsi-jicofo
-	ynh_setup_source --dest_dir="$final_path/jitsi-meet_temp" --source_id=jitsi-meet
+	declare -A packages
+	packages[jitsi-jicofo]="jicofo"
+	packages[jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
+	packages[jitsi-meet-web]="jitsi-meet"
+	packages[jitsi-videobridge]="jitsi-videobridge"
+
+	for package in "${!packages[@]}"
+	do
+		ynh_secure_remove --file="$final_path/${package}"
+		ynh_setup_source --dest_dir="$final_path/${package}_temp" --source_id=$package
+		pushd "$final_path/${package}_temp"
+			ar x $package.deb data.tar.xz
+			tar xf data.tar.xz
+		popd
+
+		mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
+		ynh_secure_remove --file="$final_path/${package}_temp"
+	done
+
+	ynh_setup_source --dest_dir="$final_path/jitsi-meet-prosody" --source_id=mod_auth_ldap
 fi
+
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:$app "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info --message="Upgrading nginx web server configuration..."
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_print_info --message="Upgrading dependencies..."
+ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
-ynh_install_nodejs --nodejs_version=10
+if ! yunohost app list | grep -q "prosody"
+then
+	yunohost tools update
+	yunohost app install prosody
+else
+	yunohost tools update
+	yunohost app upgrade prosody
+fi
 
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_print_info --message="Making sure dedicated system user exists..."
-
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir=$final_path
+ynh_app_setting_set --app=$app --key=require_prosody --value="1"
+gpasswd --add prosody $app
 
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
-# BUILD JITSI-VIDEOBRIDGE
+# CONFIGURE PROSODY
 #=================================================
-ynh_print_info --message="Building Jitsi-Videobridge..."
+ynh_script_progression --message="Configuring Prosody..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	mkdir -p "$final_path/.sip-communicator"
-	cp ../conf/sip-communicator.properties "$final_path/.sip-communicator/sip-communicator.properties"
-	ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/.sip-communicator/sip-communicator.properties"
-	chown -R $app: $final_path
+	ynh_add_config --template="../conf/prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
+	chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 fi
 
 #=================================================
-# BUILD JITSI-JICOFO
+# CONFIGURE JITSI-VIDEOBRIDGE
 #=================================================
-ynh_print_info --message="Building Jitsi-Jicofo..."
+ynh_script_progression --message="Configuring Jitsi-Videobridge..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	pushd "$final_path/jitsi-jicofo-build"
-		mvn package -DskipTests -Dassembly.skipAssembly=false
-	popd
+	public_ipv4="$(curl ip.yunohost.org)" || true
+	private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
-	unzip $final_path/jitsi-jicofo-build/target/jicofo-linux-x64-1.1-SNAPSHOT.zip -d $final_path
+	ynh_add_config --template="../conf/jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
 
-	ynh_secure_remove --file="$final_path/jitsi-jicofo"
+	ynh_add_config --template="../conf/jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
 
-	mv $final_path/jicofo-linux-x64-1.1-SNAPSHOT/ $final_path/jitsi-jicofo/
+	ynh_add_config --template="../conf/jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
 
-	ynh_secure_remove --file="$final_path/jitsi-jicofo-build"
+	ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
+
+	ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 fi
 
 #=================================================
-# BUILD JITSI-MEET
+# CONFIGURE JITSI-JICOFO
 #=================================================
-ynh_print_info --message="Building Jitsi-Meet..."
-
+ynh_script_progression --message="configuring Jitsi-Jicofo..."
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	pushd "$final_path/jitsi-meet_temp"
-		ar x jitsi-meet-web.deb data.tar.xz
-		tar xf data.tar.xz
-	popd
+	ynh_add_config --template="../conf/jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
 
-	config="$final_path/jitsi-meet/config.js"
-	ynh_backup_if_checksum_is_different --file="$config"
+	ynh_add_config --template="../conf/jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
 
-	ynh_secure_remove --file="$final_path/jitsi-meet"
-
-	mv "$final_path/jitsi-meet_temp/usr/share/jitsi-meet/" "$final_path/jitsi-meet/"
-	ynh_secure_remove --file="$final_path/jitsi-meet_temp"
-	cp ../conf/config.js "$config"
-	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-
-	# Recalculate and store the checksum of the file for the next upgrade.
-	ynh_store_file_checksum --file="$config"
+	ynh_add_config --template="../conf/jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
 fi
 
 #=================================================
-# SETUP LOGROTATE
+# CONFIGURE JITSI-MEET
 #=================================================
-ynh_print_info --message="Upgrading logrotate configuration..."
+ynh_script_progression --message="Configuring Jitsi-Meet..."
 
-# Use logrotate to manage app-specific logfile(s)
-ynh_use_logrotate --non-append
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	ynh_add_config --template="../conf/jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+	chmod 644 "/etc/$app/meet/$domain-config.js"
+fi
+
+#=================================================
+# CREATE LOG DIR
+#=================================================
+ynh_script_progression --message="Creating log dir..."
+
+mkdir -p "/var/log/$app"
+chown -R $app: /var/log/$app
+chmod -R 770 /var/log/$app
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_print_info --message="Upgrading systemd configuration..."
+ynh_script_progression --message="Upgrading systemd configuration..."
 
 # Create a dedicated systemd config
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-videobridge.service"
-ynh_replace_string --match_string="__VIDEOBRIDGE_SECRET__" --replace_string="$videobridge_secret" --target_file="../conf/jitsi-videobridge.service"
-ynh_replace_string --match_string="__PORT_COMPONENT__" --replace_string="$port_component" --target_file="../conf/jitsi-videobridge.service"
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
-
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../conf/jitsi-jicofo.service"
-ynh_replace_string --match_string="__FOCUS_SECRET__" --replace_string="$focus_secret" --target_file="../conf/jitsi-jicofo.service"
-ynh_replace_string --match_string="__FOCUS_USER__" --replace_string="$focus_user" --target_file="../conf/jitsi-jicofo.service"
-ynh_replace_string --match_string="__FOCUS_PASSWORD__" --replace_string="$focus_password" --target_file="../conf/jitsi-jicofo.service"
 ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
 #=================================================
@@ -223,31 +231,39 @@ ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
-ynh_print_info --message="Securing files and directories..."
+ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions on app files
-chown -R root: $final_path
+chown -R $app: /etc/$app
 
 #=================================================
-# SETUP SSOWAT
+# SETUP LOGROTATE
 #=================================================
-ynh_print_info --message="Upgrading SSOwat configuration..."
+ynh_script_progression --message="Upgrading logrotate configuration..."
 
-# Make app public
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+# Use logrotate to manage app-specific logfile(s)
+ynh_use_logrotate --non-append
+
+#=================================================
+# INTEGRATE SERVICE IN YUNOHOST
+#=================================================
+ynh_script_progression --message="Integrating service in YunoHost..."
+
+yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
+yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -255,4 +271,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Upgrade of $app completed"
+ynh_script_progression --message="Upgrade of $app completed"

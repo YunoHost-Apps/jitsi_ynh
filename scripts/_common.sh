@@ -5,7 +5,7 @@
 #=================================================
 
 # dependencies used by the app
-pkg_dependencies="openjdk-8-jdk|openjdk-11-jdk openjdk-8-jre|openjdk-11-jre maven"
+pkg_dependencies="openjdk-8-jre-headless|openjdk-11-jre-headless debconf|debconf-2.0 procps uuid-runtime lua-ldap"
 
 #=================================================
 # PERSONAL HELPERS
