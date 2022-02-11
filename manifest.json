@@ -17,12 +17,9 @@
     },
     "license": "Apache-2.0",
     "maintainer": {
-        "name": ""
+        "name": "yalh76"
     },
     "previous_maintainers": [
-        {
-        "name": "yalh76"
-        },
         {
         "name": "ju",
         "email": "julien.malik@paraiso.me"
@@ -30,13 +27,13 @@
     ],
     "requirements": {
         "yunohost": ">= 4.3.0"
-      },
+    },
     "multi_instance": false,
     "services": [
         "nginx"
     ],
     "arguments": {
-        "install" : [
+        "install": [
             {
                 "name": "domain",
                 "type": "domain"
