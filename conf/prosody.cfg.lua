@@ -108,6 +108,10 @@ Component "internal.auth.__DOMAIN__" "muc"
     muc_room_default_public_jids = true
 
 VirtualHost "auth.__DOMAIN__"
+    ssl = {
+        key = "/etc/prosody/certs/auth.__DOMAIN__.key";
+        certificate = "/etc/prosody/certs/auth.__DOMAIN__.crt";
+    }
     modules_enabled = {
         "limits_exception";
     }
