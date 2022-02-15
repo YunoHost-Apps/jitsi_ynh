@@ -152,6 +152,15 @@ gpasswd --add prosody $app
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
+# CONFIGURE FIREWALL
+#=================================================
+ynh_script_progression --message="Configuring firewall..."
+
+# Open this port
+ynh_exec_warn_less yunohost firewall allow TCP $port
+ynh_exec_warn_less yunohost firewall allow UDP $port_videobridge
+
+#=================================================
 # CONFIGURE PROSODY
 #=================================================
 ynh_script_progression --message="Configuring Prosody..."
