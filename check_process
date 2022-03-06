@@ -1,6 +1,6 @@
 ;; Test with prosody already installed
 	; pre-install
-			sudo yunohost app install prosody --force
+			sudo yunohost app install https://github.com/YunoHost-Apps/prosody_ynh --force
 	; Manifest
 		domain="domain.tld"
 	; Checks
