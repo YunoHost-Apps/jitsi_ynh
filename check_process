@@ -37,7 +37,3 @@
 ;;; Options
 Email=yalh@yahoo.com
 Notification=all
-;;; Upgrade options
-	; commit=7e81cff25dd5a85a5f9b97299b2dc251f2725d4b
-		name=1.0.3729~ynh1
-		manifest_arg=domain=DOMAIN&path=PATH&admin=USER&language=fr&is_public=1&password=pass&port=666&
