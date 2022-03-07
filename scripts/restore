@@ -88,6 +88,7 @@ ynh_script_progression --message="Reinstalling dependencies..."
 
 # Define and install dependencies
 ynh_install_apps --apps="$ynh_app_dependencies"
+gpasswd --add prosody $app
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
