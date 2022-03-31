@@ -1,5 +1,5 @@
-SOURCE_URL=https://download.jitsi.org/stable/jitsi-meet-web_1.0.5818-1_all.deb
-SOURCE_SUM=72e260c0d3f046e94c05d4441de57f3012213cffe360794f09f4d2db6125fcc1
+SOURCE_URL=https://download.jitsi.org/stable/jitsi-meet-web_1.0.5913-1_all.deb
+SOURCE_SUM=0d6b8ba2b56556b2816fd98f02401ff2a9a84ade594cc517827484c6fb994798
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=deb
 SOURCE_IN_SUBDIR=true
