@@ -1,0 +1,71 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+ynh_abort_if_errors
+
+#=================================================
+# SHOW_CONFIG FUNCTION FOR 'SHOW' COMMAND
+#=================================================
+get__max_memory(){
+  local max_memory=$(ynh_app_setting_get --app=$app --key=max_memory)
+  
+  # If max_memory doesn't exist, create it and set to default 3074 mb value
+  if [ -z "$max_memory" ]; then
+    max_memory=3072
+    ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
+  fi
+	
+  cat << EOF
+value: $max_memory
+EOF
+}
+
+set__max_memory(){
+
+  #=================================================
+  # LOAD SETTINGS
+  #=================================================
+
+  ynh_script_progression --message="Loading installation settings..."
+  
+  app=$YNH_APP_INSTANCE_NAME
+
+  domain=$(ynh_app_setting_get --app=$app --key=domain)
+  path_url=$(ynh_app_setting_get --app=$app --key=path)
+  final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+
+  max_memory=$(ynh_app_setting_get --app=$app --key=max_memory)
+
+  focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
+  focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
+  focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
+
+  videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
+  videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
+
+  port=$(ynh_app_setting_get --app=$app --key=port)
+  port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
+  port_component=$(ynh_app_setting_get --app=$app --key=port_component)
+
+  #=================================================
+  # UPDATE CONFIG FILES
+  #=================================================
+  ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+  ynh_add_config --template="../conf/jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
+  
+  ynh_script_progression -l --message="Upgrade of $app completed"
+}
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+ynh_app_config_run $1
+
