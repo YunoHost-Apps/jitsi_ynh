@@ -35,8 +35,6 @@ set__max_memory(){
   #=================================================
 
   ynh_script_progression --message="Loading installation settings..."
-  
-  app=$YNH_APP_INSTANCE_NAME
 
   domain=$(ynh_app_setting_get --app=$app --key=domain)
   path_url=$(ynh_app_setting_get --app=$app --key=path)
