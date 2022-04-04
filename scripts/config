@@ -40,8 +40,6 @@ set__max_memory(){
   path_url=$(ynh_app_setting_get --app=$app --key=path)
   final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-  max_memory=$(ynh_app_setting_get --app=$app --key=max_memory)
-
   focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
   focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
   focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
