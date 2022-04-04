@@ -44,7 +44,7 @@ focus_user="focus"
 videobridge_user="jvb"
 
 user_memory_usage=1.5
-max_memory=$(($user_memory_usage * $maxmembers))
+max_memory=$(( $user_memory_usage * $maxmembers ))
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
