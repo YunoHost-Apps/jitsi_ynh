@@ -37,6 +37,12 @@
             {
                 "name": "domain",
                 "type": "domain"
+            },
+            {
+                "name": "max video members",
+                "type": "string",
+                "default": "1056"
+                "example": "One user consume around 1,5mb of memory for 50 simultaneous user will consume next to 71 Mb"
             }
         ]
     }
