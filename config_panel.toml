@@ -113,6 +113,7 @@ services = ["__APP__-jicofo","","__APP__-videobridge"]
         ########################################################################
 
         [main.config.max_memory]
+        bind = "null"
         ask.en = "Max memory to use for VM"
         #ask.fr = "Utilisateurs simultanés maximum"
         #ask.es = "Maximo de usuario simultaneo"
