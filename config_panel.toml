@@ -1,0 +1,132 @@
+## Config panel are available from webadmin > Apps > YOUR_APP > Config Panel Button
+## Those panels let user configure some params on their apps using a friendly interface,
+## and remove the need to manually edit files from the command line.
+ 
+## From a packager perspective, this .toml is coupled to the scripts/config script,
+## which may be used to define custom getters/setters. However, most use cases
+## should be covered automagically by the core, thus it may not be necessary
+## to define a scripts/config at all!
+ 
+## -----------------------------------------------------------------------------
+## IMPORTANT: In accordance with YunoHost's spirit, please keep things simple and 
+## do not overwhelm the admin with tons of misunderstandable or advanced settings.
+## -----------------------------------------------------------------------------
+
+## The top level describe the entire config panels screen.
+
+## The version is a required property. 
+## Here a small reminder to associate config panel version with YunoHost version
+## | Config | YNH    | Config panel small change log                           |
+## | ------ | ---    | ------------------------------------------------------- |
+## | 0.1    | 3.x    | 0.1 config script not compatible with YNH >= 4.3        |
+## | 1.0    | 4.3.x  | The new config panel system with 'bind' property        |
+version = "1.0"
+
+## (optional) i18n property let you internationalize questions, however this feature 
+## is only available in core configuration panel (like yunohost domain config).
+## So in app config panel this key is ignored for now, but you can internationalize
+## by using a lang dictionary (see property name bellow)
+# i18n = "prefix_translation_key"
+
+################################################################################
+#### ABOUT PANELS
+################################################################################
+
+## The next level describes web admin panels
+## You have to choose an ID for each panel, in this example the ID is "main"
+## Keep in mind this ID will be used in CLI to refer to your question, so choose
+## something short and meaningfull.
+## In the webadmin, each panel corresponds to a distinct tab / form
+[main]
+
+## Define the label for your panel
+## Internationalization works similarly to the 'description' and 'ask' questions in the manifest
+name = "Main configuration"
+#name.en = "Main configuration"
+#name.fr = "Configuration principale"
+#name.es = "Configuración principal"
+
+## (optional) If you need to trigger a service reload-or-restart after the user
+# change a question in this panel, you can add your service in the list.
+services = ["__APP__-web","","__APP__-streaming","nginx"]
+# or services = ["nginx", "__APP__"] to also reload-or-restart nginx
+
+## (optional) This help properties is a short help displayed on the same line
+## than the panel title but not displayed in the tab.
+# help = ""
+    
+    ############################################################################
+    #### ABOUT SECTIONS
+    ############################################################################
+
+    ## A panel is composed of one or several sections.
+    ##
+    ## Sections are meant to group questions together when they correspond to
+    ## a same subtopic. This impacts the rendering in terms of CLI prompts
+    ## and HTML forms
+    ##
+    ## You should choose an ID for your section, and prefix it with the panel ID
+    ## (Be sure to not make a typo in the panel ID, which would implicitly create
+    ## an other entire panel)
+    ##
+    ## We use the context of pepettes_ynh as an example,
+    ## which is a simple donation form app written in python,
+    ## and for which the admin will want to edit the configuration
+    [main.config]
+
+    ## (optional) Defining a proper title for sections is not mandatory
+    ## and depends on the exact rendering you're aiming for the CLI / webadmin
+    name = "Global configurations"
+    #name.en = "Domains configurations"
+    #name.fr = "Configuratin des domaines"
+    #name.es = "Configuración de dominios"
+
+    ## (optional) This help properties is a short help displayed on the same line
+    ## than the section title, meant to provide additional details
+    #help = "Domains are the name which appear in your browther navigation bar (eg: sub.domain.tld)"
+    #help.en = "Domains are the name which appear in your browther navigation bar (eg: sub.domain.tld)"
+    #help.fr = "Les domaines sont les noms qui apparaissent dans la barre de nvigation de votre navigateur (ex : sub.domain.tld)"
+    #help.es = "los dominios son los nombres que apparecent en la barra de navegación de su navegador (ex: sub.domain.tld)"
+    
+    ## (optional) As for panel, you can specify to trigger a service 
+    ## reload-or-restart after the user change a question in this section.
+    ## This property is added to the panel property, it doesn't deactivate it.
+    ## So no need to replicate, the service list from panel services property.
+    # services = []
+    
+    ## (optional) By default all questions are optionals, but you can specify a
+    ## default behaviour for question in the section
+    #optional = true
+        
+    ## (optional) It's also possible with the 'visible' property to only
+    ## display the section depending on the user's answers to previous questions.
+    ##
+    ## Be careful that the 'visible' property should only refer to **previous** questions
+    ## Hence, it should not make sense to have a "visible" property on the very first section.
+    ##
+    ## Also, keep in mind that this feature only works in the webadmin and not in CLI
+    ## (therefore a user could be prompted in CLI for a question that may not be relevant)
+    # visible = true
+
+        ########################################################################
+        #### ABOUT QUESTIONS
+        ########################################################################
+
+        [main.config.max_memory]
+        ask.en = "Max simultaneous users"
+        #ask.fr = "Utilisateurs simultanés maximum"
+        #ask.es = "Maximo de usuario simultaneo"
+        type = "number"
+        #example = "domain.tld or sub.domain.tld"
+        #example.en = "domain.tld or sub.domain.tld"
+        #example.fr = "domain.tld ou sub.domain.tld"
+        #example.es = "domain.tld o sub.domain.tld"
+        help = "One user consume about 1,5 Mib memory, for example if max user is set to 50 this parameter will alocate 71 mb for jitsi VMs"
+        #help.en = "Fill the domain name of the users identifiers if different to the server domain"
+        #help.fr = "Saisissez le nom de domaine des identifiants utilisateurs si différent au domaine du serveur"
+        #help.es = "Ingresa el nombre de dominio del nombre de usuario si diferente del dominio del servidor"
+        #pattern.regexp = '^(\w{3,30})(\.(\w{3,30}))*$'
+        #pattern.error = "The domain should be at least like domain.tld or better sub.domain.tld"
+        #pattern.error.en = "The domain should be at least like domain.tld or better sub.domain.tld"
+        #pattern.error.fr = "Le domaine doit etre au moind du type domain.tld ou mieux sub.domain.tld"
+        #pattern.error.es = "El dominio debe estar al menos del typo domain.tld o mejor sub.domain.tld"
