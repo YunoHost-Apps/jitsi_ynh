@@ -43,7 +43,7 @@
                 "ask":{
                     "en":"Set max simultaneous video members your jitsi will be able to hosts"
                 },
-                "type": "Number",
+                "type": "number",
                 "default": 1056,
                 "example": "One user consume around 1,5mb of memory for 50 simultaneous user will consume next to 71 Mb"
             }
