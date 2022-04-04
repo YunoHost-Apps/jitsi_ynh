@@ -24,6 +24,7 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
+maxmembers=$YNH_APP_ARG_MAXMEMBERS
 path_url="/"
 
 app=$YNH_APP_INSTANCE_NAME
@@ -41,6 +42,8 @@ turn_secret=$(ynh_string_random --length=8)
 focus_user="focus"
 
 videobridge_user="jvb"
+
+max_memory=$((1.5*$maxmembers))
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -60,6 +63,7 @@ ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
 ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
