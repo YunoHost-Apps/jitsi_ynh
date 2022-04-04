@@ -48,7 +48,7 @@ name = "Main configuration"
 
 ## (optional) If you need to trigger a service reload-or-restart after the user
 # change a question in this panel, you can add your service in the list.
-services = ["__APP__-jicofo","","__APP__-videobridge"]
+services = ["__APP__-jicofo","__APP__-videobridge"]
 # or services = ["nginx", "__APP__"] to also reload-or-restart nginx
 
 ## (optional) This help properties is a short help displayed on the same line
