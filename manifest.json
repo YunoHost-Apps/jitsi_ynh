@@ -39,13 +39,13 @@
                 "type": "domain"
             },
             {
-                "name": "maxmembers",
+                "name": "max_memory",
                 "ask":{
-                    "en":"Set max simultaneous video members your jitsi will be able to hosts"
+                    "en":"Set max memory to use for each javaVM (Each simultaneous user consume around 1,5mb of memory)"
                 },
                 "type": "number",
-                "default": 1056,
-                "example": "One user consume around 1,5mb of memory for 50 simultaneous user will consume next to 71 Mb"
+                "default": 1500,
+                "example": "for 50 simultaneous user will consume next to 75 Mb"
             }
         ]
     }
