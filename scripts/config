@@ -52,6 +52,11 @@ set__max_memory(){
   port_component=$(ynh_app_setting_get --app=$app --key=port_component)
 
   #=================================================
+  # SET SETTINGS
+  #=================================================
+  ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
+  
+  #=================================================
   # UPDATE CONFIG FILES
   #=================================================
   ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
