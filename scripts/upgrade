@@ -82,7 +82,7 @@ fi
 
 # If max_memory doesn't exist, create it and set to default 3074 mb value
 if [ -z "$max_memory" ]; then
-	max_memory=3072
+	max_memory=75
 	ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
 fi
 
