@@ -1,7 +1,6 @@
 ;; Test complet
 	; Manifest
 		domain="domain.tld"
-		maxmembers=50
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=0

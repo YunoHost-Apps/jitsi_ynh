@@ -37,15 +37,6 @@
             {
                 "name": "domain",
                 "type": "domain"
-            },
-            {
-                "name": "max_memory",
-                "ask":{
-                    "en":"Set max memory to use for each javaVM (Each simultaneous user consume around 1,5mb of memory)"
-                },
-                "type": "number",
-                "default": 1500,
-                "example": "for 50 simultaneous user will consume next to 75 Mb"
             }
         ]
     }
