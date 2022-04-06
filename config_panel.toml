@@ -1,0 +1,14 @@
+version = "1.0"
+
+[main]
+name = "Main configuration"
+services = ["__APP__-jicofo","__APP__-videobridge"]
+
+    [main.config]
+    name = "Global configurations"
+
+        [main.config.max_memory]
+        bind = "null"
+        ask.en = "Max memory to use for VM"
+        type = "number"
+        help = "One user consume about 1,5 Mib memory, for example if plan to have max 50 simultaneous users this parameter should be set to 75 mb"
