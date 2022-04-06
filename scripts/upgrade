@@ -20,6 +20,8 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
+max_memory=$(ynh_app_setting_get --app=$app --key=max_memory)
+
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
 focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
@@ -76,6 +78,12 @@ ynh_script_progression --message="Ensuring downward compatibility..."
 if [ -z "$final_path" ]; then
 	final_path=/var/www/$app
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
+# If max_memory doesn't exist, create it and set to default 75 mb value
+if [ -z "$max_memory" ]; then
+	max_memory=75
+	ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
 fi
 
 #=================================================
