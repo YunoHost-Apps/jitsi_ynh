@@ -80,7 +80,7 @@ if [ -z "$final_path" ]; then
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
 
-# If max_memory doesn't exist, create it and set to default 3074 mb value
+# If max_memory doesn't exist, create it and set to default 75 mb value
 if [ -z "$max_memory" ]; then
 	max_memory=75
 	ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
