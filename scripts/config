@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
+# GENERIC STARTING
 #=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
@@ -12,14 +12,20 @@ source /usr/share/yunohost/helpers
 ynh_abort_if_errors
 
 #=================================================
-# SHOW_CONFIG FUNCTION FOR 'SHOW' COMMAND
+# RETRIEVE ARGUMENTS
 #=================================================
+
+
+#=================================================
+# SPECIFIC GETTERS FOR TOML SHORT KEY
+#=================================================
+
 get__max_memory(){
   local max_memory=$(ynh_app_setting_get --app=$app --key=max_memory)
   
-  # If max_memory doesn't exist, create it and set to default 3074 mb value
+  # If max_memory doesn't exist, create it and set to default 75 mb value
   if [ -z "$max_memory" ]; then
-    max_memory=3072
+    max_memory=75
     ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
   fi
 	
@@ -27,6 +33,14 @@ get__max_memory(){
 value: $max_memory
 EOF
 }
+
+#=================================================
+# SPECIFIC VALIDATORS FOR TOML SHORT KEYS
+#=================================================
+
+#=================================================
+# SPECIFIC SETTERS FOR TOML SHORT KEYS
+#=================================================
 
 set__max_memory(){
 
@@ -54,19 +68,21 @@ set__max_memory(){
   #=================================================
   # SET SETTINGS
   #=================================================
+  
   ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
   
   #=================================================
   # UPDATE CONFIG FILES
   #=================================================
+  
   ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
   ynh_add_config --template="../conf/jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
   
-  ynh_script_progression -l --message="Upgrade of $app completed"
+  ynh_script_progression -l --message="Configuration of $app updated"
 }
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-ynh_app_config_run $1
 
+ynh_app_config_run $1

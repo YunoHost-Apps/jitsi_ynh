@@ -31,8 +31,6 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-max_memory=$(ynh_app_setting_get --app=$app --key=max_memory)
-
 focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
 focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
 focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
@@ -51,12 +49,6 @@ ynh_script_progression --message="Validating restoration parameters..."
 
 test ! -d $final_path \
 	|| ynh_die --message="There is already a directory: $final_path "
-
-# If max_memory doesn't exist, create it and set to default 3074 mb value
-if [ -z "$max_memory" ]; then
-	max_memory=3072
-	ynh_app_setting_set --app=$app --key=final_path --value=$max_memory
-fi
 
 #=================================================
 # STANDARD RESTORATION STEPS

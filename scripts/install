@@ -24,7 +24,6 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-max_memory=$YNH_APP_ARG_MAX_MEMORY
 path_url="/"
 
 app=$YNH_APP_INSTANCE_NAME
@@ -42,6 +41,8 @@ turn_secret=$(ynh_string_random --length=8)
 focus_user="focus"
 
 videobridge_user="jvb"
+
+max_memory=75
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
