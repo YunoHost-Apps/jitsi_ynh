@@ -6,7 +6,10 @@
 
 # dependencies used by the app
 pkg_dependencies="openjdk-8-jre-headless|openjdk-11-jre-headless debconf|debconf-2.0 procps uuid-runtime lua-ldap"
-pkg_extra_dependencies_arm="openjdk-8-jre_*_armhf.deb openjdk-8-jre-headless_*_armhf.deb openjdk-8-jdf_*_armhf.deb openjdk-8-jdk-headless_*_armhf.deb"
+pkg_extra_dependencies_arm="openjdk-8-jre_8u322-b06-1~deb9u1_armhf.deb \
+                            openjdk-8-jre-headless_8u322-b06-1~deb9u1_armhf.deb \
+                            openjdk-8-jdf_8u322-b06-1~deb9u1_armhf.deb \
+                            openjdk-8-jdk-headless_8u322-b06-1~deb9u1_armhf.deb"
 
 #=================================================
 # PERSONAL HELPERS
