@@ -163,7 +163,7 @@ then
 	
 	if [ ! -d "/tmp/jitsi-install/jitsi-sctp/usrsctp/" ]
 	then
-		mv ./usrsctp ./jitsi-sctp/usrsctp/
+		mv ./usrsctp ./jitsi-sctp/
 	fi
 	cd ./jitsi-sctp
 	# needed to make compile works
