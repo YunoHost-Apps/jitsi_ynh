@@ -129,9 +129,9 @@ ynh_script_progression --message="Setting up source files..."
 if [ $(uname -m) == "armv7l" ] 
 then
 	# prepare openjdk8 installation
-	if  [ -d "/tmp/jitsi-install" ]
+	if  [ -d "/tmp/jitsi-install/" ]
 	then
-		rm -rf /tmp/jitsi-install
+		rm -rf /tmp/jitsi-install/
 	fi
 	
 	mkdir /tmp/jitsi-install/
@@ -157,8 +157,8 @@ then
 	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-armhf
 	sudo apt update
 	sudo apt install automake autoconf build-essential libtool git maven m4 -y
-	git clone https://github.com/sctplab/usrsctp.git /tmp/jitsi-install/
-	git clone https://github.com/jitsi/jitsi-sctp /tmp/jitsi-install/
+	git clone https://github.com/sctplab/usrsctp /tmp/jitsi-install/usrsctp
+	git clone https://github.com/jitsi/jitsi-sctp /tmp/jitsi-install/jitsi-sctp
 	
 	if [ ! -d "/tmp/jitsi-install/jitsi-sctp/usrsctp/" ]
 	then
