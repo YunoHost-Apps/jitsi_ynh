@@ -159,10 +159,17 @@ then
 	sudo apt install automake autoconf build-essential libtool git maven m4 -y
 	git clone https://github.com/sctplab/usrsctp.git
 	git clone https://github.com/jitsi/jitsi-sctp
-	mv ./usrsctp ./jitsi-sctp/usrsctp/
+	
+	if [! -d "/tmp/jitsi-install/jitsi-sctp/usrsctp/" ] 
+	then
+		mv ./usrsctp ./jitsi-sctp/usrsctp/
+	fi
 	cd ./jitsi-sctp
 	# needed to make compile works
-	mkdir -p ./jniwrapper/native/src/main/resources/lib/linux-arm/
+	if [! -d "/tmp/jitsi-install/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ] 
+	then
+		mkdir -p ./jniwrapper/native/src/main/resources/lib/linux-arm/
+	fi
 	
 	# compile
 	mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
