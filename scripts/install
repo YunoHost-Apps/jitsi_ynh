@@ -148,7 +148,7 @@ then
 	sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
 	
 	# stop related services if exist
-	sudo systemctl stop prosody jitsi-videobridge jitsi-jicofo
+	#sudo systemctl stop prosody jitsi-videobridge jitsi-jicofo
 
 	# prepare jniwrapper comppilation
 	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-armhf
