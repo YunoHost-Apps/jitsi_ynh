@@ -345,7 +345,7 @@ ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="
 if [ $(uname -m) == "armv7l" ] 
 then
 	# rm official jniwrapper to copy 
-	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-*"
+	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-8-g04269a7.jar"
 	cp "/tmp/jitsi-install/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
 fi
 # Start a systemd service
