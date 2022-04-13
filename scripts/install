@@ -339,7 +339,7 @@ if [ $(uname -m) == "armv7l" ]
 then
 	# rm official jniwrapper to copy 
 	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-*"
-	cp "./jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
+	cp "/tmp/jitsi-install/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
 fi
 # Start a systemd service
 ynh_systemd_action --service_name=$app-jicofo --action="restart" --log_path="/var/log/$app/$app-jicofo.log"
