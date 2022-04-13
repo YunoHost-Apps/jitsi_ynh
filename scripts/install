@@ -164,7 +164,7 @@ then
 	
 	if [ ! -d "/tmp/jitsi-install/jitsi-sctp/usrsctp/" ]
 	then
-		mv /tmp/jitsi-install/usrsctp /tmp/jitsi-install/jitsi-sctp/
+		cp /tmp/jitsi-install/usrsctp /tmp/jitsi-install/jitsi-sctp/
 	fi
 	# needed to make compile works
 	if [ ! -d "/tmp/jitsi-install/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ]
