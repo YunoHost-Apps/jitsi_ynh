@@ -129,9 +129,12 @@ ynh_script_progression --message="Setting up source files..."
 if [ $(uname -m) == "armv7l" ] 
 then
 	# prepare openjdk8 installation
-	mkdir /tmp/jitsi-install/
-	cd /tmp/jitsi-install/
+	if [! -d "/tmp/jitsi-install/" ] 
+	then
+		mkdir /tmp/jitsi-install/
+	fi
 	
+	cd /tmp/jitsi-install/
 	#install openjdk 8 because javah is used by jitsi and not supported in higher versions
 	wget http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/openjdk-8-jre_8u322-b06-1~deb9u1_armhf.deb
 	wget http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/openjdk-8-jre-headless_8u322-b06-1~deb9u1_armhf.deb
@@ -190,9 +193,7 @@ if [ $(uname -m) == "armv7l" ]
 then
 	# rm official jniwrapper to copy 
 	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-*"
-	cp "./jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-SNAPSHOT.jar"
-	chmod 640 jniwrapper-native-1.0-SNAPSHOT.jar
-	chown $app:$app jniwrapper-native-1.0-SNAPSHOT.jar
+	cp "./jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
 fi
 
 ynh_setup_source --dest_dir="$final_path/jitsi-meet-prosody" --source_id=mod_auth_ldap
