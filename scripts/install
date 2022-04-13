@@ -129,11 +129,12 @@ ynh_script_progression --message="Setting up source files..."
 if [ $(uname -m) == "armv7l" ] 
 then
 	# prepare openjdk8 installation
-	if  [ ! -d "/tmp/jitsi-install/" ]
+	if  [ -d "/tmp/jitsi-install/" ]
 	then
-		mkdir /tmp/jitsi-install/
+		rm -rf /tmp/jitsi-install/
 	fi
 	
+	mkdir /tmp/jitsi-install/
 	cd /tmp/jitsi-install/
 	#install openjdk 8 because javah is used by jitsi and not supported in higher versions
 	wget http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/openjdk-8-jre_8u322-b06-1~deb9u1_armhf.deb
