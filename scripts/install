@@ -129,9 +129,9 @@ ynh_script_progression --message="Setting up source files..."
 if [ $(uname -m) == "armv7l" ] 
 then
 	# prepare openjdk8 installation
-	if  [ -d "/tmp/jitsi-install/" ]
+	if  [ -d "/tmp/jitsi-install" ]
 	then
-		rm -rf /tmp/jitsi-install/
+		rm -rf /tmp/jitsi-install
 	fi
 	
 	mkdir /tmp/jitsi-install/
