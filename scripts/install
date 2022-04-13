@@ -44,6 +44,8 @@ videobridge_user="jvb"
 
 max_memory=200 #125 mib with no user +1,5*50 users=75 mib
 
+scriptpath=$(pwd)
+
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
@@ -171,8 +173,10 @@ then
 	fi
 	
 	# compile
+	cd /tmp/jitsi-install/jitsi-sctp
 	mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
 	mvn package	
+	cd $scriptpath
 fi
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
