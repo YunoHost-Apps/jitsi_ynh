@@ -129,7 +129,7 @@ ynh_script_progression --message="Setting up source files..."
 if [ $(uname -m) == "armv7l" ] 
 then
 	# prepare openjdk8 installation
-	if [! -d "/tmp/jitsi-install/" ] 
+	if  ! -d "/tmp/jitsi-install/" 
 	then
 		mkdir /tmp/jitsi-install/
 	fi
@@ -160,13 +160,13 @@ then
 	git clone https://github.com/sctplab/usrsctp.git
 	git clone https://github.com/jitsi/jitsi-sctp
 	
-	if [! -d "/tmp/jitsi-install/jitsi-sctp/usrsctp/" ] 
+	if ! -d "/tmp/jitsi-install/jitsi-sctp/usrsctp/" 
 	then
 		mv ./usrsctp ./jitsi-sctp/usrsctp/
 	fi
 	cd ./jitsi-sctp
 	# needed to make compile works
-	if [! -d "/tmp/jitsi-install/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ] 
+	if ! -d "/tmp/jitsi-install/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/"
 	then
 		mkdir -p ./jniwrapper/native/src/main/resources/lib/linux-arm/
 	fi
