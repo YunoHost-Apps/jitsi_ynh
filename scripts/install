@@ -42,7 +42,7 @@ focus_user="focus"
 
 videobridge_user="jvb"
 
-max_memory=150
+max_memory=200 #125 mib with no user +1,5*50 users=75 mib
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
