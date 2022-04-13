@@ -42,7 +42,7 @@ focus_user="focus"
 
 videobridge_user="jvb"
 
-max_memory=75
+max_memory=150
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -156,7 +156,7 @@ then
 	# prepare jniwrapper comppilation
 	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-armhf
 	sudo apt update
-	sudo apt install automake autoconf build-essential libtool git maven m4
+	sudo apt install automake autoconf build-essential libtool git maven m4 -y
 	git clone https://github.com/sctplab/usrsctp.git
 	git clone https://github.com/jitsi/jitsi-sctp
 	mv ./usrsctp ./jitsi-sctp/usrsctp/
@@ -188,13 +188,6 @@ do
 	mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
 	ynh_secure_remove --file="$final_path/${package}_temp"
 done
-
-if [ $(uname -m) == "armv7l" ] 
-then
-	# rm official jniwrapper to copy 
-	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-*"
-	cp "./jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
-fi
 
 ynh_setup_source --dest_dir="$final_path/jitsi-meet-prosody" --source_id=mod_auth_ldap
 
@@ -341,6 +334,16 @@ ynh_script_progression --message="Starting a systemd service..."
 # Start a systemd service
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+
+if [ $(uname -m) == "armv7l" ] 
+then
+	# rm official jniwrapper to copy 
+	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-*"
+	cp "./jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
+fi
+# Start a systemd service
+ynh_systemd_action --service_name=$app-jicofo --action="restart" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name=$app-videobridge --action="restart" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # SETUP SSOWAT
