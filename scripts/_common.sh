@@ -37,9 +37,9 @@ ynh_jniwrapper_armhf ()
     packages_arm[jitsi-sctp]="jitsi-sctp"
     packages_arm[usrsctp]="jitsi-sctp/usrsctp"
 
-    for packages_arm in "${!packages_arm[@]}"
+    for package_arm in "${!packages_arm[@]}"
     do
-      ynh_setup_source --dest_dir="$tempdir" --source_id=$packages_arm
+      ynh_setup_source --dest_dir="$tempdir/${packages_arm[$package_arm]}" --source_id=$package_arm
     done
 
     # needed to make compile works
