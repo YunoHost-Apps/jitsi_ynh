@@ -99,6 +99,12 @@ ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_script_progression --message="Installing specific arm dependencies..."
+	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" $pkg_extra_depedencies_arm --name=$app-stretch
+fi
+
 
 if ! yunohost app list | grep -q "prosody"
 then
