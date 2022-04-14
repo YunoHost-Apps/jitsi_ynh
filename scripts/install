@@ -239,9 +239,14 @@ then
 	# prepare jniwrapper compilation
 	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-armhf
 	
-	git clone https://github.com/sctplab/usrsctp $tempdir/usrsctp
-	git clone https://github.com/jitsi/jitsi-sctp $tempdir/jitsi-sctp
-	mv $tempdir/usrsctp $tempdir/jitsi-sctp/usrsctp/
+	declare -A packages_arm
+	packages_arm[jitsi-sctp]="jitsi-sctp"
+	packages_arm[usrsctp]="jitsi-sctp/usrsctp"
+	
+	for packages_arm in "${!packages_arm[@]}"
+	do
+		ynh_setup_source --dest_dir="$tempdir" --source_id=$packages_arm
+	done
 	
 	# needed to make compile works
 	if [ ! -d "$tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ]
@@ -249,15 +254,14 @@ then
 		mkdir -p $tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/
 	fi
 	
-	# compile
-	cd $tempdir/jitsi-sctp
-	mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
-	mvn package	
-	cd $scriptpath
-
+	pushd "$tempdir/jitsi-sctp"
+		mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
+		mvn package	
+	popd
+	
 	# rm official jniwrapper to copy 
 	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-8-g04269a7.jar"
-	cp "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
+	mv "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
 	
 	ynh_secure_remove --file="$tempdir"
 
