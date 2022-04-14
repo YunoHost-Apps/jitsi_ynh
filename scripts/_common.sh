@@ -9,10 +9,10 @@ pkg_dependencies="openjdk-8-jre-headless|openjdk-11-jre-headless debconf|debconf
 
 if [ $YNH_ARCH == "armhf" ] 
 then
-	pkg_dependencies_arm="openjdk-8-jre openjdk-8-jre-headless openjdk-8-jdk openjdk-8-jdk-headless \
-                          automake autoconf build-essential libtool git maven m4"
-    
-    pkg_dependencies="$pkg_dependencies $pkg_dependencies_arm"
+	pkg_dependencies_arm="automake autoconf build-essential libtool git maven m4"
+	pkg_dependencies="$pkg_dependencies $pkg_dependencies_arm"
+
+	pkg_extra_depedencies_arm="openjdk-8-jre openjdk-8-jre-headless openjdk-8-jdk openjdk-8-jdk-headless"
 fi
 #=================================================
 # PERSONAL HELPERS
