@@ -1,0 +1,7 @@
+SOURCE_URL=https://github.com/jitsi/jitsi-sctp
+SOURCE_SUM=6ed4f76bbe9dfe4d4e6508d48e8337c2867dce8ec3de50b3b03fc60bfae8aaa4
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=deb
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=jitsi-meet-prosody.deb
+SOURCE_EXTRACT=false
