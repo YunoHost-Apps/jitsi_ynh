@@ -98,11 +98,10 @@ ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
 
-ynh_package_update
 # install generic dependencies
 ynh_install_app_dependencies $pkg_dependencies
 
-if [ $(uname -m) == "armv7l" ] 
+if [ $YNH_ARCH == "armhf" ] 
 then
 	# install arm specific depedencies to compile extra dependencies
 	ynh_install_app_dependencies $pkg_dependencies_arm
@@ -226,9 +225,9 @@ ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties
 ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 
 #=================================================
-# REPLACE JNIWRAPPER FOR ARMV7L AARCHITECTURE
+# REPLACE JNIWRAPPER FOR ARMHF AARCHITECTURE
 #=================================================
-if [ $(uname -m) == "armv7l" ] 
+if [ $YNH_ARCH == "armhf" ] 
 then
 	# set openjdk-8 as default 
 	sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
