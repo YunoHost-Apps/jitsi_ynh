@@ -82,7 +82,7 @@ fi
 
 # If max_memory doesn't exist, create it and set to default 75 mb value
 if [ -z "$max_memory" ]; then
-	max_memory=75
+	max_memory=200
 	ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
 fi
 
@@ -144,15 +144,6 @@ ynh_add_nginx_config
 ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	# install arm specific depedencies to compile extra dependencies
-	ynh_install_app_dependencies $pkg_dependencies_arm
-	
-	# install extra dependencies not present in default debian repositories
-	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security/ $(lsb_release -cs)/updates main" --package="$pkg_extra_dependencies_arm"
-fi
 
 if ! yunohost app list | grep -q "prosody"
 then
