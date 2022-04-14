@@ -35,7 +35,7 @@ ynh_jniwrapper_armhf ()
 
     declare -A packages_arm
     packages_arm[jitsi-sctp]="jitsi-sctp"
-    packages_arm[usrsctp]="jitsi-sctp/usrsctp"
+    packages_arm[usrsctp]="jitsi-sctp/usrsctp/usrsctp"
 
     for package_arm in "${!packages_arm[@]}"
     do
