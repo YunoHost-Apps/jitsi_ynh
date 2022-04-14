@@ -23,8 +23,9 @@ ynh_version_gt ()
 
 ynh_jniwrapper_armhf ()
 {
+    
     # set openjdk-8 as default 
-    sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
+    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
     tempdir="$(mktemp -d)"
 
     # prepare jniwrapper compilation
@@ -51,7 +52,7 @@ ynh_jniwrapper_armhf ()
     popd
 
     # rm official jniwrapper to copy 
-    rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-8-g04269a7.jar"
+    ynh_secure_remove --file="$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-8-g04269a7.jar"
     mv "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
 
     ynh_secure_remove --file="$tempdir"
