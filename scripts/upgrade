@@ -145,6 +145,15 @@ ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
+if [ $YNH_ARCH == "armhf" ] 
+then
+	# install arm specific depedencies to compile extra dependencies
+	ynh_install_app_dependencies $pkg_dependencies_arm
+	
+	# install extra dependencies not present in default debian repositories
+	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security/ $(lsb_release -cs)/updates main" --package="$pkg_extra_dependencies_arm"
+fi
+
 if ! yunohost app list | grep -q "prosody"
 then
 	yunohost tools update
@@ -198,6 +207,16 @@ then
 	ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
 
 	ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+fi
+
+#=================================================
+# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE
+#=================================================
+ynh_script_progression --message="Configuring jniwrapper for armhf ..."
+
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_jniwrapper_armhf
 fi
 
 #=================================================
