@@ -1,7 +1,7 @@
-SOURCE_URL=https://github.com/sctplab/usrsctp.git
-SOURCE_SUM=6ed4f76bbe9dfe4d4e6508d48e8337c2867dce8ec3de50b3b03fc60bfae8aaa4
+SOURCE_URL=https://github.com/sctplab/usrsctp/archive/refs/heads/master.zip
+SOURCE_SUM=1daee6f1a7b81478ac4d1e154f5cfdc3d35f45515dca3e1d6941d8d570cf95a1
 SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=deb
+SOURCE_FORMAT=zip
 SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=jitsi-meet-prosody.deb
-SOURCE_EXTRACT=false
+SOURCE_FILENAME=usrsctp-master.zip
+SOURCE_EXTRACT=true
