@@ -1,7 +1,6 @@
-SOURCE_URL=https://github.com/jitsi/jitsi-sctp/archive/refs/heads/master.zip
-SOURCE_SUM=c83829a9a9a5acc2cec156086824cf9709e04e8f6693ad19a43316bcee52fad5
+SOURCE_URL=https://github.com/jitsi/jitsi-sctp/archive/04269a7342fbd3bd66dd40ed892cfc80559d62d4.tar.gz
+SOURCE_SUM=3aa5b7b913158388e0403162c524d41415ad5ec1db0187500da5fcdd607f8321
 SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=zip
+SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=jitsi-sctp-master.zip
 SOURCE_EXTRACT=true
