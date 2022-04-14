@@ -212,10 +212,10 @@ fi
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE
 #=================================================
-ynh_script_progression --message="Configuring jniwrapper for armhf ..."
 
 if [ $YNH_ARCH == "armhf" ] 
 then
+	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
 	ynh_jniwrapper_armhf
 fi
 
