@@ -100,7 +100,18 @@ ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
 
+ynh_package_update
+# install generic dependencies
 ynh_install_app_dependencies $pkg_dependencies
+
+if [ $(uname -m) == "armv7l" ] 
+then
+	# install arm specific depedencies to compile extra dependencies
+	ynh_install_app_dependencies $pkg_dependencies_arm
+	
+	# install extra dependencies not present in default debian repositories
+	ynh_install_extra_app_dependencies  --repo="http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/" --package="$pkg_extra_dependencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc" 
+fi
 
 if ! yunohost app list | grep -q "prosody"
 then
@@ -127,54 +138,6 @@ gpasswd --add www-data $app
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Setting up source files..."
-
-if [ $(uname -m) == "armv7l" ] 
-then
-	# prepare openjdk8 installation
-	if  [ -d "/tmp/jitsi-install/" ]
-	then
-		rm -rf /tmp/jitsi-install/
-	fi
-	
-	mkdir /tmp/jitsi-install/
-	#install openjdk 8 because javah is used by jitsi and not supported in higher versions
-	wget http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/openjdk-8-jre_8u322-b06-1~deb9u1_armhf.deb -P /tmp/jitsi-install/
-	wget http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/openjdk-8-jre-headless_8u322-b06-1~deb9u1_armhf.deb -P /tmp/jitsi-install/
-	wget http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/openjdk-8-jdk_8u322-b06-1~deb9u1_armhf.deb -P /tmp/jitsi-install/
-	wget http://security.debian.org/debian-security/pool/updates/main/o/openjdk-8/openjdk-8-jdk-headless_8u322-b06-1~deb9u1_armhf.deb -P /tmp/jitsi-install/
-	
-	sudo apt install \
-	 /tmp/jitsi-install/openjdk-8-jre_8u322-b06-1~deb9u1_armhf.deb \
-	 /tmp/jitsi-install/openjdk-8-jre-headless_8u322-b06-1~deb9u1_armhf.deb \
-	 /tmp/jitsi-install/openjdk-8-jdk_8u322-b06-1~deb9u1_armhf.deb \
-	 /tmp/jitsi-install/openjdk-8-jdk-headless_8u322-b06-1~deb9u1_armhf.deb
-	
-	# ser openjdk as default 
-	sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
-	
-	# stop related services if exist
-	#sudo systemctl stop prosody jitsi-videobridge jitsi-jicofo
-
-	# prepare jniwrapper comppilation
-	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-armhf
-	sudo apt update
-	sudo apt install automake autoconf build-essential libtool git maven m4 -y
-	git clone https://github.com/sctplab/usrsctp /tmp/jitsi-install/usrsctp
-	git clone https://github.com/jitsi/jitsi-sctp /tmp/jitsi-install/jitsi-sctp
-	mv /tmp/jitsi-install/usrsctp /tmp/jitsi-install/jitsi-sctp/usrsctp/
-	
-	# needed to make compile works
-	if [ ! -d "/tmp/jitsi-install/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ]
-	then
-		mkdir -p /tmp/jitsi-install/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/
-	fi
-	
-	# compile
-	cd /tmp/jitsi-install/jitsi-sctp
-	mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
-	mvn package	
-	cd $scriptpath
-fi
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
@@ -265,6 +228,43 @@ ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties
 ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 
 #=================================================
+# REPLACE JNIWRAPPER FOR ARMV7L AARCHITECTURE
+#=================================================
+if [ $(uname -m) == "armv7l" ] 
+then
+	# set openjdk-8 as default 
+	sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
+	tempdir="$(mktemp -d)"
+	
+	# prepare jniwrapper compilation
+	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-armhf
+	
+	git clone https://github.com/sctplab/usrsctp $tempdir/usrsctp
+	git clone https://github.com/jitsi/jitsi-sctp $tempdir/jitsi-sctp
+	mv $tempdir/usrsctp $tempdir/jitsi-sctp/usrsctp/
+	
+	# needed to make compile works
+	if [ ! -d "$tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ]
+	then
+		mkdir -p $tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/
+	fi
+	
+	# compile
+	cd $tempdir/jitsi-sctp
+	mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
+	mvn package	
+	cd $scriptpath
+
+	# rm official jniwrapper to copy 
+	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-8-g04269a7.jar"
+	cp "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
+	
+	ynh_secure_remove --file="$tempdir"
+
+fi
+
+
+#=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
 ynh_script_progression --message="Configuring Jitsi-Jicofo..."
@@ -316,8 +316,6 @@ ynh_script_progression --message="Securing files and directories..."
 chown -R $app: /etc/$app
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 # SETUP LOGROTATE
 #=================================================
 ynh_script_progression --message="Configuring log rotation..."
@@ -341,16 +339,6 @@ ynh_script_progression --message="Starting a systemd service..."
 # Start a systemd service
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
-
-if [ $(uname -m) == "armv7l" ] 
-then
-	# rm official jniwrapper to copy 
-	rm "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-8-g04269a7.jar"
-	cp "/tmp/jitsi-install/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
-fi
-# Start a systemd service
-ynh_systemd_action --service_name=$app-jicofo --action="restart" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name=$app-videobridge --action="restart" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # SETUP SSOWAT
