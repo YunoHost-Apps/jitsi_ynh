@@ -23,8 +23,6 @@ ynh_version_gt ()
 
 ynh_jniwrapper_armhf ()
 {
-  if [ $YNH_ARCH == "armhf" ] 
-  then
     # set openjdk-8 as default 
     sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
     tempdir="$(mktemp -d)"
@@ -57,7 +55,6 @@ ynh_jniwrapper_armhf ()
     mv "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
 
     ynh_secure_remove --file="$tempdir"
-  fi
 }
 
 
