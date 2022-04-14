@@ -27,7 +27,7 @@ ynh_jniwrapper_armhf ()
 {
     
     # set openjdk-8 as default 
-    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
+    # update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
     tempdir="$(mktemp -d)"
 
     # prepare jniwrapper compilation
