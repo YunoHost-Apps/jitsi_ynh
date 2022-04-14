@@ -227,8 +227,10 @@ ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF AARCHITECTURE
 #=================================================
-ynh_jniwrapper_armhf
-
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_jniwrapper_armhf
+fi
 #=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
