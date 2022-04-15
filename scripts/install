@@ -221,6 +221,17 @@ ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties
 ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 
 #=================================================
+# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
+#=================================================
+
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
+	ynh_jniwrapper_armhf
+    
+fi
+
+#=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
 ynh_script_progression --message="Configuring Jitsi-Jicofo..."
@@ -310,17 +321,6 @@ ynh_permission_update --permission="main" --add="visitors"
 ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
-
-#=================================================
-# REPLACE JNIWRAPPER FOR ARMHF AARCHITECTURE
-#=================================================
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
-	ynh_jniwrapper_armhf
-    
-fi
 
 #=================================================
 # END OF SCRIPT
