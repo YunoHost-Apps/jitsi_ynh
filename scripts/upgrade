@@ -207,16 +207,6 @@ then
 fi
 
 #=================================================
-# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE
-#=================================================
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
-	ynh_jniwrapper_armhf
-fi
-
-#=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
 ynh_script_progression --message="configuring Jitsi-Jicofo..."
@@ -299,6 +289,17 @@ ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="
 ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE 
+#=================================================
+# jitsi need to be started at least once. why ? modifications will be taken event without restarting services.
+
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
+	ynh_jniwrapper_armhf
+fi
 
 #=================================================
 # END OF SCRIPT
