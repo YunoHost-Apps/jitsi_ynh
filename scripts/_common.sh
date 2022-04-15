@@ -54,7 +54,7 @@ ynh_jniwrapper_armhf ()
     popd
 
     # rm official jniwrapper to copy 
-    original_jniwrapper=$(ls $final_path/jitsi-videobridge/lib/jniwrapper-native-*.jar
+    original_jniwrapper=$(ls $final_path/jitsi-videobridge/lib/jniwrapper-native-*.jar)
     ynh_secure_remove --file="$original_jniwrapper"
 
     mv "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
