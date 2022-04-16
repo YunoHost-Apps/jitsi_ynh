@@ -42,7 +42,7 @@ focus_user="focus"
 
 videobridge_user="jvb"
 
-max_memory=75
+max_memory=200 #125 mib with no user +1,5*50 users=75 mib
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -99,6 +99,12 @@ ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_script_progression --message="Installing specific arm dependencies..."
+	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm"
+fi
+
 
 if ! yunohost app list | grep -q "prosody"
 then
@@ -215,6 +221,17 @@ ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties
 ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 
 #=================================================
+# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
+#=================================================
+
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
+	ynh_jniwrapper_armhf
+    
+fi
+
+#=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
 ynh_script_progression --message="Configuring Jitsi-Jicofo..."
@@ -265,8 +282,6 @@ ynh_script_progression --message="Securing files and directories..."
 # Set permissions to app files
 chown -R $app: /etc/$app
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================

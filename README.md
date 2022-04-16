@@ -33,8 +33,12 @@ Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Vi
 1. **Jitsi** requires a dedicated **root domain**, eg. jitsi.domain.tld
 2. **Jitsi** requires the ports TCP/4443 and UDP/10000 to be forwarded to your YunoHost (The same way you forwarded 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
 3. **Jitsi** will stop and disable Metronome XMPP.
-4. LDAP authentication is activated, only authenticated users to create new conference rooms. Whenever a new room is about to be created, Jitsi Meet will prompt for a user name and password. After the room is created, others will be able to join from anonymous domain.
-5. **Jitsi** is configured for 50 users maximum, this number can be increase going to the Yunohost config panel
+4. LDAP authentication is activated, only authenticated users can create new conference rooms. Whenever a new room is about to be created, Jitsi Meet will prompt for a user name and password. After the room is created, others will be able to join from anonymous domain.
+5. **Jitsi** is configured for to user 200MiB memory (next to 50 simultaneus users), this number can be increase going to the Yunohost config panel
+5. **Jitsi** is compatible with armhf architecture, it was tested on odroid xu4 and hc1. 
+
+## known bug
+- if a second user join before the first user declared himself as moderator video and sound should never appear, reload page should correct the problem
 
 ## Documentation and resources
 
