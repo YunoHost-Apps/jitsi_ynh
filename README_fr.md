@@ -14,7 +14,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Javascript, propose des vidéos-conférences de haute qualité, sécurisées et évolutives.
 
 
-**Version incluse :** 1.0.5913~ynh2
+**Version incluse :** 1.0.5913~ynh3
 
 **Démo :** https://meet.jit.si/
 
@@ -30,11 +30,7 @@ Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Ja
 2. **Jitsi** demande que les ports TCP/4443 et UDP/10000 soient routés vers votre YunoHost (De la même manière que le sont les ports 80 (HTTP), 443 (HTTPS), etc... https://yunohost.org/#/isp_box_config)
 3. **Jitsi** va arréter et désactiver le service XMPP Metronome.
 4. L'authentification LDAP est activée, seuls les utilisateurs authentifiés peuvent créer de nouvelles salles de conférence. Chaque fois qu'une nouvelle salle est sur le point d'être créée, Jitsi Meet vous demandera un nom d'utilisateur et un mot de passe. Une fois la salle créée, d'autres personnes pourront la rejoindre à partir d'un domaine anonyme. 
-5. **Jitsi** est configuré pour utiliser 200MiB (equivalent a 50 utilisateurs maximum), ce nombre peut être augmenté en allant dans le panneau de configuration Yunohost
-6. **Jitsi** est compatible avec l'architecture armhf (testé sur odroid XU4 et HC1) 
-
-## Bugs connus
-- si un second utilisateur rejoins le salon avant que le premié ne se soit déclaré comme modérateur, il risque de ne pas y avoir de partage de video et d'audio. Un rechargement de la page devrait suffir apres que le modérateur se soit identifé.
+5. **Jitsi** est configuré pour 50 utilisateurs maximum, ce nombre peut être augmenté en allant dans le panneau de configuration Yunohost
 
 ## Documentations et ressources
 
