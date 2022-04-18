@@ -11,4 +11,4 @@ services = ["__APP__-jicofo","__APP__-videobridge"]
         bind = "null"
         ask.en = "Max memory to use for VM"
         type = "number"
-        help = "One user consume about 1,5 Mib memory, for example if plan to have max 50 simultaneous users this parameter should be set to 75 mb"
+        help = "One user consume about 1,5 Mib memory ,with no user jitsi consume 120 MiB. For example if plan to have max 50 simultaneous users this parameter should be set to 200 mb"

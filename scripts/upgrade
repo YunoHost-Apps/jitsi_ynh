@@ -82,7 +82,7 @@ fi
 
 # If max_memory doesn't exist, create it and set to default 75 mb value
 if [ -z "$max_memory" ]; then
-	max_memory=75
+	max_memory=200
 	ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
 fi
 
@@ -145,6 +145,12 @@ ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_script_progression --message="Installing specific arm dependencies..."
+	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
+fi
+
 if ! yunohost app list | grep -q "prosody"
 then
 	yunohost tools update
@@ -198,6 +204,18 @@ then
 	ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
 
 	ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+fi
+
+
+#=================================================
+# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
+#=================================================
+
+if [ $YNH_ARCH == "armhf" ] 
+then
+	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
+	ynh_jniwrapper_armhf
+    
 fi
 
 #=================================================
