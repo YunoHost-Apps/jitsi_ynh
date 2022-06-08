@@ -7,6 +7,7 @@
 #=================================================
 
 source _common.sh
+source ynh_apps
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -53,6 +54,14 @@ ynh_remove_systemd_config --service=$app-videobridge
 ynh_remove_systemd_config --service=$app-jicofo
 
 #=================================================
+# REMOVE LOGROTATE CONFIGURATION
+#=================================================
+ynh_script_progression --message="Removing logrotate configuration..."
+
+# Remove the app-specific logrotate config
+ynh_remove_logrotate
+
+#=================================================
 # RECONFIGURE PROSODY
 #=================================================
 ynh_script_progression --message="Reconfiguring Prosody..."
@@ -78,14 +87,6 @@ ynh_secure_remove --file="/usr/local/share/ca-certificates/auth.$domain.crt"
 update-ca-certificates -f
 
 ynh_systemd_action --service_name=prosody --action=restart
-
-#=================================================
-# REMOVE LOGROTATE CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing logrotate configuration..."
-
-# Remove the app-specific logrotate config
-ynh_remove_logrotate
 
 #=================================================
 # REMOVE APP MAIN DIR
@@ -115,27 +116,7 @@ ynh_remove_app_dependencies
 ynh_app_setting_delete --app=$app --key=require_prosody
 gpasswd --delete prosody $app
 
-# List apps requiring Prosody
-installed_apps=$(yunohost app list | grep -oP 'id: \K.*$')
-required_by=""
-installed_app_required_by=""
-for installed_app in $installed_apps
-do
-    installed_app_required_by=$(ynh_app_setting_get --app=$installed_app --key="require_prosody")
-    if [[ $installed_app_required_by ]]
-    then
-        required_by="${installed_app_required_by}"
-    fi
-    installed_app_required_by=""
-done
-
-# If Prosody is no more required
-if [[ ! $required_by ]]
-then
-    # Remove Prosody
-    ynh_print_info --message="Removing of Prosody"
-    yunohost app remove prosody --purge
-fi
+ynh_remove_apps
 
 #=================================================
 # CLOSE A PORT
