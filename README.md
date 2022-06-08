@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Jitsi Meet for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi) ![](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi) ![Working status](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)  
 [![Install Jitsi Meet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jitsi)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -24,7 +24,7 @@ Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Vi
 
 ## Screenshots
 
-![](./doc/screenshots/screenshot.png)
+![Screenshot of Jitsi Meet](./doc/screenshots/screenshot.png)
 
 ## Disclaimers / important information
 
@@ -38,21 +38,22 @@ Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Vi
 
 ## Documentation and resources
 
-* Official app website: https://jitsi.org/
-* Official user documentation: https://jitsi.org/user-faq/
-* Upstream app code repository: https://github.com/jitsi/jitsi-meet
-* YunoHost documentation for this app: https://yunohost.org/app_jitsi
-* Report a bug: https://github.com/YunoHost-Apps/jitsi_ynh/issues
+* Official app website: <https://jitsi.org/>
+* Official user documentation: <https://jitsi.org/user-faq/>
+* Upstream app code repository: <https://github.com/jitsi/jitsi-meet>
+* YunoHost documentation for this app: <https://yunohost.org/app_jitsi>
+* Report a bug: <https://github.com/YunoHost-Apps/jitsi_ynh/issues>
 
 ## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
-```
+
+``` bash
 sudo yunohost app install https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing --debug
 or
 sudo yunohost app upgrade jitsi -u https://github.com/YunoHost-Apps/jitsi_ynh/tree/testing --debug
 ```
 
-**More info regarding app packaging:** https://yunohost.org/packaging_apps
+**More info regarding app packaging:** <https://yunohost.org/packaging_apps>
