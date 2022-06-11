@@ -6,8 +6,9 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-#Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
+source ../settings/scripts/ynh_apps
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -53,13 +54,6 @@ test ! -d $final_path \
 #=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
-# RESTORE THE NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the NGINX web server configuration..."
-
-ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-#=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
 ynh_script_progression --message="Recreating the dedicated system user..."
@@ -87,19 +81,23 @@ chown -R $app:$app "$final_path"
 ynh_script_progression --message="Reinstalling dependencies..."
 
 # Define and install dependencies
+ynh_install_apps --apps="$ynh_app_dependencies"
 ynh_install_app_dependencies $pkg_dependencies
 
-if ! yunohost app list | grep -q "prosody"
+if [ $YNH_ARCH == "armhf" ] 
 then
-	yunohost tools update
-	yunohost app install prosody
-else
-	yunohost tools update
-	yunohost app upgrade prosody
+	ynh_script_progression --message="Installing specific arm dependencies..."
+	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
 fi
 
-ynh_app_setting_set --app=$app --key=require_prosody --value="1"
 gpasswd --add prosody $app
+
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Restoring the NGINX web server configuration..."
+
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # CONFIGURE FIREWALL
