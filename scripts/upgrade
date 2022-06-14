@@ -7,6 +7,7 @@
 #=================================================
 
 source _common.sh
+source ynh_apps
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -131,18 +132,11 @@ chmod -R o-rwx "$final_path"
 chown -R $app:$app "$final_path"
 
 #=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
 ynh_script_progression --message="Upgrading dependencies..."
 
+ynh_install_apps --apps="$ynh_app_dependencies"
 ynh_install_app_dependencies $pkg_dependencies
 
 if [ $YNH_ARCH == "armhf" ] 
@@ -151,17 +145,15 @@ then
 	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
 fi
 
-if ! yunohost app list | grep -q "prosody"
-then
-	yunohost tools update
-	yunohost app install prosody
-else
-	yunohost tools update
-	yunohost app upgrade prosody
-fi
-
-ynh_app_setting_set --app=$app --key=require_prosody --value="1"
 gpasswd --add prosody $app
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -253,6 +245,14 @@ chown -R $app: /var/log/$app
 chmod -R 770 /var/log/$app
 
 #=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
+ynh_script_progression --message="Securing files and directories..."
+
+# Set permissions on app files
+chown -R $app: /etc/$app
+
+#=================================================
 # SETUP SYSTEMD
 #=================================================
 ynh_script_progression --message="Upgrading systemd configuration..."
@@ -263,14 +263,6 @@ ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 
 #=================================================
 # GENERIC FINALIZATION
-#=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
-ynh_script_progression --message="Securing files and directories..."
-
-# Set permissions on app files
-chown -R $app: /etc/$app
-
 #=================================================
 # SETUP LOGROTATE
 #=================================================
