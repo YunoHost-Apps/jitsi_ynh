@@ -20,6 +20,7 @@ Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Vi
 
 **Shipped version:** 1.0.6155~ynh2
 
+
 **Demo:** https://meet.jit.si/
 
 ## Screenshots
