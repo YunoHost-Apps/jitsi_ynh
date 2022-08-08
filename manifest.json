@@ -13,7 +13,8 @@
         "website": "https://jitsi.org/",
         "demo": "https://meet.jit.si/",
         "userdoc": "https://jitsi.org/user-faq/",
-        "code": "https://github.com/jitsi/jitsi-meet"
+        "code": "https://github.com/jitsi/jitsi-meet",
+        "cpe": "cpe:2.3:a:jitsi:jitsi"
     },
     "license": "Apache-2.0",
     "maintainer": {
@@ -21,8 +22,8 @@
     },
     "previous_maintainers": [
         {
-        "name": "ju",
-        "email": "julien.malik@paraiso.me"
+            "name": "ju",
+            "email": "julien.malik@paraiso.me"
         }
     ],
     "requirements": {
