@@ -7,7 +7,6 @@
 #=================================================
 
 source _common.sh
-source ynh_apps
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -15,7 +14,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	ynh_clean_check_starting
+	true
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -48,7 +47,7 @@ max_memory=200 #125 mib with no user +1,5*50 users=75 mib
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_script_progression --message="Validating installation parameters..."
+ynh_script_progression --message="Validating installation parameters..." --weight=1
 
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
@@ -59,7 +58,7 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..."
+ynh_script_progression --message="Storing installation settings..." --weight=1
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
@@ -76,7 +75,7 @@ ynh_app_setting_set --app=$app --key=turn_secret --value=$turn_secret
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Finding an available port..."
+ynh_script_progression --message="Finding an available port..." --weight=1
 
 # Find an available port
 port=4443
@@ -97,7 +96,7 @@ ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..."
+ynh_script_progression --message="Installing dependencies..." --weight=1
 
 ynh_install_apps --apps="$ynh_app_dependencies"
 ynh_install_app_dependencies $pkg_dependencies
@@ -111,7 +110,7 @@ fi
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Configuring system user..."
+ynh_script_progression --message="Configuring system user..." --weight=1
 
 # Create a system user
 ynh_system_user_create --username=$app --home_dir="$final_path"
@@ -121,7 +120,7 @@ gpasswd --add www-data $app
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Setting up source files..."
+ynh_script_progression --message="Setting up source files..." --weight=1
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
@@ -152,7 +151,7 @@ chown -R $app:$app "$final_path"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring NGINX web server..."
+ynh_script_progression --message="Configuring NGINX web server..." --weight=1
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config
@@ -162,7 +161,7 @@ ynh_add_nginx_config
 #=================================================
 # CONFIGURE PROSODY
 #=================================================
-ynh_script_progression --message="Configuring prosody..."
+ynh_script_progression --message="Configuring prosody..." --weight=1
 
 ynh_add_config --template="../conf/prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
@@ -191,7 +190,7 @@ prosodyctl mod_roster_command subscribe $focus_user.$domain $focus_user@auth.$do
 #=================================================
 # CONFIGURE JITSI-VIDEOBRIDGE
 #=================================================
-ynh_script_progression --message="Configuring Jitsi-Videobridge..."
+ynh_script_progression --message="Configuring Jitsi-Videobridge..." --weight=1
 
 public_ipv4="$(curl ip.yunohost.org)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
@@ -217,7 +216,7 @@ ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc
 
 if [ $YNH_ARCH == "armhf" ] 
 then
-	ynh_script_progression --message="Configuring jniwrapper for armhf ..."
+	ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
 	ynh_jniwrapper_armhf
     
 fi
@@ -225,7 +224,7 @@ fi
 #=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
-ynh_script_progression --message="Configuring Jitsi-Jicofo..."
+ynh_script_progression --message="Configuring Jitsi-Jicofo..." --weight=1
 
 mkdir -p "/etc/$app/jicofo"
 
@@ -238,7 +237,7 @@ ynh_add_config --template="../conf/jitsi-jicofo-logging.properties" --destinatio
 #=================================================
 # CONFIGURE JITSI-MEET
 #=================================================
-ynh_script_progression --message="Configuring Jitsi-Meet..."
+ynh_script_progression --message="Configuring Jitsi-Meet..." --weight=1
 
 mkdir -p "/etc/$app/meet"
 
@@ -248,7 +247,7 @@ chmod 644 "/etc/$app/meet/$domain-config.js"
 #=================================================
 # CREATE LOG DIR
 #=================================================
-ynh_script_progression --message="Creating log dir..."
+ynh_script_progression --message="Creating log dir..." --weight=1
 
 mkdir -p "/var/log/$app"
 chown -R $app: /var/log/$app
@@ -257,7 +256,7 @@ chmod -R 770 /var/log/$app
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
-ynh_script_progression --message="Securing files and directories..."
+ynh_script_progression --message="Securing files and directories..." --weight=1
 
 # Set permissions to app files
 chown -R $app: /etc/$app
@@ -265,7 +264,7 @@ chown -R $app: /etc/$app
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Configuring a systemd service..."
+ynh_script_progression --message="Configuring a systemd service..." --weight=1
 
 # Create a dedicated systemd config
 ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
@@ -276,7 +275,7 @@ ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Configuring log rotation..."
+ynh_script_progression --message="Configuring log rotation..." --weight=1
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
@@ -284,7 +283,7 @@ ynh_use_logrotate
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
+ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
 yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
 yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
@@ -292,7 +291,7 @@ yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..." --weight=1
 
 # Start a systemd service
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
@@ -301,7 +300,7 @@ ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring permissions..."
+ynh_script_progression --message="Configuring permissions..." --weight=1
 
 # Make app public
 ynh_permission_update --permission="main" --add="visitors"
@@ -309,7 +308,7 @@ ynh_permission_update --permission="main" --add="visitors"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -317,4 +316,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed"
+ynh_script_progression --message="Installation of $app completed" --last
