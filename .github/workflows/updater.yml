@@ -46,7 +46,4 @@ jobs:
           title: 'Upgrade to version ${{ env.VERSION }}'
           body: |
             Upgrade to v${{ env.VERSION }}
-            [See upstream release page](${{ env.RELEASE }})
-            Provided description:
-            ${{ env.DESCRIPTION }}
           draft: false
