@@ -67,7 +67,6 @@ ynh_jniwrapper_armhf ()
     ynh_secure_remove --file="$tempdir"
 }
 
-
 #=================================================
 # EXPERIMENTAL HELPERS
 #=================================================
