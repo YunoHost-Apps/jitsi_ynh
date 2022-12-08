@@ -18,7 +18,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Javascript, propose des vidéos-conférences de haute qualité, sécurisées et évolutives.
 
 
-**Version incluse :** 2.0.8044~ynh1
+**Version incluse :** 2.0.8138~ynh1
 
 **Démo :** https://meet.jit.si/
 
