@@ -17,6 +17,8 @@
 		upgrade=1	from_commit=12d4758ea7582c9d15d0bd80e2eb5f03ccac8484
 		# 1.0.5913~ynh3
 		upgrade=1	from_commit=afbc84d313452267cd97b9df44801d0ae085b1f2
+		# 2.0.8719~ynh2
+		upgrade=1	from_commit=4a043dfd46acc078e6c222a83958b2f64f16a79f
 		backup_restore=1
 		multi_instance=0
 		port_already_use=0

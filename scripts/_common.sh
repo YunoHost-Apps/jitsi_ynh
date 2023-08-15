@@ -5,7 +5,7 @@
 #=================================================
 
 # dependencies used by the app
-pkg_dependencies="openjdk-8-jre-headless|openjdk-11-jre-headless debconf|debconf-2.0 procps uuid-runtime lua-ldap"
+pkg_dependencies="openjdk-8-jre-headless|openjdk-11-jre-headless|openjdk-17-jre-headless debconf|debconf-2.0 procps uuid-runtime lua-ldap"
 
 ynh_app_dependencies="prosody"
 
@@ -14,7 +14,7 @@ then
 	pkg_dependencies_arm="automake autoconf build-essential libtool git maven m4"
 	pkg_dependencies="$pkg_dependencies $pkg_dependencies_arm"
 
-	pkg_extra_depedencies_arm="openjdk-8-jre openjdk-8-jre-headless openjdk-8-jdk openjdk-8-jdk-headless"
+	pkg_extra_depedencies_arm="openjdk-8-jre|openjdk-11-jre|openjdk-17-jre openjdk-8-jre-headless|openjdk-11-jre-headless|openjdk-17-jre-headless openjdk-8-jdk|openjdk-11-jdk|openjdk-17-jdk openjdk-8-jdk-headless|openjdk-11-jdk-headless|openjdk-17-jdk-headless"
 fi
 #=================================================
 # PERSONAL HELPERS
