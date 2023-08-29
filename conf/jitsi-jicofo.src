@@ -1,5 +1,5 @@
-SOURCE_URL=https://download.jitsi.org/stable/jicofo_1.0-1038-1_all.deb
-SOURCE_SUM=f553b76ca3a81ed97faba8049b08bc2dce065e0252c8527b8f129f68a439e3d7
+SOURCE_URL=https://download.jitsi.org/stable/jicofo_1.0-1048-1_all.deb
+SOURCE_SUM=76a8e63866541ac7689b0619aac8859022d0e5514d3fa7330ecbaffcc45226c3
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=deb
 SOURCE_IN_SUBDIR=true
