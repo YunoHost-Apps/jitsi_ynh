@@ -42,7 +42,7 @@ Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Ja
 * Site officiel de l’app : <https://jitsi.org/>
 * Documentation officielle utilisateur : <https://jitsi.org/user-faq/>
 * Dépôt de code officiel de l’app : <https://github.com/jitsi/jitsi-meet>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_jitsi>
+* YunoHost Store: <https://apps.yunohost.org/app/jitsi>
 * Signaler un bug : <https://github.com/YunoHost-Apps/jitsi_ynh/issues>
 
 ## Informations pour les développeurs
