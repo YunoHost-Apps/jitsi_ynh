@@ -1,5 +1,5 @@
-SOURCE_URL=https://download.jitsi.org/stable/jitsi-videobridge2_2.3-59-g5c48e421-1_all.deb
-SOURCE_SUM=c8516f74339d1bafd5968415e15581af6aefedd87b74d88be83e1c7a9d902311
+SOURCE_URL=https://download.jitsi.org/stable/jitsi-videobridge2_2.3-61-g814bffd6-1_all.deb
+SOURCE_SUM=133603eb1e024aff252516c1091ec8adf87ca1a3a5f2ac3ebf0e9845f061ea79
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=deb
 SOURCE_IN_SUBDIR=true
