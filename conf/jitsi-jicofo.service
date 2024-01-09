@@ -6,8 +6,8 @@ After=network.target
 EnvironmentFile=/etc/__APP__/jicofo/config
 Environment=LOGFILE=/var/log/__APP__/jitsi-jicofo.log
 User=__APP__
-WorkingDirectory=__FINALPATH__/jitsi-jicofo/
-ExecStart=/bin/bash -c "exec __FINALPATH__/jitsi-jicofo/jicofo.sh --host=${JICOFO_HOST} --domain=${JICOFO_HOSTNAME} --user_name=${JICOFO_AUTH_USER} --user_domain=${JICOFO_AUTH_DOMAIN} --user_password=${JICOFO_AUTH_PASSWORD} ${JICOFO_OPTS} < /dev/null >> ${LOGFILE} 2>&1"
+WorkingDirectory=__INSTALL_DIR__/jitsi-jicofo/
+ExecStart=/bin/bash -c "exec __INSTALL_DIR__/jitsi-jicofo/jicofo.sh --host=${JICOFO_HOST} --domain=${JICOFO_HOSTNAME} --user_name=${JICOFO_AUTH_USER} --user_domain=${JICOFO_AUTH_DOMAIN} --user_password=${JICOFO_AUTH_PASSWORD} ${JICOFO_OPTS} < /dev/null >> ${LOGFILE} 2>&1"
 
 [Install]
 WantedBy=multi-user.target

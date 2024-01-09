@@ -14,15 +14,15 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression --message="Loading settings..." --weight=1
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-port=$(ynh_app_setting_get --app=$app --key=port)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
-port_component=$(ynh_app_setting_get --app=$app --key=port_component)
-focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
-videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? port=$(ynh_app_setting_get --app=$app --key=port)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
+#REMOVEME? port_component=$(ynh_app_setting_get --app=$app --key=port_component)
+#REMOVEME? focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
+#REMOVEME? videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
 
 #=================================================
 # STANDARD REMOVE
@@ -90,10 +90,10 @@ ynh_systemd_action --service_name=prosody --action=restart
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Removing app main directory..." --weight=1
+#REMOVEME? ynh_script_progression --message="Removing app main directory..." --weight=1
 
 # Remove the app directory securely
-ynh_secure_remove --file="$final_path"
+#REMOVEME? ynh_secure_remove --file="$install_dir"
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
@@ -106,10 +106,10 @@ ynh_remove_nginx_config
 #=================================================
 # REMOVE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Removing dependencies..." --weight=1
+#REMOVEME? ynh_script_progression --message="Removing dependencies..." --weight=1
 
 # Remove metapackage and its dependencies
-ynh_remove_app_dependencies
+#REMOVEME? ynh_remove_app_dependencies
 
 # Remove Prosody
 ynh_app_setting_delete --app=$app --key=require_prosody
@@ -151,11 +151,11 @@ ynh_secure_remove --file="/var/log/$app"
 #=================================================
 # REMOVE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Removing the dedicated system user..." --weight=1
+#REMOVEME? ynh_script_progression --message="Removing the dedicated system user..." --weight=1
 
 gpasswd --delete www-data $app
 # Delete a system user
-ynh_system_user_delete --username=$app
+#REMOVEME? ynh_system_user_delete --username=$app
 
 #=================================================
 # END OF SCRIPT

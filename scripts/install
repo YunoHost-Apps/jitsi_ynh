@@ -13,20 +13,20 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-ynh_clean_setup () {
+#REMOVEME? ynh_clean_setup () {
 	true
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-domain=$YNH_APP_ARG_DOMAIN
-path_url="/"
+#REMOVEME? domain=$YNH_APP_ARG_DOMAIN
+path="/"
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
 #YOURSECRET3
 focus_password=$(ynh_string_random --length=8)
@@ -47,24 +47,24 @@ max_memory=200 #125 mib with no user +1,5*50 users=75 mib
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_script_progression --message="Validating installation parameters..." --weight=1
+#REMOVEME? ynh_script_progression --message="Validating installation parameters..." --weight=1
 
-final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
+#REMOVEME? install_dir=/var/www/$app
+#REMOVEME? test ! -e "$install_dir" || ynh_die --message="This path already contains a folder"
 
 # Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
+#REMOVEME? ynh_webpath_register --app=$app --domain=$domain --path=$path
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..." --weight=1
+#REMOVEME? ynh_script_progression --message="Storing installation settings..." --weight=1
 
-ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
+#REMOVEME? ynh_app_setting_set --app=$app --key=domain --value=$domain
+#REMOVEME? ynh_app_setting_set --app=$app --key=path --value=$path
 ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
-ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
+#REMOVEME? ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
 ynh_app_setting_set --app=$app --key=videobridge_user --value=$videobridge_user
 ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
@@ -75,45 +75,45 @@ ynh_app_setting_set --app=$app --key=turn_secret --value=$turn_secret
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Finding an available port..." --weight=1
+#REMOVEME? ynh_script_progression --message="Finding an available port..." --weight=1
 
 # Find an available port
 port=4443
 # Open this port
 ynh_exec_warn_less yunohost firewall allow TCP $port
-ynh_app_setting_set --app=$app --key=port --value=$port
+#REMOVEME? ynh_app_setting_set --app=$app --key=port --value=$port
 
 # Find an available port
 port_videobridge=10000
 # Open this port
 ynh_exec_warn_less yunohost firewall allow UDP $port_videobridge
-ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
+#REMOVEME? ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
 
 # Find an available port
 port_component=5347
-ynh_app_setting_set --app=$app --key=port_component --value=$port_component
+#REMOVEME? ynh_app_setting_set --app=$app --key=port_component --value=$port_component
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --weight=1
+#REMOVEME? ynh_script_progression --message="Installing dependencies..." --weight=1
 
 ynh_install_apps --apps="$ynh_app_dependencies"
-ynh_install_app_dependencies $pkg_dependencies
+#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
 
 if [ $YNH_ARCH == "armhf" ] 
 then
-	ynh_script_progression --message="Installing specific arm dependencies..."
-	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
+#REMOVEME? 	ynh_script_progression --message="Installing specific arm dependencies..."
+#REMOVEME? 	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
 fi
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Configuring system user..." --weight=1
+#REMOVEME? ynh_script_progression --message="Configuring system user..." --weight=1
 
 # Create a system user
-ynh_system_user_create --username=$app --home_dir="$final_path"
+#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 gpasswd --add prosody $app
 gpasswd --add www-data $app
 
@@ -122,7 +122,7 @@ gpasswd --add www-data $app
 #=================================================
 ynh_script_progression --message="Setting up source files..." --weight=1
 
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+#REMOVEME? ynh_app_setting_set --app=$app --key=install_dir --value=$install_dir
 # Download, check integrity, uncompress and patch the source from app.src
 declare -A packages
 packages[jitsi-jicofo]="jicofo"
@@ -132,21 +132,21 @@ packages[jitsi-videobridge]="jitsi-videobridge"
 
 for package in "${!packages[@]}"
 do
-	ynh_setup_source --dest_dir="$final_path/${package}_temp" --source_id=$package
-	pushd "$final_path/${package}_temp"
+	ynh_setup_source --dest_dir="$install_dir/${package}_temp" --source_id=$package
+	pushd "$install_dir/${package}_temp"
 		ar x $package.deb data.tar.xz
 		tar xf data.tar.xz
 	popd
 
-	mv "$final_path/${package}_temp/usr/share/${packages[$package]}/" "$final_path/${package}/"
-	ynh_secure_remove --file="$final_path/${package}_temp"
+	mv "$install_dir/${package}_temp/usr/share/${packages[$package]}/" "$install_dir/${package}/"
+#REMOVEME? 	ynh_secure_remove --file="$install_dir/${package}_temp"
 done
 
-ynh_setup_source --dest_dir="$final_path/jitsi-meet-prosody" --source_id=mod_auth_ldap
+ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:$app "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:$app "$install_dir"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -300,17 +300,17 @@ ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring permissions..." --weight=1
+#REMOVEME? ynh_script_progression --message="Configuring permissions..." --weight=1
 
 # Make app public
-ynh_permission_update --permission="main" --add="visitors"
+#REMOVEME? ynh_permission_update --permission="main" --add="visitors"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..." --weight=1
+#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
-ynh_systemd_action --service_name=nginx --action=reload
+#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
