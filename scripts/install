@@ -10,23 +10,8 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-#REMOVEME? ynh_clean_setup () {
-	true
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
-#=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
-
-#REMOVEME? domain=$YNH_APP_ARG_DOMAIN
-path="/"
-
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
 #YOURSECRET3
 focus_password=$(ynh_string_random --length=8)
@@ -45,75 +30,35 @@ videobridge_user="jvb"
 max_memory=200 #125 mib with no user +1,5*50 users=75 mib
 
 #=================================================
-# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
-#=================================================
-#REMOVEME? ynh_script_progression --message="Validating installation parameters..." --weight=1
-
-#REMOVEME? install_dir=/var/www/$app
-#REMOVEME? test ! -e "$install_dir" || ynh_die --message="This path already contains a folder"
-
-# Register (book) web path
-#REMOVEME? ynh_webpath_register --app=$app --domain=$domain --path=$path
-
-#=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-#REMOVEME? ynh_script_progression --message="Storing installation settings..." --weight=1
+ynh_script_progression --message="Storing installation settings..." --weight=1
 
-#REMOVEME? ynh_app_setting_set --app=$app --key=domain --value=$domain
-#REMOVEME? ynh_app_setting_set --app=$app --key=path --value=$path
 ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
 ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
-#REMOVEME? ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
+ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
 ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
 ynh_app_setting_set --app=$app --key=videobridge_user --value=$videobridge_user
 ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
 ynh_app_setting_set --app=$app --key=turn_secret --value=$turn_secret
 
 #=================================================
-# STANDARD MODIFICATIONS
-#=================================================
-# FIND AND OPEN A PORT
-#=================================================
-#REMOVEME? ynh_script_progression --message="Finding an available port..." --weight=1
-
-# Find an available port
-port=4443
-# Open this port
-ynh_exec_warn_less yunohost firewall allow TCP $port
-#REMOVEME? ynh_app_setting_set --app=$app --key=port --value=$port
-
-# Find an available port
-port_videobridge=10000
-# Open this port
-ynh_exec_warn_less yunohost firewall allow UDP $port_videobridge
-#REMOVEME? ynh_app_setting_set --app=$app --key=port_videobridge --value=$port_videobridge
-
-# Find an available port
-port_component=5347
-#REMOVEME? ynh_app_setting_set --app=$app --key=port_component --value=$port_component
-
-#=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-#REMOVEME? ynh_script_progression --message="Installing dependencies..." --weight=1
-
-ynh_install_apps --apps="$ynh_app_dependencies"
-#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
+ynh_script_progression --message="Installing dependencies..." --weight=1
 
 if [ $YNH_ARCH == "armhf" ] 
 then
-#REMOVEME? 	ynh_script_progression --message="Installing specific arm dependencies..."
-#REMOVEME? 	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
+	ynh_script_progression --message="Installing specific arm dependencies..."
+	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
 fi
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-#REMOVEME? ynh_script_progression --message="Configuring system user..." --weight=1
+ynh_script_progression --message="Configuring system user..." --weight=1
 
 # Create a system user
-#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 gpasswd --add prosody $app
 gpasswd --add www-data $app
 
@@ -122,7 +67,6 @@ gpasswd --add www-data $app
 #=================================================
 ynh_script_progression --message="Setting up source files..." --weight=1
 
-#REMOVEME? ynh_app_setting_set --app=$app --key=install_dir --value=$install_dir
 # Download, check integrity, uncompress and patch the source from app.src
 declare -A packages
 packages[jitsi-jicofo]="jicofo"
@@ -139,7 +83,7 @@ do
 	popd
 
 	mv "$install_dir/${package}_temp/usr/share/${packages[$package]}/" "$install_dir/${package}/"
-#REMOVEME? 	ynh_secure_remove --file="$install_dir/${package}_temp"
+	ynh_secure_remove --file="$install_dir/${package}_temp"
 done
 
 ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
@@ -163,7 +107,7 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Configuring prosody..." --weight=1
 
-ynh_add_config --template="../conf/prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
+ynh_add_config --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
@@ -200,15 +144,15 @@ ynh_app_setting_set --app=$app --key=muc_nickname --value=$muc_nickname
 
 mkdir -p "/etc/$app/videobridge"
 
-ynh_add_config --template="../conf/jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
+ynh_add_config --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
 
-ynh_add_config --template="../conf/jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
+ynh_add_config --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
 
-ynh_add_config --template="../conf/jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
+ynh_add_config --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
 
-ynh_add_config --template="../conf/jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
+ynh_add_config --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
 
-ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+ynh_add_config --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
@@ -218,7 +162,6 @@ if [ $YNH_ARCH == "armhf" ]
 then
 	ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
 	ynh_jniwrapper_armhf
-    
 fi
 
 #=================================================
@@ -228,11 +171,11 @@ ynh_script_progression --message="Configuring Jitsi-Jicofo..." --weight=1
 
 mkdir -p "/etc/$app/jicofo"
 
-ynh_add_config --template="../conf/jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
+ynh_add_config --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
 
-ynh_add_config --template="../conf/jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
+ynh_add_config --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
 
-ynh_add_config --template="../conf/jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
+ynh_add_config --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
 
 #=================================================
 # CONFIGURE JITSI-MEET
@@ -241,7 +184,7 @@ ynh_script_progression --message="Configuring Jitsi-Meet..." --weight=1
 
 mkdir -p "/etc/$app/meet"
 
-ynh_add_config --template="../conf/jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+ynh_add_config --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
 chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
@@ -296,21 +239,6 @@ ynh_script_progression --message="Starting a systemd service..." --weight=1
 # Start a systemd service
 ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-#REMOVEME? ynh_script_progression --message="Configuring permissions..." --weight=1
-
-# Make app public
-#REMOVEME? ynh_permission_update --permission="main" --add="visitors"
-
-#=================================================
-# RELOAD NGINX
-#=================================================
-#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..." --weight=1
-
-#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT

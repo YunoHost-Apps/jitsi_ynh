@@ -11,54 +11,13 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-#REMOVEME? ynh_clean_setup () {
-	true
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
-#=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading settings..." --weight=1
-
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
-
-#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
-#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
-#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
-
-#REMOVEME? focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
-#REMOVEME? focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
-#REMOVEME? focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
-
-#REMOVEME? videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
-#REMOVEME? videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
-
-#REMOVEME? port=$(ynh_app_setting_get --app=$app --key=port)
-#REMOVEME? port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
-#REMOVEME? port_component=$(ynh_app_setting_get --app=$app --key=port_component)
-
-#=================================================
-# CHECK IF THE APP CAN BE RESTORED
-#=================================================
-#REMOVEME? ynh_script_progression --message="Validating restoration parameters..." --weight=1
-
-#REMOVEME? test ! -d $install_dir \
-	|| ynh_die --message="There is already a directory: $install_dir "
-
-#=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-#REMOVEME? ynh_script_progression --message="Recreating the dedicated system user..." --weight=1
+ynh_script_progression --message="Recreating the dedicated system user..." --weight=1
 
 # Create the dedicated user (if not existing)
-#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 gpasswd --add www-data $app
 
 #=================================================
@@ -81,12 +40,12 @@ chown -R $app:$app "$install_dir"
 
 # Define and install dependencies
 ynh_install_apps --apps="$ynh_app_dependencies"
-#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
+	ynh_install_app_dependencies $pkg_dependencies
 
 if [ $YNH_ARCH == "armhf" ] 
 then
-#REMOVEME? 	ynh_script_progression --message="Installing specific arm dependencies..." --weight=1
-#REMOVEME? 	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
+	ynh_script_progression --message="Installing specific arm dependencies..." --weight=1
+	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
 fi
 
 gpasswd --add prosody $app
