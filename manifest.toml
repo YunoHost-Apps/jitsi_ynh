@@ -93,7 +93,7 @@ ram.runtime = "50M"
     [resources.apt]
     packages = [
         "openjdk-17-jre-headless",
-        "debconf-2.0",
+        "debconf",
         "procps",
         "uuid-runtime",
         "lua-ldap",
