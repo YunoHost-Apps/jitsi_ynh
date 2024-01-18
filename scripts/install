@@ -73,13 +73,13 @@ ynh_add_config --template="prosody.cfg.lua" --destination="/etc/prosody/conf.ava
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
- prosodyctl cert generate "$domain"
+echo | prosodyctl cert generate "$domain"
 ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
 ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
 ln -sf "/var/lib/prosody/$domain.crt" "/usr/local/share/ca-certificates/$domain.crt"
 ynh_script_progression --message="Configuring prosody 2..." --weight=1
 
- prosodyctl cert generate "auth.$domain"
+echo | prosodyctl cert generate "auth.$domain"
 ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
