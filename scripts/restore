@@ -40,11 +40,11 @@ ynh_restore_file --origin_path="/etc/prosody/conf.avail/$domain.cfg.lua"
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
-echo | prosodyctl cert generate "$domain"
+echo | ynh_exec_warn_less prosodyctl cert generate "$domain"
 ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
 ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
 
-echo | prosodyctl cert generate "auth.$domain"
+echo | ynh_exec_warn_less prosodyctl cert generate "auth.$domain"
 ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"

@@ -96,7 +96,7 @@ prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.
 #=================================================
 ynh_script_progression --message="Configuring Jitsi-Videobridge..." --weight=1
 
-public_ipv4="$(curl ip.yunohost.org)" || true
+public_ipv4="$(curl --no-progress-meter ip.yunohost.org)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
 mkdir -p "/etc/$app/videobridge"
