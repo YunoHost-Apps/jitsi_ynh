@@ -83,12 +83,17 @@ ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
 
+ynh_script_progression --message="Updating ca-certificates..." --weight=1
 update-ca-certificates -f
 
+ynh_script_progression --message="Restarting prosody..." --weight=1
 ynh_systemd_action --service_name="prosody" --action="restart"
 
+ynh_script_progression --message="prosodyctl register..." --weight=1
 prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
+ynh_script_progression --message="prosodyctl register..." --weight=1
 prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
+ynh_script_progression --message="prosodyctl mod_roster_command..." --weight=1
 prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.$domain"
 
 #=================================================
