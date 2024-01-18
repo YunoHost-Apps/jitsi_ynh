@@ -24,7 +24,6 @@ architectures = "all"
 multi_instance = false
 
 ldap = true
-
 sso = false
 
 disk = "50M"
@@ -34,6 +33,10 @@ ram.runtime = "50M"
 [install]
     [install.domain]
     type = "domain"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "visitors"
 
 [resources]
     [resources.sources]
