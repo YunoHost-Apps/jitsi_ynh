@@ -1,6 +1,0 @@
-SOURCE_URL=https://github.com/sctplab/usrsctp/archive/8e12cd9e01fc94d2e84ea1afa351c845966e116e.tar.gz
-SOURCE_SUM=0574a31fecca543cf8e46c1bff441a3048ccf7d403da0543639db334e9a09b2f
-SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=tar.gz
-SOURCE_IN_SUBDIR=true
-SOURCE_EXTRACT=true

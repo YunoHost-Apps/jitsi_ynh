@@ -4,31 +4,38 @@
 # COMMON VARIABLES
 #=================================================
 
-# dependencies used by the app
-pkg_dependencies="openjdk-8-jre-headless|openjdk-11-jre-headless|openjdk-17-jre-headless debconf|debconf-2.0 procps uuid-runtime lua-ldap"
-
-ynh_app_dependencies="prosody"
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	pkg_dependencies_arm="automake autoconf build-essential libtool git maven m4"
-	pkg_dependencies="$pkg_dependencies $pkg_dependencies_arm"
-
-	pkg_extra_depedencies_arm="openjdk-8-jre|openjdk-11-jre|openjdk-17-jre openjdk-8-jre-headless|openjdk-11-jre-headless|openjdk-17-jre-headless openjdk-8-jdk|openjdk-11-jdk|openjdk-17-jdk openjdk-8-jdk-headless|openjdk-11-jdk-headless|openjdk-17-jdk-headless"
-fi
 #=================================================
 # PERSONAL HELPERS
 #=================================================
 
-ynh_version_gt ()
-{
-    dpkg --compare-versions "$1" gt "$2"
+_setup_sources() {
+    # Download, check integrity, uncompress and patch the source from app.src
+    declare -A packages=(
+        [jitsi-jicofo]="jicofo"
+        [jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
+        [jitsi-meet-web]="jitsi-meet"
+        [jitsi-videobridge]="jitsi-videobridge"
+    )
+
+    for package in "${!packages[@]}"; do
+        ynh_setup_source --dest_dir="$install_dir/temp" --source_id="$package"
+        pushd "$install_dir/temp"
+            ar x "$package.deb" data.tar.xz
+            tar xf data.tar.xz
+        popd
+
+        mv "$install_dir/temp/usr/share/${packages[$package]}/" "$install_dir/$package/"
+        ynh_secure_remove --file="$install_dir/temp"
+    done
+
+    ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
 }
+
 
 ynh_jniwrapper_armhf ()
 {
-    
-    # set openjdk-8 as default 
+
+    # set openjdk-8 as default
     # update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
     tempdir="$(mktemp -d)"
 
@@ -39,30 +46,28 @@ ynh_jniwrapper_armhf ()
     packages_arm[jitsi-sctp]="jitsi-sctp"
     packages_arm[usrsctp]="jitsi-sctp/usrsctp/usrsctp"
 
-    for package_arm in "${!packages_arm[@]}"
-    do
-      ynh_setup_source --dest_dir="$tempdir/${packages_arm[$package_arm]}" --source_id=$package_arm
+    for package_arm in "${!packages_arm[@]}"; do
+        ynh_setup_source --dest_dir="$tempdir/${packages_arm[$package_arm]}" --source_id=$package_arm
     done
 
     # needed to make compile works
-    if [ ! -d "$tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ]
-    then
-      mkdir -p $tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/
+    if [ ! -d "$tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/" ]; then
+        mkdir -p $tempdir/jitsi-sctp/jniwrapper/native/src/main/resources/lib/linux-arm/
     fi
 
     pushd "$tempdir/jitsi-sctp"
-      mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
-      mvn package	
+        mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
+        mvn package
     popd
 
-    # rm official jniwrapper to copy 
-    original_jniwrapper=$(ls $final_path/jitsi-videobridge/lib/jniwrapper-native-*.jar)
+    # rm official jniwrapper to copy
+    original_jniwrapper=$(ls $install_dir/jitsi-videobridge/lib/jniwrapper-native-*.jar)
     ynh_secure_remove --file="$original_jniwrapper"
 
-    mv "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$final_path/jitsi-videobridge/lib/"
+    mv "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$install_dir/jitsi-videobridge/lib/"
 
-    chmod 640 "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-SNAPSHOT.jar"
-    chown -R $app:$app "$final_path/jitsi-videobridge/lib/jniwrapper-native-1.0-SNAPSHOT.jar"
+    chmod 640 "$install_dir/jitsi-videobridge/lib/jniwrapper-native-1.0-SNAPSHOT.jar"
+    chown -R $app:$app "$install_dir/jitsi-videobridge/lib/jniwrapper-native-1.0-SNAPSHOT.jar"
 
     ynh_secure_remove --file="$tempdir"
 }

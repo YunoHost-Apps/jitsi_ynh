@@ -1,6 +1,0 @@
-SOURCE_URL=https://github.com/jitsi/jitsi-sctp/archive/45bf9f296167f79a52cdc1b0e93bbfa4dc8c4976.tar.gz
-SOURCE_SUM=1eead17b10d059bafe8e1b06a8351936b608e7514b131588deac61d24b859397
-SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=tar.gz
-SOURCE_IN_SUBDIR=true
-SOURCE_EXTRACT=true

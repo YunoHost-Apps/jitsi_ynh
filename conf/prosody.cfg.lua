@@ -1,4 +1,4 @@
-plugin_paths = { "__FINALPATH__/jitsi-meet-prosody/" }
+plugin_paths = { "__INSTALL_DIR__/jitsi-meet-prosody/" }
 
 -- domain mapper options, must at least have domain base set to use the mapper
 muc_mapper_domain_base = "__DOMAIN__";
