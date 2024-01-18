@@ -1,3 +1,5 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
 packaging_format = 2
 
 id = "jitsi"
@@ -29,48 +31,49 @@ disk = "50M"
 ram.build = "50M"
 ram.runtime = "50M"
 
+[install]
     [install.domain]
     type = "domain"
 
 [resources]
     [resources.sources]
-        [resources.sources.jitsi-meet-web]
-        url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.7712-1_all.deb"
-        sha256 = "43917b5d3fd003823933d84beaf822a8a9edaa8f06f897e13b6b575bba3f3c18"
-        format = "deb"
-        rename = "jitsi-meet-web.deb"
+    [resources.sources.jitsi-meet-web]
+    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.7712-1_all.deb"
+    sha256 = "43917b5d3fd003823933d84beaf822a8a9edaa8f06f897e13b6b575bba3f3c18"
+    format = "whatever"
+    rename = "jitsi-meet-web.deb"
 
-        [resources.sources.jitsi-sctp]
-        url = "https://github.com/jitsi/jitsi-sctp/archive/45bf9f296167f79a52cdc1b0e93bbfa4dc8c4976.tar.gz"
-        sha256 = "1eead17b10d059bafe8e1b06a8351936b608e7514b131588deac61d24b859397"
+    [resources.sources.jitsi-sctp]
+    url = "https://github.com/jitsi/jitsi-sctp/archive/45bf9f296167f79a52cdc1b0e93bbfa4dc8c4976.tar.gz"
+    sha256 = "1eead17b10d059bafe8e1b06a8351936b608e7514b131588deac61d24b859397"
 
-        [resources.sources.jitsi-jicofo]
-        url = "https://download.jitsi.org/stable/jicofo_1.0-1059-1_all.deb"
-        sha256 = "365051508e23ff99e3152fd3b414ec695ff920b16da9677a485f85aa91a9d549"
-        format = "deb"
-        rename = "jitsi-jicofo.deb"
+    [resources.sources.jitsi-jicofo]
+    url = "https://download.jitsi.org/stable/jicofo_1.0-1059-1_all.deb"
+    sha256 = "365051508e23ff99e3152fd3b414ec695ff920b16da9677a485f85aa91a9d549"
+    format = "whatever"
+    rename = "jitsi-jicofo.deb"
 
-        [resources.sources.jitsi-videobridge]
-        url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-64-g719465d1-1_all.deb"
-        sha256 = "cd960148768c846cc97ce37211490f5026a5c4bc81fc48ea2ea22024f83667ca"
-        format = "deb"
-        rename = "jitsi-videobridge.deb"
+    [resources.sources.jitsi-videobridge]
+    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-64-g719465d1-1_all.deb"
+    sha256 = "cd960148768c846cc97ce37211490f5026a5c4bc81fc48ea2ea22024f83667ca"
+    format = "whatever"
+    rename = "jitsi-videobridge.deb"
 
-        [resources.sources.usrsctp]
-        url = "https://github.com/sctplab/usrsctp/archive/8e12cd9e01fc94d2e84ea1afa351c845966e116e.tar.gz"
-        sha256 = "0574a31fecca543cf8e46c1bff441a3048ccf7d403da0543639db334e9a09b2f"
+    [resources.sources.usrsctp]
+    url = "https://github.com/sctplab/usrsctp/archive/8e12cd9e01fc94d2e84ea1afa351c845966e116e.tar.gz"
+    sha256 = "0574a31fecca543cf8e46c1bff441a3048ccf7d403da0543639db334e9a09b2f"
 
-        [resources.sources.jitsi-meet-prosody]
-        url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.7712-1_all.deb"
-        sha256 = "30e360d42c4badf07e7269979b8af71eac05d689febc367420e0ca4abecfb16a"
-        format = "deb"
-        rename = "jitsi-meet-prosody.deb"
+    [resources.sources.jitsi-meet-prosody]
+    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.7712-1_all.deb"
+    sha256 = "30e360d42c4badf07e7269979b8af71eac05d689febc367420e0ca4abecfb16a"
+    format = "whatever"
+    rename = "jitsi-meet-prosody.deb"
 
-        [resources.sources.mod_auth_ldap]
-        url = "https://hg.prosody.im/prosody-modules/raw-file/tip/mod_auth_ldap/mod_auth_ldap.lua"
-        sha256 = "49c67ec86ec75ac8de93803be2ac7f907d1e9d3d22cd4c88fd48aaeed7a411e3"
-        format = "lua"
-        rename = "mod_auth_ldap.lua"
+    [resources.sources.mod_auth_ldap]
+    url = "https://hg.prosody.im/prosody-modules/raw-file/tip/mod_auth_ldap/mod_auth_ldap.lua"
+    sha256 = "49c67ec86ec75ac8de93803be2ac7f907d1e9d3d22cd4c88fd48aaeed7a411e3"
+    format = "whatever"
+    rename = "mod_auth_ldap.lua"
 
 
     [resources.system_user]
@@ -88,9 +91,17 @@ ram.runtime = "50M"
     main.url = "/"
 
     [resources.apt]
-    packages = "openjdk-8-jre-headless|openjdk-11-jre-headless|openjdk-17-jre-headless debconf|debconf-2.0 procps uuid-runtime lua-ldap prosody"
-        
-        [[resources.apt.extras]]
-        repo = "deb http://security.debian.org/debian-security stretch/updates main"
-        key = "https://ftp-master.debian.org/keys/archive-key-9-security.asc"
-        packages = "#FIXME#$pkg_extra_depedencies_arm"
+    packages = [
+        "openjdk-17-jre-headless",
+        "debconf|debconf-2.0",
+        "procps",
+        "uuid-runtime",
+        "lua-ldap",
+        "prosody",
+    ]
+
+    packages_from_raw_bash = """
+        if [[ "$YNH_ARCH" == "armhf" ]] || [[ "$YNH_ARCH" == "arm64" ]]; then
+           echo automake autoconf build-essential libtool git maven m4
+        fi
+    """

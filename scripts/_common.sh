@@ -4,18 +4,6 @@
 # COMMON VARIABLES
 #=================================================
 
-# dependencies used by the app
-#REMOVEME? pkg_dependencies="openjdk-8-jre-headless|openjdk-11-jre-headless|openjdk-17-jre-headless debconf|debconf-2.0 procps uuid-runtime lua-ldap"
-
-#REMOVEME? ynh_app_dependencies="prosody"
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	pkg_dependencies_arm="automake autoconf build-essential libtool git maven m4"
-#REMOVEME? 	pkg_dependencies="$pkg_dependencies $pkg_dependencies_arm"
-
-	pkg_extra_depedencies_arm="openjdk-8-jre|openjdk-11-jre|openjdk-17-jre openjdk-8-jre-headless|openjdk-11-jre-headless|openjdk-17-jre-headless openjdk-8-jdk|openjdk-11-jdk|openjdk-17-jdk openjdk-8-jdk-headless|openjdk-11-jdk-headless|openjdk-17-jdk-headless"
-fi
 #=================================================
 # PERSONAL HELPERS
 #=================================================
@@ -27,8 +15,8 @@ ynh_version_gt ()
 
 ynh_jniwrapper_armhf ()
 {
-    
-    # set openjdk-8 as default 
+
+    # set openjdk-8 as default
     # update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
     tempdir="$(mktemp -d)"
 
@@ -52,10 +40,10 @@ ynh_jniwrapper_armhf ()
 
     pushd "$tempdir/jitsi-sctp"
       mvn package -DbuildSctp -DbuildNativeWrapper -DdeployNewJnilib -DskipTests
-      mvn package	
+      mvn package
     popd
 
-    # rm official jniwrapper to copy 
+    # rm official jniwrapper to copy
     original_jniwrapper=$(ls $install_dir/jitsi-videobridge/lib/jniwrapper-native-*.jar)
     ynh_secure_remove --file="$original_jniwrapper"
 
