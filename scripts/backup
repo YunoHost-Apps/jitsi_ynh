@@ -22,25 +22,23 @@ ynh_print_info --message="Declaring files to be backed up..."
 ynh_backup --src_path="$install_dir"
 
 #=================================================
-# BACKUP THE NGINX CONFIGURATION
+# SYSTEM CONFIGURATION
 #=================================================
 
+# Backup the nginx configuration
 ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
-#=================================================
-# SPECIFIC BACKUP
-#=================================================
-# BACKUP LOGROTATE
-#=================================================
-
-ynh_backup --src_path="/etc/logrotate.d/$app"
-
-#=================================================
-# BACKUP SYSTEMD
-#=================================================
-
+# Backup the systemd service units
 ynh_backup --src_path="/etc/systemd/system/$app-videobridge.service"
 ynh_backup --src_path="/etc/systemd/system/$app-jicofo.service"
+
+# Backup the logrotate configuration
+ynh_backup --src_path="/etc/logrotate.d/$app"
+
+# Backup the Fail2Ban config
+ynh_backup --src_path="/etc/fail2ban/jail.d/$app.conf"
+ynh_backup --src_path="/etc/fail2ban/filter.d/$app.conf"
+
 
 #=================================================
 # BACKUP VARIOUS FILES
@@ -49,6 +47,8 @@ ynh_backup --src_path="/etc/systemd/system/$app-jicofo.service"
 ynh_backup --src_path="/etc/$app/"
 
 ynh_backup --src_path="/etc/prosody/conf.avail/$domain.cfg.lua"
+
+ynh_backup --src_path="/var/log/$app/"
 
 #=================================================
 # END OF SCRIPT

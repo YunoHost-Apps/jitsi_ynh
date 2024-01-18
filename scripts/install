@@ -10,95 +10,57 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
+# INITIALIZE AND STORE SETTINGS
 #=================================================
-
-#YOURSECRET3
-focus_password=$(ynh_string_random --length=8)
-#YOURSECRET1
-videobridge_secret=$(ynh_string_random --length=8)
-#YOURSECRET2
-focus_secret=$(ynh_string_random --length=8)
-
-#OTHER SECRET
-turn_secret=$(ynh_string_random --length=8)
 
 focus_user="focus"
+focus_password=$(ynh_string_random --length=8)
+ynh_app_setting_set --app="$app" --key=focus_user --value="$focus_user"
+ynh_app_setting_set --app="$app" --key=focus_password --value="$focus_password"
 
 videobridge_user="jvb"
+videobridge_secret=$(ynh_string_random --length=8)
+ynh_app_setting_set --app="$app" --key=videobridge_user --value="$videobridge_user"
+ynh_app_setting_set --app="$app" --key=videobridge_secret --value="$videobridge_secret"
+
+focus_secret=$(ynh_string_random --length=8)
+turn_secret=$(ynh_string_random --length=8)
+ynh_app_setting_set --app="$app" --key=focus_secret --value="$focus_secret"
+ynh_app_setting_set --app="$app" --key=turn_secret --value="$turn_secret"
 
 max_memory=200 #125 mib with no user +1,5*50 users=75 mib
+ynh_app_setting_set --app="$app" --key=max_memory --value="$max_memory"
 
-#=================================================
-# STORE SETTINGS FROM MANIFEST
-#=================================================
-ynh_script_progression --message="Storing installation settings..." --weight=1
-
-ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
-ynh_app_setting_set --app=$app --key=focus_user --value=$focus_user
-ynh_app_setting_set --app=$app --key=focus_password --value=$focus_password
-ynh_app_setting_set --app=$app --key=focus_secret --value=$focus_secret
-ynh_app_setting_set --app=$app --key=videobridge_user --value=$videobridge_user
-ynh_app_setting_set --app=$app --key=videobridge_secret --value=$videobridge_secret
-ynh_app_setting_set --app=$app --key=turn_secret --value=$turn_secret
-
-#=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Installing dependencies..." --weight=1
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	ynh_script_progression --message="Installing specific arm dependencies..."
-	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
-fi
+muc_nickname=$(uuidgen)
+ynh_app_setting_set --app="$app" --key=muc_nickname --value="$muc_nickname"
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
 ynh_script_progression --message="Configuring system user..." --weight=1
 
-# Create a system user
-gpasswd --add prosody $app
-gpasswd --add www-data $app
+gpasswd --add prosody "$app"
+gpasswd --add www-data "$app"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Setting up source files..." --weight=1
 
-# Download, check integrity, uncompress and patch the source from app.src
-declare -A packages
-packages[jitsi-jicofo]="jicofo"
-packages[jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
-packages[jitsi-meet-web]="jitsi-meet"
-packages[jitsi-videobridge]="jitsi-videobridge"
-
-for package in "${!packages[@]}"
-do
-	ynh_setup_source --dest_dir="$install_dir/${package}_temp" --source_id=$package
-	pushd "$install_dir/${package}_temp"
-		ar x $package.deb data.tar.xz
-		tar xf data.tar.xz
-	popd
-
-	mv "$install_dir/${package}_temp/usr/share/${packages[$package]}/" "$install_dir/${package}/"
-	ynh_secure_remove --file="$install_dir/${package}_temp"
-done
-
-ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
+_setup_sources
 
 chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
-chown -R $app:$app "$install_dir"
+chown -R "$app:$app" "$install_dir"
 
 #=================================================
-# NGINX CONFIGURATION
+# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
 #=================================================
-ynh_script_progression --message="Configuring NGINX web server..." --weight=1
 
-# Create a dedicated NGINX config
-ynh_add_nginx_config
+if [ "$YNH_ARCH" == "armhf" ]; then
+    ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
+    ynh_jniwrapper_armhf
+fi
 
 #=================================================
 # SPECIFIC SETUP
@@ -111,12 +73,12 @@ ynh_add_config --template="prosody.cfg.lua" --destination="/etc/prosody/conf.ava
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
-echo | prosodyctl cert generate $domain
+ynh_exec_warn_less prosodyctl cert generate "$domain"
 ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
 ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
 ln -sf "/var/lib/prosody/$domain.crt" "/usr/local/share/ca-certificates/$domain.crt"
 
-echo | prosodyctl cert generate "auth.$domain"
+ynh_exec_warn_less prosodyctl cert generate "auth.$domain"
 ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
@@ -126,10 +88,8 @@ update-ca-certificates -f
 ynh_systemd_action --service_name="prosody" --action="restart"
 
 prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
-
 prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
-
-prosodyctl mod_roster_command subscribe $focus_user.$domain $focus_user@auth.$domain
+prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.$domain"
 
 #=================================================
 # CONFIGURE JITSI-VIDEOBRIDGE
@@ -139,30 +99,13 @@ ynh_script_progression --message="Configuring Jitsi-Videobridge..." --weight=1
 public_ipv4="$(curl ip.yunohost.org)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
-muc_nickname=$(uuidgen)
-ynh_app_setting_set --app=$app --key=muc_nickname --value=$muc_nickname
-
 mkdir -p "/etc/$app/videobridge"
 
 ynh_add_config --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
-
 ynh_add_config --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
-
 ynh_add_config --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
-
 ynh_add_config --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
-
 ynh_add_config --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
-
-#=================================================
-# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
-#=================================================
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
-	ynh_jniwrapper_armhf
-fi
 
 #=================================================
 # CONFIGURE JITSI-JICOFO
@@ -172,9 +115,7 @@ ynh_script_progression --message="Configuring Jitsi-Jicofo..." --weight=1
 mkdir -p "/etc/$app/jicofo"
 
 ynh_add_config --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
-
 ynh_add_config --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
-
 ynh_add_config --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
 
 #=================================================
@@ -188,48 +129,33 @@ ynh_add_config --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$
 chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
-# CREATE LOG DIR
-#=================================================
-ynh_script_progression --message="Creating log dir..." --weight=1
-
-mkdir -p "/var/log/$app"
-chown -R $app: /var/log/$app
-chmod -R 770 /var/log/$app
-
-#=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 ynh_script_progression --message="Securing files and directories..." --weight=1
 
 # Set permissions to app files
-chown -R $app: /etc/$app
+chown -R "$app:" "/etc/$app"
 
 #=================================================
-# SETUP SYSTEMD
+# SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring a systemd service..." --weight=1
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 # Create a dedicated systemd config
-ynh_add_systemd_config --service=$app-videobridge --template="jitsi-videobridge.service"
-ynh_add_systemd_config --service=$app-jicofo --template="jitsi-jicofo.service"
+ynh_add_systemd_config --service="$app-videobridge" --template="jitsi-videobridge.service"
+yunohost service add "$app-videobridge" --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports "$port" "$port_videobridge"
 
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Configuring log rotation..." --weight=1
+ynh_add_systemd_config --service="$app-jicofo" --template="jitsi-jicofo.service"
+yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
 
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
-
-yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
-yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
+chown -R "$app:" "/var/log/$app"
+chmod -R 770 "/var/log/$app"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -237,8 +163,8 @@ yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
 ynh_script_progression --message="Starting a systemd service..." --weight=1
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemd_action --service_name="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # END OF SCRIPT
