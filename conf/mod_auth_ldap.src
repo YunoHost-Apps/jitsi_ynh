@@ -1,7 +1,0 @@
-SOURCE_URL=https://hg.prosody.im/prosody-modules/raw-file/tip/mod_auth_ldap/mod_auth_ldap.lua
-SOURCE_SUM=49c67ec86ec75ac8de93803be2ac7f907d1e9d3d22cd4c88fd48aaeed7a411e3
-SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=lua
-SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=mod_auth_ldap.lua
-SOURCE_EXTRACT=false

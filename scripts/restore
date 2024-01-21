@@ -11,101 +11,25 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-ynh_clean_setup () {
-	true
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading settings..." --weight=1
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-
-focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
-focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
-focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
-
-videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
-videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
-
-port=$(ynh_app_setting_get --app=$app --key=port)
-port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
-port_component=$(ynh_app_setting_get --app=$app --key=port_component)
-
-#=================================================
-# CHECK IF THE APP CAN BE RESTORED
-#=================================================
-ynh_script_progression --message="Validating restoration parameters..." --weight=1
-
-test ! -d $final_path \
-	|| ynh_die --message="There is already a directory: $final_path "
-
-#=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Recreating the dedicated system user..." --weight=1
+ynh_script_progression --message="Reconfiguring the dedicated system user..." --weight=1
 
-# Create the dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
-gpasswd --add www-data $app
+gpasswd --add prosody "$app"
+gpasswd --add www-data "$app"
 
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
 ynh_script_progression --message="Restoring the app main directory..." --weight=1
 
-ynh_restore_file --origin_path="$final_path"
+ynh_restore_file --origin_path="$install_dir"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:$app "$final_path"
-
-#=================================================
-# SPECIFIC RESTORATION
-#=================================================
-# REINSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Reinstalling dependencies..." --weight=1
-
-# Define and install dependencies
-ynh_install_apps --apps="$ynh_app_dependencies"
-ynh_install_app_dependencies $pkg_dependencies
-
-if [ $YNH_ARCH == "armhf" ] 
-then
-	ynh_script_progression --message="Installing specific arm dependencies..." --weight=1
-	ynh_install_extra_app_dependencies --repo="deb http://security.debian.org/debian-security stretch/updates main" --package="$pkg_extra_depedencies_arm" --key="https://ftp-master.debian.org/keys/archive-key-9-security.asc"
-fi
-
-gpasswd --add prosody $app
-
-#=================================================
-# RESTORE THE NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the NGINX web server configuration..." --weight=1
-
-ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-#=================================================
-# CONFIGURE FIREWALL
-#=================================================
-ynh_script_progression --message="Configuring firewall..." --weight=1
-
-# Open this port
-ynh_exec_warn_less yunohost firewall allow TCP $port
-ynh_exec_warn_less yunohost firewall allow UDP $port_videobridge
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R "$app:$app" "$install_dir"
 
 #=================================================
 # CONFIGURE PROSODY
@@ -116,9 +40,11 @@ ynh_restore_file --origin_path="/etc/prosody/conf.avail/$domain.cfg.lua"
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
-ln -sf /var/lib/prosody/$domain.key /etc/prosody/certs/$domain.key
-ln -sf /var/lib/prosody/$domain.crt /etc/prosody/certs/$domain.crt
+echo | ynh_exec_warn_less prosodyctl cert generate "$domain"
+ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
+ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
 
+echo | ynh_exec_warn_less prosodyctl cert generate "auth.$domain"
 ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
@@ -128,67 +54,42 @@ update-ca-certificates -f
 ynh_systemd_action --service_name="prosody" --action="restart"
 
 prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
-
 prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
-
-prosodyctl mod_roster_command subscribe $focus_user.$domain $focus_user@auth.$domain
-
-#=================================================
-# RESTORE THE APP CONFIG
-#=================================================
-ynh_script_progression --message="Restoring the app config..." --weight=1
-
-ynh_restore_file --origin_path="/etc/$app"
-
-chmod 644 "/etc/$app/meet/$domain-config.js"
+prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.$domain"
 
 #=================================================
-# CREATE LOG DIR
+# RESTORE SYSTEM CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Creating log dir..." --weight=1
+ynh_script_progression --message="Restoring system configurations related to $app..." --weight=1
 
-mkdir -p "/var/log/$app"
-chown -R $app: /var/log/$app
-
-#=================================================
-# RESTORE SYSTEMD
-#=================================================
-ynh_script_progression --message="Restoring the systemd configuration..." --weight=1
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app-videobridge.service"
-systemctl enable $app-videobridge.service --quiet
-ynh_restore_file --origin_path="/etc/systemd/system/$app-jicofo.service"
-systemctl enable $app-jicofo.service --quiet
+systemctl enable "$app-videobridge.service" --quiet
+yunohost service add "$app-videobridge" --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
 
-#=================================================
-# RESTORE THE LOGROTATE CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the logrotate configuration..." --weight=1
+ynh_restore_file --origin_path="/etc/systemd/system/$app-jicofo.service"
+systemctl enable "$app-jicofo.service" --quiet
+yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
 
 ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 
 #=================================================
-# INTEGRATE SERVICE IN YUNOHOST
+# RESTORE VARIOUS FILES
 #=================================================
-ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
-yunohost service add $app-videobridge --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
-yunohost service add $app-jicofo --log "/var/log/$app/$app-jicofo.log"
+ynh_restore_file --origin_path="/etc/$app/"
+chmod 644 "/etc/$app/meet/$domain-config.js"
+
+ynh_restore_file --origin_path="/var/log/$app/"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --weight=1
+ynh_script_progression --message="Reloading NGINX web server and $app's service..." --weight=1
 
-ynh_systemd_action --service_name=$app-jicofo --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name=$app-videobridge --action="start" --log_path="/var/log/$app/$app-videobridge.log"
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# RELOAD NGINX AND PHP-FPM
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..." --weight=1
+ynh_systemd_action --service_name="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemd_action --service_name="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 ynh_systemd_action --service_name=nginx --action=reload
 
