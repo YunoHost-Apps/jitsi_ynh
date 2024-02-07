@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars, no-var */
 
+var enableJaaS = false;
+
 var config = {
     // Connection
     //
