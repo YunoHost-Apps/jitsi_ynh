@@ -2,9 +2,9 @@
 
 test_format = 1.0
 
-exclude = ["change_url"]
-
 [default]
+
+    exclude = ["change_url"]
 
     # ------------
     # Tests to run
