@@ -3,7 +3,7 @@
 请勿手动编辑。
 -->
 
-# YunoHost 的 Jitsi Meet
+# YunoHost 上的 Jitsi Meet
 
 [![集成程度](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi) ![工作状态](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)
 
