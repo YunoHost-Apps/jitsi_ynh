@@ -3,7 +3,7 @@
 请勿手动编辑。
 -->
 
-# YunoHost 的 Jitsi Meet
+# YunoHost 上的 Jitsi Meet
 
 [![集成程度](https://dash.yunohost.org/integration/jitsi.svg)](https://dash.yunohost.org/appci/app/jitsi) ![工作状态](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)
 
@@ -19,7 +19,7 @@
 Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Videobridge to provide high quality, secure, and scalable video conferences.
 
 
-**分发版本：** 2.0.9164~ynh2
+**分发版本：** 2.10~ynh1
 
 **演示：** <https://meet.jit.si/>
 
