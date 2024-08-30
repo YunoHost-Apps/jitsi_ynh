@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -15,29 +9,29 @@ source /usr/share/yunohost/helpers
 
 focus_user="focus"
 focus_password=$(ynh_string_random --length=8)
-ynh_app_setting_set --app="$app" --key=focus_user --value="$focus_user"
-ynh_app_setting_set --app="$app" --key=focus_password --value="$focus_password"
+ynh_app_setting_set --key=focus_user --value="$focus_user"
+ynh_app_setting_set --key=focus_password --value="$focus_password"
 
 videobridge_user="jvb"
 videobridge_secret=$(ynh_string_random --length=8)
-ynh_app_setting_set --app="$app" --key=videobridge_user --value="$videobridge_user"
-ynh_app_setting_set --app="$app" --key=videobridge_secret --value="$videobridge_secret"
+ynh_app_setting_set --key=videobridge_user --value="$videobridge_user"
+ynh_app_setting_set --key=videobridge_secret --value="$videobridge_secret"
 
 focus_secret=$(ynh_string_random --length=8)
 turn_secret=$(ynh_string_random --length=8)
-ynh_app_setting_set --app="$app" --key=focus_secret --value="$focus_secret"
-ynh_app_setting_set --app="$app" --key=turn_secret --value="$turn_secret"
+ynh_app_setting_set --key=focus_secret --value="$focus_secret"
+ynh_app_setting_set --key=turn_secret --value="$turn_secret"
 
 max_memory=200 #125 mib with no user +1,5*50 users=75 mib
-ynh_app_setting_set --app="$app" --key=max_memory --value="$max_memory"
+ynh_app_setting_set --key=max_memory --value="$max_memory"
 
 muc_nickname=$(uuidgen)
-ynh_app_setting_set --app="$app" --key=muc_nickname --value="$muc_nickname"
+ynh_app_setting_set --key=muc_nickname --value="$muc_nickname"
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Configuring system user..." --weight=1
+ynh_script_progression "Configuring system user..."
 
 gpasswd --add prosody "$app"
 gpasswd --add www-data "$app"
@@ -45,20 +39,19 @@ gpasswd --add www-data "$app"
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Setting up source files..." --weight=1
+ynh_script_progression "Setting up source files..."
 
 _setup_sources
 
-chmod 750 "$install_dir"
-chmod -R o-rwx "$install_dir"
-chown -R "$app:$app" "$install_dir"
-
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 750 "$install_dir"
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R "$app:$app" "$install_dir"
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
 #=================================================
 
 if [ "$YNH_ARCH" == "armhf" ]; then
-    ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
+    ynh_script_progression "Configuring jniwrapper for armhf ..."
     ynh_jniwrapper_armhf
 fi
 
@@ -67,25 +60,25 @@ fi
 #=================================================
 # CONFIGURE PROSODY
 #=================================================
-ynh_script_progression --message="Configuring prosody..." --weight=1
+ynh_script_progression "Configuring prosody..."
 
-ynh_add_config --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
+ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
-echo | ynh_exec_warn_less prosodyctl cert generate "$domain"
+echo | ynh_hide_warnings prosodyctl cert generate "$domain"
 ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
 ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
 ln -sf "/var/lib/prosody/$domain.crt" "/usr/local/share/ca-certificates/$domain.crt"
 
-echo | ynh_exec_warn_less prosodyctl cert generate "auth.$domain"
+echo | ynh_hide_warnings prosodyctl cert generate "auth.$domain"
 ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
 ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
 
 update-ca-certificates -f
 
-ynh_systemd_action --service_name="prosody" --action="restart"
+ynh_systemctl --service="prosody" --action="restart"
 
 prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
 prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
@@ -94,44 +87,44 @@ prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.
 #=================================================
 # CONFIGURE JITSI-VIDEOBRIDGE
 #=================================================
-ynh_script_progression --message="Configuring Jitsi-Videobridge..." --weight=1
+ynh_script_progression "Configuring Jitsi-Videobridge..."
 
 public_ipv4="$(curl --no-progress-meter ip.yunohost.org)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
 mkdir -p "/etc/$app/videobridge"
 
-ynh_add_config --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
-ynh_add_config --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
-ynh_add_config --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
-ynh_add_config --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
-ynh_add_config --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+ynh_config_add --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
+ynh_config_add --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
+ynh_config_add --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
+ynh_config_add --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
+ynh_config_add --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 
 #=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
-ynh_script_progression --message="Configuring Jitsi-Jicofo..." --weight=1
+ynh_script_progression "Configuring Jitsi-Jicofo..."
 
 mkdir -p "/etc/$app/jicofo"
 
-ynh_add_config --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
-ynh_add_config --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
-ynh_add_config --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
+ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
+ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
+ynh_config_add --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
 
 #=================================================
 # CONFIGURE JITSI-MEET
 #=================================================
-ynh_script_progression --message="Configuring Jitsi-Meet..." --weight=1
+ynh_script_progression "Configuring Jitsi-Meet..."
 
 mkdir -p "/etc/$app/meet"
 
-ynh_add_config --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
-chmod 644 "/etc/$app/meet/$domain-config.js"
+ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
-ynh_script_progression --message="Securing files and directories..." --weight=1
+ynh_script_progression "Securing files and directories..."
 
 # Set permissions to app files
 chown -R "$app:" "/etc/$app"
@@ -139,35 +132,35 @@ chown -R "$app:" "/etc/$app"
 #=================================================
 # SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+ynh_script_progression "Adding system configurations related to $app..."
 
 # Create a dedicated NGINX config
-ynh_add_nginx_config
+ynh_config_add_nginx
 
 # Create a dedicated systemd config
-ynh_add_systemd_config --service="$app-videobridge" --template="jitsi-videobridge.service"
+ynh_config_add_systemd --service="$app-videobridge" --template="jitsi-videobridge.service"
 yunohost service add "$app-videobridge" --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports "$port" "$port_videobridge"
 
-ynh_add_systemd_config --service="$app-jicofo" --template="jitsi-jicofo.service"
+ynh_config_add_systemd --service="$app-jicofo" --template="jitsi-jicofo.service"
 yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
 
 # Use logrotate to manage application logfile(s)
-ynh_use_logrotate
+ynh_config_add_logrotate
 
-chown -R "$app:" "/var/log/$app"
-chmod -R 770 "/var/log/$app"
+#REMOVEME? Assuming ynh_config_add_logrotate is called, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R "$app:" "/var/log/$app"
+#REMOVEME? Assuming ynh_config_add_logrotate is called, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R 770 "/var/log/$app"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --weight=1
+ynh_script_progression "Starting $app's systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemd_action --service_name="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemctl --service="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemctl --service="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression "Installation of $app completed"

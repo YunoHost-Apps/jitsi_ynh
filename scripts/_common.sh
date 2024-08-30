@@ -1,11 +1,7 @@
 #!/bin/bash
 
 #=================================================
-# COMMON VARIABLES
-#=================================================
-
-#=================================================
-# PERSONAL HELPERS
+# COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
 _setup_sources() {
@@ -25,12 +21,11 @@ _setup_sources() {
         popd
 
         mv "$install_dir/temp/usr/share/${packages[$package]}/" "$install_dir/$package/"
-        ynh_secure_remove --file="$install_dir/temp"
+        ynh_safe_rm "$install_dir/temp"
     done
 
     ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
 }
-
 
 ynh_jniwrapper_armhf ()
 {
@@ -62,20 +57,12 @@ ynh_jniwrapper_armhf ()
 
     # rm official jniwrapper to copy
     original_jniwrapper=$(ls $install_dir/jitsi-videobridge/lib/jniwrapper-native-*.jar)
-    ynh_secure_remove --file="$original_jniwrapper"
+    ynh_safe_rm "$original_jniwrapper"
 
     mv "$tempdir/jitsi-sctp/jniwrapper/native/target/jniwrapper-native-1.0-SNAPSHOT.jar" "$install_dir/jitsi-videobridge/lib/"
 
     chmod 640 "$install_dir/jitsi-videobridge/lib/jniwrapper-native-1.0-SNAPSHOT.jar"
     chown -R $app:$app "$install_dir/jitsi-videobridge/lib/jniwrapper-native-1.0-SNAPSHOT.jar"
 
-    ynh_secure_remove --file="$tempdir"
+    ynh_safe_rm "$tempdir"
 }
-
-#=================================================
-# EXPERIMENTAL HELPERS
-#=================================================
-
-#=================================================
-# FUTURE OFFICIAL HELPERS
-#=================================================
