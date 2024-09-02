@@ -43,9 +43,6 @@ ynh_script_progression "Setting up source files..."
 
 _setup_sources
 
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 750 "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R "$app:$app" "$install_dir"
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
 #=================================================
@@ -119,7 +116,6 @@ ynh_script_progression "Configuring Jitsi-Meet..."
 mkdir -p "/etc/$app/meet"
 
 ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # SECURE FILES AND DIRECTORIES
@@ -146,9 +142,6 @@ yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
 
 # Use logrotate to manage application logfile(s)
 ynh_config_add_logrotate
-
-#REMOVEME? Assuming ynh_config_add_logrotate is called, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R "$app:" "/var/log/$app"
-#REMOVEME? Assuming ynh_config_add_logrotate is called, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R 770 "/var/log/$app"
 
 #=================================================
 # START SYSTEMD SERVICE
