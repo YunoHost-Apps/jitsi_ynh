@@ -7,7 +7,7 @@ name = "Jitsi Meet"
 description.en = "Video conferencing web application"
 description.fr = "Application web de conférence vidéo"
 
-version = "2.0.9646~ynh1"
+version = "2.0.9753~ynh1"
 
 maintainers = []
 
@@ -41,15 +41,15 @@ ram.runtime = "50M"
 [resources]
     [resources.sources]
     [resources.sources.jitsi-meet-web]
-    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.8091-1_all.deb"
-    sha256 = "95052170edcc8e6a90e841ca40ba508c0edad7c2037d912e9542a6f25b9dbd09"
+    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.8187-1_all.deb"
+    sha256 = "9850245d02e88d3e265c3d70f73e7dcf2d2b2de61a4e67d9141041ec2d36ee21"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-web.deb"
 
     [resources.sources.jitsi-sctp]
-    url = "https://github.com/jitsi/jitsi-sctp/archive/e04a9c9481d40d5dd8efd0a5bda05a3a4395ca69.tar.gz"
-    sha256 = "bbd41704953da32acafd85451d13851f63e9f54563d7b618b9382b72761da8d2"
+    url = "https://github.com/sctplab/usrsctp/archive/a07d9a846480f072fe53cd9f55fd014077d532af.zip"
+    sha256 = "6374cda2a0d2460afa56a75aa31f18e24bd1388fe2b8879e1796352c20349b53"
 
     [resources.sources.jitsi-jicofo]
     url = "https://download.jitsi.org/stable/jicofo_1.0-1090-1_all.deb"
@@ -70,8 +70,8 @@ ram.runtime = "50M"
     sha256 = "27be37315dccff4313f0622f88ef78691b0f579824494cfe25cbe13c7185da38"
 
     [resources.sources.jitsi-meet-prosody]
-    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.8091-1_all.deb"
-    sha256 = "2ec648b51905be961a8f90f012fe02ead4699b2a4769dcd256ff3f5ada36ffaf"
+    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.8187-1_all.deb"
+    sha256 = "eaccc7cc68f8a63f43284003e47ab239d6758ec8cf3b3b2ff783078de275f83b"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-prosody.deb"
