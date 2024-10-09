@@ -33,7 +33,7 @@ _setup_sources
 #=================================================
 
 if [ "$YNH_ARCH" == "armhf" ]; then
-    ynh_script_progression "Configuring jniwrapper for armhf ..."
+    ynh_script_progression "Configuring jniwrapper for armhf..."
     ynh_jniwrapper_armhf
 fi
 

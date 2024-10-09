@@ -48,7 +48,7 @@ _setup_sources
 #=================================================
 
 if [ "$YNH_ARCH" == "armhf" ]; then
-    ynh_script_progression "Configuring jniwrapper for armhf ..."
+    ynh_script_progression "Configuring jniwrapper for armhf..."
     ynh_jniwrapper_armhf
 fi
 
@@ -130,17 +130,14 @@ chown -R "$app:" "/etc/$app"
 #=================================================
 ynh_script_progression "Adding system configurations related to $app..."
 
-# Create a dedicated NGINX config
 ynh_config_add_nginx
 
-# Create a dedicated systemd config
 ynh_config_add_systemd --service="$app-videobridge" --template="jitsi-videobridge.service"
 yunohost service add "$app-videobridge" --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports "$port" "$port_videobridge"
 
 ynh_config_add_systemd --service="$app-jicofo" --template="jitsi-jicofo.service"
 yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
 
-# Use logrotate to manage application logfile(s)
 ynh_config_add_logrotate
 
 #=================================================
@@ -148,7 +145,6 @@ ynh_config_add_logrotate
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-# Start a systemd service
 ynh_systemctl --service="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
 ynh_systemctl --service="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
 
