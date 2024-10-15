@@ -66,7 +66,7 @@ chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 #=================================================
 ynh_script_progression --message="Configuring Jitsi-Videobridge..." --weight=1
 
-public_ipv4="$(curl --no-progress-meter ip.yunohost.org)" || true
+public_ipv4="$(curl --no-progress-meter https://ip.yunohost.org/)" || true
 private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
 ynh_add_config --template="../conf/jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
