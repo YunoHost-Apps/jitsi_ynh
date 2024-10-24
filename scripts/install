@@ -122,7 +122,6 @@ ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$
 #=================================================
 ynh_script_progression "Securing files and directories..."
 
-# Set permissions to app files
 chown -R "$app:" "/etc/$app"
 
 #=================================================
