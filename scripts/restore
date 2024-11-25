@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -53,10 +58,12 @@ ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_restore "/etc/systemd/system/$app-videobridge.service"
 systemctl enable "$app-videobridge.service" --quiet
+
 yunohost service add "$app-videobridge" --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
 
 ynh_restore "/etc/systemd/system/$app-jicofo.service"
 systemctl enable "$app-jicofo.service" --quiet
+
 yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
 
 ynh_restore "/etc/logrotate.d/$app"
@@ -67,10 +74,9 @@ ynh_restore "/etc/logrotate.d/$app"
 
 ynh_restore "/etc/$app/"
 
-ynh_restore "/var/log/$app/"
 
 #=================================================
-# START SYSTEMD SERVICE
+# RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
 #=================================================
 ynh_script_progression "Reloading NGINX web server and $app's service..."
 

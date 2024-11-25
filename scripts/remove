@@ -8,18 +8,18 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression "Removing system configurations related to $app..."
 
+ynh_config_remove_logrotate
+
 if ynh_hide_warnings yunohost service status "$app-videobridge" >/dev/null; then
     yunohost service remove "$app-videobridge"
 fi
+ynh_config_remove_systemd"$app-videobridge"
 
 if ynh_hide_warnings yunohost service status "$app-jicofo" >/dev/null; then
     yunohost service remove "$app-jicofo"
 fi
-
-ynh_config_remove_systemd"$app-videobridge"
 ynh_config_remove_systemd"$app-jicofo"
 
-ynh_config_remove_logrotate
 
 ynh_config_remove_nginx
 
