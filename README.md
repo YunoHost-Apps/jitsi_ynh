@@ -5,7 +5,9 @@ It shall NOT be edited by hand.
 
 # Jitsi Meet for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/jitsi.svg)](https://ci-apps.yunohost.org/ci/apps/jitsi/) ![Working status](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)
+[![Integration level](https://apps.yunohost.org/badge/integration/jitsi)](https://ci-apps.yunohost.org/ci/apps/jitsi/)
+![Working status](https://apps.yunohost.org/badge/state/jitsi)
+![Maintenance status](https://apps.yunohost.org/badge/maintained/jitsi)
 
 [![Install Jitsi Meet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jitsi)
 
