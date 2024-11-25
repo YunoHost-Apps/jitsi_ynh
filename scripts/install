@@ -8,148 +8,57 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# INITIALIZE AND STORE SETTINGS
+# INSTALL JITSI
 #=================================================
 
-focus_user="focus"
-focus_password=$(ynh_string_random --length=8)
-ynh_app_setting_set --key=focus_user --value="$focus_user"
-ynh_app_setting_set --key=focus_password --value="$focus_password"
+echo jitsi-videobridge2 jitsi-videobridge/jvb-hostname string "$domain"   | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/cert-choice string "I want to use my own certificate"  | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/cert-path-key string "/etc/yunohost/certs/$domain/key.pem" | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/cert-path-crt string "/etc/yunohost/certs/$domain/crt.pem" | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/jaas-choice select false | debconf-set-selections
 
-videobridge_user="jvb"
-videobridge_secret=$(ynh_string_random --length=8)
-ynh_app_setting_set --key=videobridge_user --value="$videobridge_user"
-ynh_app_setting_set --key=videobridge_secret --value="$videobridge_secret"
+ynh_apt_install_dependencies_from_extra_repository --repo="deb https://download.jitsi.org stable/" --package="jitsi-meet prosody-modules" --key="https://download.jitsi.org/jitsi-key.gpg.key"
 
-focus_secret=$(ynh_string_random --length=8)
-turn_secret=$(ynh_string_random --length=8)
-ynh_app_setting_set --key=focus_secret --value="$focus_secret"
-ynh_app_setting_set --key=turn_secret --value="$turn_secret"
-
-max_memory=200 #125 mib with no user +1,5*50 users=75 mib
-ynh_app_setting_set --key=max_memory --value="$max_memory"
-
-muc_nickname=$(uuidgen)
-ynh_app_setting_set --key=muc_nickname --value="$muc_nickname"
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression "Configuring system user..."
-
-gpasswd --add prosody "$app"
-gpasswd --add www-data "$app"
-
-#=================================================
-# DOWNLOAD, CHECK AND UNPACK SOURCE
-#=================================================
-ynh_script_progression "Setting up source files..."
-
-_setup_sources
 
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
 #=================================================
 
 if [ "$YNH_ARCH" == "armhf" ]; then
-    ynh_script_progression "Configuring jniwrapper for armhf..."
+    ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
     ynh_jniwrapper_armhf
 fi
 
 #=================================================
-# SPECIFIC SETUP
+# LDAP CONFIGURATION
 #=================================================
-# CONFIGURE PROSODY
-#=================================================
-ynh_script_progression "Configuring prosody..."
 
-ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
-chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
-ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
-
-echo | ynh_hide_warnings prosodyctl cert generate "$domain"
-ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
-ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
-ln -sf "/var/lib/prosody/$domain.crt" "/usr/local/share/ca-certificates/$domain.crt"
-
-echo | ynh_hide_warnings prosodyctl cert generate "auth.$domain"
-ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
-ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
-ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
-
-update-ca-certificates -f
-
-ynh_systemctl --service="prosody" --action="restart"
-
-prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
-prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
-prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.$domain"
-
-#=================================================
-# CONFIGURE JITSI-VIDEOBRIDGE
-#=================================================
-ynh_script_progression "Configuring Jitsi-Videobridge..."
-
-public_ipv4="$(curl --no-progress-meter https://ip.yunohost.org/)" || true
-private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
-
-mkdir -p "/etc/$app/videobridge"
-
-ynh_config_add --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
-ynh_config_add --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
-ynh_config_add --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
-ynh_config_add --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
-ynh_config_add --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
-
-#=================================================
-# CONFIGURE JITSI-JICOFO
-#=================================================
-ynh_script_progression "Configuring Jitsi-Jicofo..."
-
-mkdir -p "/etc/$app/jicofo"
-
-ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
-ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
-ynh_config_add --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
-
-#=================================================
-# CONFIGURE JITSI-MEET
-#=================================================
-ynh_script_progression "Configuring Jitsi-Meet..."
-
-mkdir -p "/etc/$app/meet"
-
-ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
-
-#=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
-ynh_script_progression "Securing files and directories..."
-
-chown -R "$app:" "/etc/$app"
+if [ $enable_ldap -eq 1 ]
+then
+    _enable_ldap
+fi
 
 #=================================================
 # SYSTEM CONFIGURATION
 #=================================================
 ynh_script_progression "Adding system configurations related to $app..."
 
+ynh_safe_rm "/etc/nginx/sites-enabled/$domain.conf"
+
 ynh_config_add_nginx
 
-ynh_config_add_systemd --service="$app-videobridge" --template="jitsi-videobridge.service"
-yunohost service add "$app-videobridge" --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports "$port" "$port_videobridge"
+yunohost service add "jitsi-videobridge2" --log="/var/log/jitsi/jvb.log" --needs_exposed_ports "$port" "$port_videobridge"
 
-ynh_config_add_systemd --service="$app-jicofo" --template="jitsi-jicofo.service"
-yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
-
-ynh_config_add_logrotate
+yunohost service add "jicofo" --log="/var/log/jitsi/jicofo.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemctl --service="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemctl --service="prosody" --action="restart" --log_path="/var/log/prosody/prosody.log"
+ynh_systemctl --service="jicofo" --action="restart" --log_path="/var/log/jitsi/jicofo.log"
+ynh_systemctl --service="jitsi-videobridge2" --action="restart" --log_path="/var/log/jitsi/jvb.log"
 
 #=================================================
 # END OF SCRIPT

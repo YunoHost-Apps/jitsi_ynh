@@ -4,27 +4,28 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-_setup_sources() {
-    # Download, check integrity, uncompress and patch the source from app.src
-    declare -A packages=(
-        [jitsi-jicofo]="jicofo"
-        [jitsi-meet-prosody]="jitsi-meet/prosody-plugins"
-        [jitsi-meet-web]="jitsi-meet"
-        [jitsi-videobridge]="jitsi-videobridge"
-    )
-
-    for package in "${!packages[@]}"; do
-        ynh_setup_source --dest_dir="$install_dir/temp" --source_id="$package"
-        pushd "$install_dir/temp"
-            ar x "$package.deb" data.tar.xz
-            tar xf data.tar.xz
-        popd
-
-        mv "$install_dir/temp/usr/share/${packages[$package]}/" "$install_dir/$package/"
-        ynh_safe_rm "$install_dir/temp"
-    done
-
-    ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
+_enable_ldap(){
+	ynh_script_progression "Configuring LDAP..."
+	
+	sed -i '/    authentication = \"jitsi-anonymous\" -- do not delete me/r ../conf/prosody.cfg-ldap.lua' /etc/prosody/conf.avail/$domain.cfg.lua
+	sed -i '/    authentication = \"jitsi-anonymous\" -- do not delete me/d' /etc/prosody/conf.avail/$domain.cfg.lua
+    ynh_store_file_checksum /etc/prosody/conf.avail/$domain.cfg.lua
+	
+	ynh_config_add --template="jicofo-ldap.conf" --destination="../conf/jicofo-ldap.conf.patch"
+	sed -i '/jicofo {/r../conf/jicofo-ldap.conf.patch' /etc/jitsi/jicofo/jicofo.conf
+	ynh_safe_rm "../conf/jicofo-ldap.conf.patch"
+    ynh_store_file_checksum /etc/jitsi/jicofo/jicofo.conf
+	
+	
+	ynh_config_add --template="prosody.cfg-guest.lua" --destination="../conf/prosody.cfg-guest.lua.patch"
+	cat ../conf/prosody.cfg-guest.lua.patch >> /etc/prosody/conf.avail/$domain.cfg.lua
+	ynh_safe_rm "../conf/prosody.cfg-guest.lua.patch"
+    ynh_store_file_checksum /etc/prosody/conf.avail/$domain.cfg.lua
+	
+	ynh_replace --match="// anonymousdomain: 'guest.example.com'," --replace="anonymousdomain: 'guest.$domain'," --file=/etc/jitsi/meet/$domain-config.js
+    ynh_store_file_checksum /etc/jitsi/meet/$domain-config.js
+	
+	ynh_setup_source --dest_dir="/usr/share/jitsi-meet/prosody-plugins" --source_id=mod_auth_ldap
 }
 
 ynh_jniwrapper_armhf ()

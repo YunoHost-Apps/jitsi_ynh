@@ -11,32 +11,11 @@ source /usr/share/yunohost/helpers
 ynh_print_info "Declaring files to be backed up..."
 
 #=================================================
-# BACKUP THE APP MAIN DIR
-#=================================================
-
-ynh_backup "$install_dir"
-
-#=================================================
 # SYSTEM CONFIGURATION
 #=================================================
 
 # Backup the NGINX configuration
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
-
-# Backup the systemd service unit
-ynh_backup "/etc/systemd/system/$app-videobridge.service"
-ynh_backup "/etc/systemd/system/$app-jicofo.service"
-
-# Backup the logrotate configuration
-ynh_backup "/etc/logrotate.d/$app"
-
-#=================================================
-# BACKUP VARIOUS FILES
-#=================================================
-
-ynh_backup "/etc/$app/"
-
-ynh_backup "/etc/prosody/conf.avail/$domain.cfg.lua"
 
 #=================================================
 # END OF SCRIPT

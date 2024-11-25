@@ -9,45 +9,35 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# RECREATE THE DEDICATED USER
+# INSTALL JITSI
 #=================================================
-ynh_script_progression "Reconfiguring the dedicated system user..."
 
-gpasswd --add prosody "$app"
-gpasswd --add www-data "$app"
+echo jitsi-videobridge2 jitsi-videobridge/jvb-hostname string "$domain"   | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/cert-choice string "I want to use my own certificate"  | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/cert-path-key string "/etc/yunohost/certs/$domain/key.pem" | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/cert-path-crt string "/etc/yunohost/certs/$domain/crt.pem" | debconf-set-selections
+echo jitsi-meet-web-config jitsi-meet/jaas-choice select false | debconf-set-selections
 
-#=================================================
-# RESTORE THE APP MAIN DIR
-#=================================================
-ynh_script_progression "Restoring the app main directory..."
+ynh_apt_install_dependencies_from_extra_repository --repo="deb https://download.jitsi.org stable/" --package="jitsi-meet prosody-modules" --key="https://download.jitsi.org/jitsi-key.gpg.key"
 
-ynh_restore "$install_dir"
 
 #=================================================
-# CONFIGURE PROSODY
+# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
 #=================================================
-ynh_script_progression "Configuring prosody..."
 
-ynh_restore "/etc/prosody/conf.avail/$domain.cfg.lua"
-chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
-ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
+if [ "$YNH_ARCH" == "armhf" ]; then
+    ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
+    ynh_jniwrapper_armhf
+fi
 
-echo | ynh_hide_warnings prosodyctl cert generate "$domain"
-ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
-ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
+#=================================================
+# LDAP CONFIGURATION
+#=================================================
 
-echo | ynh_hide_warnings prosodyctl cert generate "auth.$domain"
-ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
-ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
-ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
-
-update-ca-certificates -f
-
-ynh_systemctl --service="prosody" --action="restart"
-
-prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
-prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
-prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.$domain"
+if [ $enable_ldap -eq 1 ]
+then
+    _enable_ldap
+fi
 
 #=================================================
 # RESTORE SYSTEM CONFIGURATIONS
@@ -56,23 +46,9 @@ ynh_script_progression "Restoring system configurations related to $app..."
 
 ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-ynh_restore "/etc/systemd/system/$app-videobridge.service"
-systemctl enable "$app-videobridge.service" --quiet
+yunohost service add "jitsi-videobridge2" --log="/var/log/jitsi/jvb.log" --needs_exposed_ports "$port" "$port_videobridge"
 
-yunohost service add "$app-videobridge" --log "/var/log/$app/$app-videobridge.log" --needs_exposed_ports $port $port_videobridge
-
-ynh_restore "/etc/systemd/system/$app-jicofo.service"
-systemctl enable "$app-jicofo.service" --quiet
-
-yunohost service add "$app-jicofo" --log "/var/log/$app/$app-jicofo.log"
-
-ynh_restore "/etc/logrotate.d/$app"
-
-#=================================================
-# RESTORE VARIOUS FILES
-#=================================================
-
-ynh_restore "/etc/$app/"
+yunohost service add "jicofo" --log="/var/log/jitsi/jicofo.log"
 
 
 #=================================================
@@ -80,8 +56,9 @@ ynh_restore "/etc/$app/"
 #=================================================
 ynh_script_progression "Reloading NGINX web server and $app's service..."
 
-ynh_systemctl --service="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
-ynh_systemctl --service="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemctl --service="prosody" --action="restart" --log_path="/var/log/prosody/prosody.log"
+ynh_systemctl --service="jicofo" --action="restart" --log_path="/var/log/jitsi/jicofo.log"
+ynh_systemctl --service="jitsi-videobridge2" --action="restart" --log_path="/var/log/jitsi/jvb.log"
 
 ynh_systemctl --service=nginx --action=reload
 
