@@ -5,7 +5,9 @@ Ini TIDAK boleh diedit dengan tangan.
 
 # Jitsi Meet untuk YunoHost
 
-[![Tingkat integrasi](https://dash.yunohost.org/integration/jitsi.svg)](https://ci-apps.yunohost.org/ci/apps/jitsi/) ![Status kerja](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![Status pemeliharaan](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)
+[![Tingkat integrasi](https://apps.yunohost.org/badge/integration/jitsi)](https://ci-apps.yunohost.org/ci/apps/jitsi/)
+![Status kerja](https://apps.yunohost.org/badge/state/jitsi)
+![Status pemeliharaan](https://apps.yunohost.org/badge/maintained/jitsi)
 
 [![Pasang Jitsi Meet dengan YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jitsi)
 
