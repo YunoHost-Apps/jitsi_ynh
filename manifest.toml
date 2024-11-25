@@ -44,7 +44,7 @@ ram.runtime = "50M"
     ask.en = "Allow only authenticated users to create new conference rooms ?"
     ask.fr = "Autoriser seulement les utilisateurs authentifié à créer de nouvelles conférences ?"
     type = "boolean"
-    default = false
+    default = true
 
 [resources]
 

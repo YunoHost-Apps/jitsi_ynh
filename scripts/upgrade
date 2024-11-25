@@ -80,6 +80,7 @@ then
 	ynh_remove_apps
 	
 	ynh_secure_remove --file="/etc/$app"
+	ynh_app_setting_set_default --key=enable_ldap --value=true
 fi
 #=================================================
 # INSTALL JITSI
