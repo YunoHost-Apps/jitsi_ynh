@@ -110,6 +110,7 @@ fi
 
 if [ $enable_ldap -eq 1 ]
 then
+	ynh_script_progression "Configuring LDAP..."
     _enable_ldap
 fi
 

@@ -4,9 +4,7 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-_enable_ldap(){
-	ynh_script_progression "Configuring LDAP..."
-	
+_enable_ldap(){	
 	sed -i '/    authentication = \"jitsi-anonymous\" -- do not delete me/r ../conf/prosody.cfg-ldap.lua' /etc/prosody/conf.avail/$domain.cfg.lua
 	sed -i '/    authentication = \"jitsi-anonymous\" -- do not delete me/d' /etc/prosody/conf.avail/$domain.cfg.lua
     ynh_store_file_checksum /etc/prosody/conf.avail/$domain.cfg.lua
