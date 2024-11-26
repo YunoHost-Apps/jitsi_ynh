@@ -18,6 +18,21 @@ ynh_print_info "Declaring files to be backed up..."
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
+# BACKUP VARIOUS FILES
+#=================================================
+
+if [ $enable_ldap -eq 1 ]
+then
+	ynh_backup "/etc/prosody/conf.avail/$domain.cfg.lua"
+
+	ynh_backup "/etc/jitsi/jicofo/jicofo.conf"
+
+	ynh_backup "/etc/jitsi/meet/$domain-config.js"
+
+	ynh_backup "/usr/share/jitsi-meet/prosody-plugins/mod_auth_ldap.lua"
+fi
+
+#=================================================
 # END OF SCRIPT
 #=================================================
 

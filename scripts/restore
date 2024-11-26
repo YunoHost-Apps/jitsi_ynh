@@ -37,13 +37,22 @@ fi
 if [ $enable_ldap -eq 1 ]
 then
     ynh_script_progression "Configuring LDAP..."
-    _enable_ldap
+
+	ynh_restore "/etc/prosody/conf.avail/$domain.cfg.lua"
+
+	ynh_restore "/etc/jitsi/jicofo/jicofo.conf"
+
+	ynh_restore "/etc/jitsi/meet/$domain-config.js"
+
+	ynh_restore "/usr/share/jitsi-meet/prosody-plugins/mod_auth_ldap.lua"
 fi
 
 #=================================================
 # RESTORE SYSTEM CONFIGURATIONS
 #=================================================
 ynh_script_progression "Restoring system configurations related to $app..."
+
+ynh_safe_rm "/etc/nginx/sites-enabled/$domain.conf"
 
 ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
 
