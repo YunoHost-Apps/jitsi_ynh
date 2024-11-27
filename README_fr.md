@@ -20,7 +20,6 @@ Il NE doit PAS être modifié à la main.
 
 Jitsi Meet est un logiciel libre (Apache) dont Jitsi Videobridge, avec WebRTC Javascript, propose des vidéos-conférences de haute qualité, sécurisées et évolutives.
 
-
 **Version incluse :** 2.0.9823~ynh1
 
 **Démo :** <https://meet.jit.si/>
