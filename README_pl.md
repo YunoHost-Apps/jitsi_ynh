@@ -20,6 +20,7 @@ Nie powinno być ono edytowane ręcznie.
 
 Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Videobridge to provide high quality, secure, and scalable video conferences.
 
+
 **Dostarczona wersja:** 2.0.9823~ynh1
 
 **Demo:** <https://meet.jit.si/>
