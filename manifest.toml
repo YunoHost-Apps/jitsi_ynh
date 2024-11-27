@@ -7,7 +7,7 @@ name = "Jitsi Meet"
 description.en = "Video conferencing web application"
 description.fr = "Application web de conférence vidéo"
 
-version = "2.0.9753~ynh1"
+version = "2.0.9753~ynh2"
 
 maintainers = []
 
@@ -24,6 +24,7 @@ architectures = "all"
 multi_instance = false
 
 ldap = true
+
 sso = false
 
 disk = "50M"
@@ -88,15 +89,15 @@ ram.runtime = "50M"
 
     [resources.install_dir]
 
+    [resources.permissions]
+    main.url = "/"
+
     [resources.ports]
     main.default = 4443
     main.exposed = "TCP"
     videobridge.default = 10000
     videobridge.exposed = "UDP"
     component.default = 5347
-
-    [resources.permissions]
-    main.url = "/"
 
     [resources.apt]
     packages = [
@@ -106,6 +107,7 @@ ram.runtime = "50M"
         "uuid-runtime",
         "lua-ldap",
         "prosody",
+        "binutils",
     ]
 
     packages_from_raw_bash = """
