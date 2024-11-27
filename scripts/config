@@ -1,34 +1,27 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC STARTING
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # RETRIEVE ARGUMENTS
 #=================================================
-
 
 #=================================================
 # SPECIFIC GETTERS FOR TOML SHORT KEY
 #=================================================
 
 get__max_memory(){
-  local max_memory=$(ynh_app_setting_get --app=$app --key=max_memory)
-  
+  local max_memory=$(ynh_app_setting_get --key=max_memory)
+
   # If max_memory doesn't exist, create it and set to default 75 mb value
   if [ -z "$max_memory" ]; then
     max_memory=75
-    ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
+    ynh_app_setting_set --key=max_memory --value=$max_memory
   fi
-	
+
   cat << EOF
 value: $max_memory
 EOF
@@ -48,41 +41,39 @@ set__max_memory(){
   # LOAD SETTINGS
   #=================================================
 
-  ynh_script_progression --message="Loading installation settings..."
+  ynh_script_progression "Loading installation settings..."
 
-  domain=$(ynh_app_setting_get --app=$app --key=domain)
-  path_url=$(ynh_app_setting_get --app=$app --key=path)
-  final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+  domain=$(ynh_app_setting_get --key=domain)
+  path_url=$(ynh_app_setting_get --key=path)
+  final_path=$(ynh_app_setting_get --key=final_path)
 
-  focus_user=$(ynh_app_setting_get --app=$app --key=focus_user)
-  focus_password=$(ynh_app_setting_get --app=$app --key=focus_password)
-  focus_secret=$(ynh_app_setting_get --app=$app --key=focus_secret)
+  focus_user=$(ynh_app_setting_get --key=focus_user)
+  focus_password=$(ynh_app_setting_get --key=focus_password)
+  focus_secret=$(ynh_app_setting_get --key=focus_secret)
 
-  videobridge_user=$(ynh_app_setting_get --app=$app --key=videobridge_user)
-  videobridge_secret=$(ynh_app_setting_get --app=$app --key=videobridge_secret)
+  videobridge_user=$(ynh_app_setting_get --key=videobridge_user)
+  videobridge_secret=$(ynh_app_setting_get --key=videobridge_secret)
 
-  port=$(ynh_app_setting_get --app=$app --key=port)
-  port_videobridge=$(ynh_app_setting_get --app=$app --key=port_videobridge)
-  port_component=$(ynh_app_setting_get --app=$app --key=port_component)
+  port=$(ynh_app_setting_get --key=port)
+  port_videobridge=$(ynh_app_setting_get --key=port_videobridge)
+  port_component=$(ynh_app_setting_get --key=port_component)
 
   #=================================================
   # SET SETTINGS
   #=================================================
-  
-  ynh_app_setting_set --app=$app --key=max_memory --value=$max_memory
-  
+
+  ynh_app_setting_set --key=max_memory --value=$max_memory
+
   #=================================================
   # UPDATE CONFIG FILES
   #=================================================
-  
-  ynh_add_config --template="../conf/jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
-  ynh_add_config --template="../conf/jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
-  
-  ynh_script_progression -l --message="Configuration of $app updated"
+
+  ynh_config_add --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+  ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
+
+  ynh_script_progression -l "Configuration of $app updated"
 }
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 
 ynh_app_config_run $1
