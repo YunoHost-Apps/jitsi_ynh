@@ -5,7 +5,9 @@
 
 # Jitsi Meet для YunoHost
 
-[![Уровень интеграции](https://dash.yunohost.org/integration/jitsi.svg)](https://ci-apps.yunohost.org/ci/apps/jitsi/) ![Состояние работы](https://ci-apps.yunohost.org/ci/badges/jitsi.status.svg) ![Состояние сопровождения](https://ci-apps.yunohost.org/ci/badges/jitsi.maintain.svg)
+[![Уровень интеграции](https://apps.yunohost.org/badge/integration/jitsi)](https://ci-apps.yunohost.org/ci/apps/jitsi/)
+![Состояние работы](https://apps.yunohost.org/badge/state/jitsi)
+![Состояние сопровождения](https://apps.yunohost.org/badge/maintained/jitsi)
 
 [![Установите Jitsi Meet с YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jitsi)
 
@@ -19,7 +21,7 @@
 Jitsi Meet is a libre software (Apache) WebRTC JavaScript app that uses Jitsi Videobridge to provide high quality, secure, and scalable video conferences.
 
 
-**Поставляемая версия:** 2.0.9753~ynh1
+**Поставляемая версия:** 2.0.9753~ynh2
 
 **Демо-версия:** <https://meet.jit.si/>
 
