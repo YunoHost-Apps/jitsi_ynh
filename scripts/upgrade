@@ -28,6 +28,10 @@ ynh_script_progression "Upgrading source files..."
 
 _setup_sources
 
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R "$app:$app" "$install_dir"
+
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
 #=================================================
@@ -74,6 +78,7 @@ ynh_config_add --template="jitsi-jicofo-logging.properties" --destination="/etc/
 ynh_script_progression "Configuring Jitsi-Meet..."
 
 ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # SECURE FILES AND DIRECTORIES

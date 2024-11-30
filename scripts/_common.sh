@@ -27,9 +27,7 @@ _setup_sources() {
     ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
 }
 
-ynh_jniwrapper_armhf ()
-{
-
+ynh_jniwrapper_armhf () {
     # set openjdk-8 as default
     # update-alternatives --set java /usr/lib/jvm/java-8-openjdk-armhf/jre/bin/java
     tempdir="$(mktemp -d)"
