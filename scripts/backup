@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,47 +8,32 @@
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
-#=================================================
-# DECLARE DATA AND CONF FILES TO BACKUP
-#=================================================
-ynh_print_info --message="Declaring files to be backed up..."
-
-#=================================================
-# BACKUP THE APP MAIN DIR
-#=================================================
-
-ynh_backup --src_path="$install_dir"
+ynh_print_info "Declaring files to be backed up..."
 
 #=================================================
 # SYSTEM CONFIGURATION
 #=================================================
 
-# Backup the nginx configuration
-ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-# Backup the systemd service units
-ynh_backup --src_path="/etc/systemd/system/$app-videobridge.service"
-ynh_backup --src_path="/etc/systemd/system/$app-jicofo.service"
-
-# Backup the logrotate configuration
-ynh_backup --src_path="/etc/logrotate.d/$app"
-
-# Backup the Fail2Ban config
-ynh_backup --src_path="/etc/fail2ban/jail.d/$app.conf"
-ynh_backup --src_path="/etc/fail2ban/filter.d/$app.conf"
+# Backup the NGINX configuration
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # BACKUP VARIOUS FILES
 #=================================================
 
-ynh_backup --src_path="/etc/$app/"
+if [ $enable_ldap -eq 1 ]
+then
+	ynh_backup "/etc/prosody/conf.avail/$domain.cfg.lua"
 
-ynh_backup --src_path="/etc/prosody/conf.avail/$domain.cfg.lua"
+	ynh_backup "/etc/jitsi/jicofo/jicofo.conf"
 
-ynh_backup --src_path="/var/log/$app/"
+	ynh_backup "/etc/jitsi/meet/$domain-config.js"
+
+	ynh_backup "/usr/share/jitsi-meet/prosody-plugins/mod_auth_ldap.lua"
+fi
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
+ynh_print_info "Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
