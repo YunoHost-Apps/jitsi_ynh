@@ -33,53 +33,53 @@ gpasswd --add www-data "$app"
 if ynh_app_upgrading_from_version_before 2.0.9823~ynh1
 then
 	# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-	if ynh_exec_warn_less yunohost service status "$app-videobridge" >/dev/null; then
+	if ynh_hide_warnings yunohost service status "$app-videobridge" >/dev/null; then
 	    yunohost service remove "$app-videobridge"
 	fi
 	
-	if ynh_exec_warn_less yunohost service status "$app-jicofo" >/dev/null; then
+	if ynh_hide_warnings yunohost service status "$app-jicofo" >/dev/null; then
 	    yunohost service remove "$app-jicofo"
 	fi
 	
 	# Remove the dedicated systemd config
-	ynh_remove_systemd_config --service="$app-videobridge"
-	ynh_remove_systemd_config --service="$app-jicofo"
+	ynh_config_remove_systemd --service="$app-videobridge"
+	ynh_config_remove_systemd --service="$app-jicofo"
 	
 	# Remove the app-specific logrotate config
-	ynh_remove_logrotate
+	ynh_config_remove_logrotate
 	
 	# Remove the dedicated NGINX config
-	ynh_remove_nginx_config
+	ynh_config_remove_nginx
 	
 	prosodyctl deluser "$focus_user@auth.$domain" || true
 	prosodyctl deluser "$videobridge_user@auth.$domain" || true
 	
 	# Remove domain conf template
-	ynh_secure_remove --file="/etc/prosody/conf.d/$domain.cfg.lua"
-	ynh_secure_remove --file="/etc/prosody/conf.avail/$domain.cfg.lua"
-	ynh_secure_remove --file="/etc/prosody/certs/$domain.key"
-	ynh_secure_remove --file="/etc/prosody/certs/$domain.crt"
-	ynh_secure_remove --file="/var/lib/prosody/$domain.key"
-	ynh_secure_remove --file="/var/lib/prosody/$domain.crt"
-	ynh_secure_remove --file="/var/lib/prosody/$domain.cnf"
-	ynh_secure_remove --file="/etc/prosody/certs/auth.$domain.key"
-	ynh_secure_remove --file="/etc/prosody/certs/auth.$domain.crt"
-	ynh_secure_remove --file="/var/lib/prosody/auth.$domain.key"
-	ynh_secure_remove --file="/var/lib/prosody/auth.$domain.crt"
-	ynh_secure_remove --file="/var/lib/prosody/auth.$domain.cnf"
-	ynh_secure_remove --file="/usr/local/share/ca-certificates/auth.$domain.crt"
+	ynh_safe_rm "/etc/prosody/conf.d/$domain.cfg.lua"
+	ynh_safe_rm "/etc/prosody/conf.avail/$domain.cfg.lua"
+	ynh_safe_rm "/etc/prosody/certs/$domain.key"
+	ynh_safe_rm "/etc/prosody/certs/$domain.crt"
+	ynh_safe_rm "/var/lib/prosody/$domain.key"
+	ynh_safe_rm "/var/lib/prosody/$domain.crt"
+	ynh_safe_rm "/var/lib/prosody/$domain.cnf"
+	ynh_safe_rm "/etc/prosody/certs/auth.$domain.key"
+	ynh_safe_rm "/etc/prosody/certs/auth.$domain.crt"
+	ynh_safe_rm "/var/lib/prosody/auth.$domain.key"
+	ynh_safe_rm "/var/lib/prosody/auth.$domain.crt"
+	ynh_safe_rm "/var/lib/prosody/auth.$domain.cnf"
+	ynh_safe_rm "/usr/local/share/ca-certificates/auth.$domain.crt"
 	
 	update-ca-certificates -f
 	
 	gpasswd --delete prosody "$app"
 	
-	ynh_systemd_action --service_name=prosody --action=restart
+	ynh_systemctl --service=prosody --action=restart
 	
 	ynh_app_setting_delete --app="$app" --key=require_prosody
 
-	ynh_remove_apps
+	#ynh_remove_apps
 	
-	ynh_secure_remove --file="/etc/$app"
+	ynh_safe_rm "/etc/$app"
 	ynh_app_setting_set_default --key=enable_ldap --value=true
 fi
 #=================================================

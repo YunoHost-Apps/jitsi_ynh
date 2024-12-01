@@ -57,6 +57,7 @@ ram.runtime = "50M"
     extract = false
     rename = "mod_auth_ldap.lua"
 
+    [resources.system_user]
 
     [resources.permissions]
     main.url = "/"
