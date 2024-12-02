@@ -38,6 +38,8 @@ ynh_backup "/etc/$app/"
 
 ynh_backup "/etc/prosody/conf.avail/$domain.cfg.lua"
 
+ynh_backup "/var/log/$app/"
+
 #=================================================
 # END OF SCRIPT
 #=================================================
