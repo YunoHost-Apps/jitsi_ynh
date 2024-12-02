@@ -80,6 +80,8 @@ ynh_restore "/etc/$app/"
 chmod 644 "/etc/$app/meet/$domain-config.js"
 
 ynh_restore "/var/log/$app/"
+chown -R "$app:" "/var/log/$app"
+chmod -R 770 "/var/log/$app"
 
 #=================================================
 # RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
