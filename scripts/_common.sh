@@ -14,6 +14,7 @@ _setup_sources() {
     )
 
     for package in "${!packages[@]}"; do
+        ynh_safe_rm "$install_dir/${package}"
         ynh_setup_source --dest_dir="$install_dir/temp" --source_id="$package"
         pushd "$install_dir/temp"
             ar x "$package.deb" data.tar.xz
