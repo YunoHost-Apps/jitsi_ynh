@@ -32,6 +32,8 @@ then
 	ynh_backup "/usr/share/jitsi-meet/prosody-plugins/mod_auth_ldap.lua"
 fi
 
+ynh_backup "/var/log/$app/"
+
 #=================================================
 # END OF SCRIPT
 #=================================================

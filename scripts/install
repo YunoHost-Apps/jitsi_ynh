@@ -19,6 +19,9 @@ echo jitsi-meet-web-config jitsi-meet/jaas-choice select false | debconf-set-sel
 
 ynh_apt_install_dependencies_from_extra_repository --repo="deb https://download.jitsi.org stable/" --package="jitsi-meet prosody-modules" --key="https://download.jitsi.org/jitsi-key.gpg.key"
 
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R "$app:$app" "$install_dir"
 
 #=================================================
 # REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
