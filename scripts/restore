@@ -20,20 +20,6 @@ echo jitsi-meet-web-config jitsi-meet/jaas-choice select false | debconf-set-sel
 
 ynh_apt_install_dependencies_from_extra_repository --repo="deb https://download.jitsi.org stable/" --package="jitsi-meet prosody-modules" --key="https://download.jitsi.org/jitsi-key.gpg.key"
 
-
-#=================================================
-# REPLACE JNIWRAPPER FOR ARMHF ARCHITECTURE IN JITSI-VIDEOBRIDGE
-#=================================================
-
-if [ "$YNH_ARCH" == "armhf" ]; then
-    ynh_script_progression --message="Configuring jniwrapper for armhf ..." --weight=1
-    ynh_jniwrapper_armhf
-fi
-
-chmod 750 "$install_dir"
-chmod -R o-rwx "$install_dir"
-chown -R "$app:$app" "$install_dir"
-
 #=================================================
 # LDAP CONFIGURATION
 #=================================================
@@ -63,10 +49,6 @@ ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
 yunohost service add "jitsi-videobridge2" --log="/var/log/jitsi/jvb.log" --needs_exposed_ports "$port" "$port_videobridge"
 
 yunohost service add "jicofo" --log="/var/log/jitsi/jicofo.log"
-
-ynh_restore "/var/log/$app/"
-chown -R "$app:" "/var/log/$app"
-chmod -R 770 "/var/log/$app"
 
 #=================================================
 # RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
