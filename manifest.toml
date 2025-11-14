@@ -102,7 +102,7 @@ ram.runtime = "50M"
 
     [resources.apt]
     packages = [
-        "openjdk-8-jre-headless\\|openjdk-11-jre-headless\\|openjdk-17-jre-headless\\|openjdk-21-headless",
+        "openjdk-8-jre-headless\\|openjdk-11-jre-headless\\|openjdk-17-jre-headless\\|openjdk-21-jre-headless",
         "debconf",
         "procps",
         "uuid-runtime",
