@@ -22,6 +22,9 @@ ynh_config_change_url_nginx
 #=================================================
 ynh_script_progression "Configuring Jitsi-Videobridge..."
 
+public_ipv4="$(curl --no-progress-meter https://ip.yunohost.org/)" || true
+private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
+
 #ynh_config_add --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
 #ynh_config_add --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
 #ynh_config_add --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
