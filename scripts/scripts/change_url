@@ -1,0 +1,66 @@
+#!/bin/bash
+
+source /usr/share/yunohost/helpers
+
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Stopping $app's systemd service..."
+
+ynh_systemctl --service="$app-videobridge" --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemctl --service="$app-jicofo" --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
+
+#=================================================
+# MODIFY URL IN NGINX CONF
+#=================================================
+ynh_script_progression "Updating NGINX web server configuration..."
+
+ynh_config_change_url_nginx
+
+#=================================================
+# CONFIGURE JITSI-VIDEOBRIDGE
+#=================================================
+ynh_script_progression "Configuring Jitsi-Videobridge..."
+
+#ynh_config_add --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
+#ynh_config_add --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
+#ynh_config_add --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
+ynh_config_add --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
+ynh_config_add --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+
+#=================================================
+# CONFIGURE JITSI-JICOFO
+#=================================================
+ynh_script_progression "Configuring Jitsi-Jicofo..."
+
+ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
+ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
+#ynh_config_add --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
+
+#=================================================
+# CONFIGURE JITSI-MEET
+#=================================================
+ynh_script_progression "Configuring Jitsi-Meet..."
+
+ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+
+#=================================================
+# CONFIGURE PROSODY
+#=================================================
+ynh_script_progression "Configuring prosody..."
+
+ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Starting $app's systemd service..."
+
+ynh_systemctl --service="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemctl --service="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Change of URL completed for $app"
