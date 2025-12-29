@@ -55,6 +55,25 @@ ynh_script_progression "Configuring prosody..."
 
 ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
 chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
+ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
+
+echo | ynh_hide_warnings prosodyctl cert generate "$domain"
+ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
+ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
+ln -sf "/var/lib/prosody/$domain.crt" "/usr/local/share/ca-certificates/$domain.crt"
+
+echo | ynh_hide_warnings prosodyctl cert generate "auth.$domain"
+ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
+ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
+ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
+
+update-ca-certificates -f
+
+ynh_systemctl --service="prosody" --action="restart"
+
+prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
+prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
+prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.$domain"
 
 #=================================================
 # START SYSTEMD SERVICE
