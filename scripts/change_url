@@ -22,41 +22,64 @@ ynh_config_change_url_nginx
 #=================================================
 ynh_script_progression "Configuring Jitsi-Videobridge..."
 
-public_ipv4="$(curl --no-progress-meter https://ip.yunohost.org/)" || true
-private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
+# public_ipv4="$(curl --no-progress-meter https://ip.yunohost.org/)" || true
+# private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
 
-#ynh_config_add --template="jitsi-videobridge-callstats-java-sdk.properties" --destination="/etc/$app/videobridge/callstats-java-sdk.properties"
-#ynh_config_add --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
-#ynh_config_add --template="jitsi-videobridge-logging.properties" --destination="/etc/$app/videobridge/logging.properties"
-ynh_config_add --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
-ynh_config_add --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+#ynh_config_add --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/videobridge/sip-communicator.properties"
+# ynh_config_add --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/videobridge/config"
 
 #=================================================
 # CONFIGURE JITSI-JICOFO
 #=================================================
 ynh_script_progression "Configuring Jitsi-Jicofo..."
 
-ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
-ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
-#ynh_config_add --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
+#ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/jicofo/config"
+#ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/jicofo/jicofo.conf"
 
 #=================================================
 # CONFIGURE JITSI-MEET
 #=================================================
 ynh_script_progression "Configuring Jitsi-Meet..."
 
-ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
-chmod 644 "/etc/$app/meet/$domain-config.js"
+#ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+mv "/etc/$app/meet/$old_domain-config.js" "/etc/$app/meet/$domain-config.js"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/meet/$domain-config.js"
+#chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # CONFIGURE PROSODY
 #=================================================
 ynh_script_progression "Configuring prosody..."
 
-ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
-chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
-ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
+#ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
+mv "/etc/prosody/conf.avail/$old_domain.cfg.lua" "/etc/prosody/conf.avail/$domain.cfg.lua"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/prosody/conf.avail/$domain.cfg.lua"
+#chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
+#ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
+prosodyctl deluser "$focus_user@auth.$old_domain" || true
+prosodyctl deluser "$videobridge_user@auth.$old_domain" || true
+
+# Remove old domain conf template
+ynh_safe_rm "/etc/prosody/conf.d/$old_domain.cfg.lua"
+ynh_safe_rm "/etc/prosody/conf.avail/$old_domain.cfg.lua"
+ynh_safe_rm "/etc/prosody/certs/$old_domain.key"
+ynh_safe_rm "/etc/prosody/certs/$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/$old_domain.key"
+ynh_safe_rm "/var/lib/prosody/$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/$old_domain.cnf"
+ynh_safe_rm "/etc/prosody/certs/auth.$old_domain.key"
+ynh_safe_rm "/etc/prosody/certs/auth.$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/auth.$old_domain.key"
+ynh_safe_rm "/var/lib/prosody/auth.$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/auth.$old_domain.cnf"
+ynh_safe_rm "/usr/local/share/ca-certificates/auth.$old_domain.crt"
+
+# Add new domain
 echo | ynh_hide_warnings prosodyctl cert generate "$domain"
 ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
 ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
