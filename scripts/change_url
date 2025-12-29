@@ -59,7 +59,7 @@ ynh_script_progression "Configuring prosody..."
 mv "/etc/prosody/conf.avail/$old_domain.cfg.lua" "/etc/prosody/conf.avail/$domain.cfg.lua"
 ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/prosody/conf.avail/$domain.cfg.lua"
 #chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
-#ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
+ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
 prosodyctl deluser "$focus_user@auth.$old_domain" || true
 prosodyctl deluser "$videobridge_user@auth.$old_domain" || true
