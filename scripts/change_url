@@ -46,6 +46,7 @@ ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/ji
 ynh_script_progression "Configuring Jitsi-Meet..."
 
 ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
+chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # CONFIGURE PROSODY
@@ -53,6 +54,7 @@ ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$
 ynh_script_progression "Configuring prosody..."
 
 ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
+chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 
 #=================================================
 # START SYSTEMD SERVICE
