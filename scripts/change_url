@@ -22,12 +22,7 @@ ynh_config_change_url_nginx
 #=================================================
 ynh_script_progression "Configuring Jitsi-Videobridge..."
 
-# public_ipv4="$(curl --no-progress-meter https://ip.yunohost.org/)" || true
-# private_ipv4="$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')" || true
-
-#ynh_config_add --template="jitsi-videobridge-sip-communicator.properties" --destination="/etc/$app/videobridge/sip-communicator.properties"
 ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/videobridge/sip-communicator.properties"
-# ynh_config_add --template="jitsi-videobridge.config" --destination="/etc/$app/videobridge/config"
 ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/videobridge/config"
 
 #=================================================
@@ -35,9 +30,7 @@ ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/vide
 #=================================================
 ynh_script_progression "Configuring Jitsi-Jicofo..."
 
-#ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
 ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/jicofo/config"
-#ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
 ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/jicofo/jicofo.conf"
 
 #=================================================
@@ -45,20 +38,16 @@ ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/jico
 #=================================================
 ynh_script_progression "Configuring Jitsi-Meet..."
 
-#ynh_config_add --template="jitsi-meet-config.js" --destination="/etc/$app/meet/$domain-config.js"
 mv "/etc/$app/meet/$old_domain-config.js" "/etc/$app/meet/$domain-config.js"
 ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/meet/$domain-config.js"
-#chmod 644 "/etc/$app/meet/$domain-config.js"
 
 #=================================================
 # CONFIGURE PROSODY
 #=================================================
 ynh_script_progression "Configuring prosody..."
 
-#ynh_config_add --template="prosody.cfg.lua" --destination="/etc/prosody/conf.avail/$domain.cfg.lua"
 mv "/etc/prosody/conf.avail/$old_domain.cfg.lua" "/etc/prosody/conf.avail/$domain.cfg.lua"
 ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/prosody/conf.avail/$domain.cfg.lua"
-#chmod 644 "/etc/prosody/conf.avail/$domain.cfg.lua"
 ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
 
 prosodyctl deluser "$focus_user@auth.$old_domain" || true
