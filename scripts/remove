@@ -20,7 +20,6 @@ if ynh_hide_warnings yunohost service status "$app-jicofo" >/dev/null; then
 fi
 ynh_config_remove_systemd "$app-jicofo"
 
-
 ynh_config_remove_nginx
 
 #=================================================
