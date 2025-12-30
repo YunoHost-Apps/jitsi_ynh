@@ -39,8 +39,16 @@ ram.runtime = "50M"
     type = "group"
     default = "visitors"
 
+    [install.enable_ldap]
+    ask.en = "Allow only authenticated users to create new conference rooms ?"
+    ask.fr = "Autoriser seulement les utilisateurs authentifié à créer de nouvelles conférences ?"
+    type = "boolean"
+    default = true
+
 [resources]
+
     [resources.sources]
+
     [resources.sources.jitsi-meet-web]
     url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.8936-1_all.deb"
     sha256 = "7c91eb1643af7fe4a4101e10238a42dad82f3741dbd680ccb69a5f9198644303"
@@ -84,10 +92,7 @@ ram.runtime = "50M"
     extract = false
     rename = "mod_auth_ldap.lua"
 
-
     [resources.system_user]
-
-    [resources.install_dir]
 
     [resources.permissions]
     main.url = "/"
@@ -103,11 +108,6 @@ ram.runtime = "50M"
     packages = [
         "openjdk-8-jre-headless\\|openjdk-11-jre-headless\\|openjdk-17-jre-headless\\|openjdk-21-jre-headless",
         "debconf",
-        "procps",
-        "uuid-runtime",
-        "lua-ldap",
-        "prosody",
-        "binutils",
     ]
 
     packages_from_raw_bash = """
