@@ -18,6 +18,8 @@ if ynh_hide_warnings yunohost service status "jicofo" >/dev/null; then
     yunohost service remove "jicofo"
 fi
 
+ynh_config_remove_systemd "$app-jicofo"
+
 ynh_config_remove_nginx
 
 # Remove other various files specific to the app... such as:

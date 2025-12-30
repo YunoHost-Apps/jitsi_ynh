@@ -7,7 +7,7 @@ name = "Jitsi Meet"
 description.en = "Video conferencing web application"
 description.fr = "Application web de conférence vidéo"
 
-version = "2.0.9823~ynh1"
+version = "2.0.10655~ynh1"
 
 maintainers = []
 
@@ -19,13 +19,12 @@ userdoc = "https://jitsi.org/user-faq/"
 code = "https://github.com/jitsi/jitsi-meet"
 
 [integration]
-yunohost = ">= 12.0"
+yunohost = ">= 12.1.17"
 helpers_version = "2.1"
 architectures = "all"
 multi_instance = false
 
 ldap = true
-
 sso = false
 
 disk = "50M"
@@ -50,6 +49,42 @@ ram.runtime = "50M"
 
     [resources.sources]
 
+    [resources.sources.jitsi-meet-web]
+    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.8936-1_all.deb"
+    sha256 = "7c91eb1643af7fe4a4101e10238a42dad82f3741dbd680ccb69a5f9198644303"
+    format = "whatever"
+    extract = false
+    rename = "jitsi-meet-web.deb"
+
+    [resources.sources.jitsi-sctp]
+    url = "https://github.com/sctplab/usrsctp/archive/fd070e05a7474f38c7fecdf4d4b6005d2547ee00.zip"
+    sha256 = "a0f9255a88fef2e375b590f2823ddbc70ab38142b9931cd3f1c7c0b700bf7043"
+
+    [resources.sources.jitsi-jicofo]
+    url = "https://download.jitsi.org/stable/jicofo_1.0-1167-1_all.deb"
+    sha256 = "9a657519078d300de53fca383649cdc65f9f5ab5e10631c5e6c18b2e0210009d"
+    format = "whatever"
+    extract = false
+    rename = "jitsi-jicofo.deb"
+
+    [resources.sources.jitsi-videobridge]
+    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-260-gea11cd36c-1_all.deb"
+    sha256 = "1e1f10c70e83941fe4023e2e823050a94d0677c448612e9f45c5de1c7b011df9"
+    format = "whatever"
+    extract = false
+    rename = "jitsi-videobridge.deb"
+
+    [resources.sources.usrsctp]
+    url = "https://github.com/sctplab/usrsctp/archive/fd070e05a7474f38c7fecdf4d4b6005d2547ee00.zip"
+    sha256 = "a0f9255a88fef2e375b590f2823ddbc70ab38142b9931cd3f1c7c0b700bf7043"
+
+    [resources.sources.jitsi-meet-prosody]
+    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.8936-1_all.deb"
+    sha256 = "3db2d34a205478dba65b8654e60da6f2029e12c20ca8a9d9c421df61a5ffa5be"
+    format = "whatever"
+    extract = false
+    rename = "jitsi-meet-prosody.deb"
+
     [resources.sources.mod_auth_ldap]
     url = "https://hg.prosody.im/prosody-modules/raw-file/tip/mod_auth_ldap/mod_auth_ldap.lua"
     sha256 = "49c67ec86ec75ac8de93803be2ac7f907d1e9d3d22cd4c88fd48aaeed7a411e3"
@@ -71,6 +106,7 @@ ram.runtime = "50M"
 
     [resources.apt]
     packages = [
+        "openjdk-8-jre-headless\\|openjdk-11-jre-headless\\|openjdk-17-jre-headless\\|openjdk-21-jre-headless",
         "debconf",
     ]
 
