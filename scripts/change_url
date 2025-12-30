@@ -1,0 +1,102 @@
+#!/bin/bash
+
+source /usr/share/yunohost/helpers
+
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Stopping $app's systemd service..."
+
+ynh_systemctl --service="$app-videobridge" --action="stop" --log_path="/var/log/$app/$app-videobridge.log"
+ynh_systemctl --service="$app-jicofo" --action="stop" --log_path="/var/log/$app/$app-jicofo.log"
+
+#=================================================
+# MODIFY URL IN NGINX CONF
+#=================================================
+ynh_script_progression "Updating NGINX web server configuration..."
+
+ynh_config_change_url_nginx
+
+#=================================================
+# CONFIGURE JITSI-VIDEOBRIDGE
+#=================================================
+ynh_script_progression "Configuring Jitsi-Videobridge..."
+
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/videobridge/sip-communicator.properties"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/videobridge/config"
+
+#=================================================
+# CONFIGURE JITSI-JICOFO
+#=================================================
+ynh_script_progression "Configuring Jitsi-Jicofo..."
+
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/jicofo/config"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/jicofo/jicofo.conf"
+
+#=================================================
+# CONFIGURE JITSI-MEET
+#=================================================
+ynh_script_progression "Configuring Jitsi-Meet..."
+
+mv "/etc/$app/meet/$old_domain-config.js" "/etc/$app/meet/$domain-config.js"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/$app/meet/$domain-config.js"
+
+#=================================================
+# CONFIGURE PROSODY
+#=================================================
+ynh_script_progression "Configuring prosody..."
+
+mv "/etc/prosody/conf.avail/$old_domain.cfg.lua" "/etc/prosody/conf.avail/$domain.cfg.lua"
+ynh_replace --match="$old_domain" --replace="$new_domain" --file="/etc/prosody/conf.avail/$domain.cfg.lua"
+ln -s "/etc/prosody/conf.avail/$domain.cfg.lua" "/etc/prosody/conf.d/$domain.cfg.lua"
+
+prosodyctl deluser "$focus_user@auth.$old_domain" || true
+prosodyctl deluser "$videobridge_user@auth.$old_domain" || true
+
+# Remove old domain conf template
+ynh_safe_rm "/etc/prosody/conf.d/$old_domain.cfg.lua"
+ynh_safe_rm "/etc/prosody/conf.avail/$old_domain.cfg.lua"
+ynh_safe_rm "/etc/prosody/certs/$old_domain.key"
+ynh_safe_rm "/etc/prosody/certs/$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/$old_domain.key"
+ynh_safe_rm "/var/lib/prosody/$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/$old_domain.cnf"
+ynh_safe_rm "/etc/prosody/certs/auth.$old_domain.key"
+ynh_safe_rm "/etc/prosody/certs/auth.$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/auth.$old_domain.key"
+ynh_safe_rm "/var/lib/prosody/auth.$old_domain.crt"
+ynh_safe_rm "/var/lib/prosody/auth.$old_domain.cnf"
+ynh_safe_rm "/usr/local/share/ca-certificates/auth.$old_domain.crt"
+
+# Add new domain
+echo | ynh_hide_warnings prosodyctl cert generate "$domain"
+ln -sf "/var/lib/prosody/$domain.key" "/etc/prosody/certs/$domain.key"
+ln -sf "/var/lib/prosody/$domain.crt" "/etc/prosody/certs/$domain.crt"
+ln -sf "/var/lib/prosody/$domain.crt" "/usr/local/share/ca-certificates/$domain.crt"
+
+echo | ynh_hide_warnings prosodyctl cert generate "auth.$domain"
+ln -sf "/var/lib/prosody/auth.$domain.key" "/etc/prosody/certs/auth.$domain.key"
+ln -sf "/var/lib/prosody/auth.$domain.crt" "/etc/prosody/certs/auth.$domain.crt"
+ln -sf "/var/lib/prosody/auth.$domain.crt" "/usr/local/share/ca-certificates/auth.$domain.crt"
+
+update-ca-certificates -f
+
+ynh_systemctl --service="prosody" --action="restart"
+
+prosodyctl register "$focus_user" "auth.$domain" "$focus_password"
+prosodyctl register "$videobridge_user" "auth.$domain" "$videobridge_secret"
+prosodyctl mod_roster_command subscribe "$focus_user.$domain" "$focus_user@auth.$domain"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Starting $app's systemd service..."
+
+ynh_systemctl --service="$app-jicofo" --action="start" --log_path="/var/log/$app/$app-jicofo.log"
+ynh_systemctl --service="$app-videobridge" --action="start" --log_path="/var/log/$app/$app-videobridge.log"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Change of URL completed for $app"
