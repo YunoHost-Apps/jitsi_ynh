@@ -168,7 +168,7 @@ var config = {
 
     // Start the conference in audio only mode (no video is being received nor
     // sent).
-    // startAudioOnly: false,
+    startAudioOnly: __STARTAUDIOONLY__,
 
     // Every participant after the Nth will start audio muted.
     // startAudioMuted: 10,
@@ -308,16 +308,16 @@ var config = {
     // fileRecordingsServiceSharingEnabled: false,
 
     // Local recording configuration.
-    // localRecording: {
-    //     // Whether to disable local recording or not.
-    //     disable: false,
+    localRecording: {
+        // Whether to disable local recording or not.
+        disable: __LOCALRECORDING_DISABLE__,
 
-    //     // Whether to notify all participants when a participant is recording locally.
-    //     notifyAllParticipants: false,
+        // Whether to notify all participants when a participant is recording locally.
+        notifyAllParticipants: true,
 
-    //     // Whether to disable the self recording feature (only local participant streams).
-    //     disableSelfRecording: false,
-    // },
+        // Whether to disable the self recording feature (only local participant streams).
+        disableSelfRecording: __LOCALRECORDING_DISABLESELFRECORDING__,
+    },
 
     // Customize the Live Streaming dialog. Can be modified for a non-YouTube provider.
     // liveStreaming: {
@@ -640,7 +640,7 @@ var config = {
     // does not affect the mobile app since opening an etherpad
     // obscures the conference controls -- it's better to let users
     // choose to open the pad on their own in that case.
-    // openSharedDocumentOnJoin: false,
+    openSharedDocumentOnJoin: __ETHERPAD_OPENSHAREDDOCUMENTONJOIN__,
 
     // If true, shows the unsafe room name warning label when a room name is
     // deemed unsafe (due to the simplicity in the name) and a password is not
@@ -883,7 +883,7 @@ var config = {
         // through the JVB and use the peer to peer connection instead. When a
         // 3rd participant joins the conference will be moved back to the JVB
         // connection.
-        enabled: true,
+        enabled: __P2P_ENABLED__,
 
         // Enable unified plan implementation support on Chromium for p2p connection.
         // enableUnifiedOnChrome: false,
@@ -919,7 +919,9 @@ var config = {
         stunServers: [
 
             // { urls: 'stun:__DOMAIN__:3478' },
-            { urls: 'stun:meet-jit-si-turnrelay.jitsi.net:443' },
+            { 
+                urls: 'stun:__P2P_STUNSERVERS__' 
+            },
         ],
     },
 
@@ -1267,7 +1269,7 @@ var config = {
     //
     // If set, add a "Open shared document" link to the bottom right menu that
     // will open an etherpad document.
-    // etherpad_base: 'https://your-etherpad-installati.on/p/',
+    etherpad_base: '__ETHERPAD_BASE__',
 
     // To enable information about dial-in access to meetings you need to provide
     // dialInNumbersUrl and dialInConfCodeUrl.
@@ -1482,13 +1484,14 @@ var config = {
     // defaultLogoUrl: 'images/watermark.svg',
 
     // Settings for the Excalidraw whiteboard integration.
-    // whiteboard: {
-    //     // Whether the feature is enabled or not.
-    //     enabled: true,
-    //     // The server used to support whiteboard collaboration.
-    //     // https://github.com/jitsi/excalidraw-backend
-    //     collabServerBaseUrl: 'https://excalidraw-backend.example.com',
-    // },
+    whiteboard: {
+        // Whether the feature is enabled or not.
+        enabled: __WHITEBOARD_ENABLED__,
+        // The server used to support whiteboard collaboration.
+        // https://github.com/jitsi/excalidraw-backend
+        collabServerBaseUrl: '__WHITEBOARD_COLLABSERVERBASEURL__',
+        userLimit: __WHITEBOARD_USERLIMIT__,
+    },
 };
 
 // Set the default values for JaaS customers
