@@ -32,6 +32,29 @@ ynh_app_setting_set --key=max_memory --value="$max_memory"
 muc_nickname=$(uuidgen)
 ynh_app_setting_set --key=muc_nickname --value="$muc_nickname"
 
+# Config panel
+startaudioonly="false"
+ynh_app_setting_set --key=startaudioonly --value="$startaudioonly"
+localrecording_disable="false"
+ynh_app_setting_set --key=localrecording_disable --value="$localrecording_disable"
+localrecording_disableselfrecording="false"
+ynh_app_setting_set --key=localrecording_disableselfrecording --value="$localrecording_disableselfrecording"
+p2p_enabled="true"
+ynh_app_setting_set --key=p2p_enabled --value="$p2p_enabled"
+p2p_stunservers="stun:meet-jit-si-turnrelay.jitsi.net:443"
+ynh_app_setting_set --key=p2p_stunservers --value="$p2p_stunservers"
+etherpad_base=""
+ynh_app_setting_set --key=etherpad_base --value="$etherpad_base"
+etherpad_openshareddocumentonjoin="false"
+ynh_app_setting_set --key=etherpad_openshareddocumentonjoin --value="$etherpad_openshareddocumentonjoin"
+whiteboard_enabled="false"
+ynh_app_setting_set --key=whiteboard_enabled --value="$whiteboard_enabled"
+whiteboard_collabserverbaseurl=""
+ynh_app_setting_set --key=whiteboard_collabserverbaseurl --value="$whiteboard_collabserverbaseurl"
+whiteboard_userlimit=25
+ynh_app_setting_set --key=whiteboard_userlimit --value="$whiteboard_userlimit"
+
+
 #=================================================
 # CREATE DEDICATED USER
 #=================================================

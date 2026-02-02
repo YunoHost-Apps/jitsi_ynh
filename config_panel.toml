@@ -12,3 +12,81 @@ services = ["__APP__-jicofo","__APP__-videobridge"]
         ask.en = "Max memory to use for VM"
         type = "number"
         help = "One user consume about 1,5 Mib memory ,with no user jitsi consume 120 MiB. For example if plan to have max 50 simultaneous users this parameter should be set to 200 mb"
+
+        [main.config.startAudioOnly]
+        ask.en = "Start in audio only mode"
+        bind = "startAudioOnly:/etc/__APP__/meet/__DOMAIN__-config.js"
+        type = "boolean"
+        help = "Start the conference in audio only mode (no video is being received nor sent)."
+    
+    [main.recording]
+    name = "Recording"
+        [main.recording.localRecording_disable]
+        ask.en = "Disable local recording"
+        bind = "localRecording>disable:/etc/__APP__/meet/__DOMAIN__-config.js"
+        type = "boolean"
+        help = "If activated, if forbid any user to record the meeting to local storage."
+        
+        [main.recording.localRecording_disableSelfRecording]
+        ask.en = "Disable self recording"
+        bind = "localRecording>disableSelfRecording:/etc/__APP__/meet/__DOMAIN__-config.js"
+        type = "boolean"
+        help = ""
+        
+    [main.p2p]
+    name = "P2P mode"
+        [main.p2p.p2p_enabled]
+        ask.en = "Enable P2P mode"
+        bind = "p2p>enabled:/etc/__APP__/meet/__DOMAIN__-config.js"
+        type = "boolean"
+        help = "When enabled the system will try to establish a direct connection when there are exactly 2 participants in the room."
+
+        [main.p2p.p2p_stunServers]
+        ask.en = "STUN servers"
+        bind = "stunServers>urls:/etc/__APP__/meet/__DOMAIN__-config.js"
+        help = "STUN servers that will be used in the peer to peer connections"
+        type = "string"
+        pattern.regexp = '^stun:((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,}):\d\d+$'
+        pattern.error = "Provide a domain and a port in this format `stun:DOMAIN:PORT`"
+        example = "stun:meet-jit-si-turnrelay.jitsi.net:443"
+    
+    [main.etherpad]
+    name = "Etherpad integration"
+        [main.etherpad.etherpad_base]
+        ask.en = "Etherpad URL"
+        bind = ":/etc/__APP__/meet/__DOMAIN__-config.js"
+        help = "If set, add a `Open shared document` link to the bottom right menu that will open an etherpad document."
+        type = "url"
+        optional = true
+        pattern.regexp = '^https?://((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})(:\d\d+)?/p/$'
+        pattern.error = "Provide a pad URL ending with `/p/`"
+        example = "https://your-etherpad-installati.on/p/"
+
+        [main.etherpad.etherpad_openSharedDocumentOnJoin]
+        ask.en = "Auto open"
+        bind = "openSharedDocumentOnJoin:/etc/__APP__/meet/__DOMAIN__-config.js"
+        help = "On computer, if activated, the etherpad shared document will be automatically open."
+        type = "boolean"
+
+    [main.whiteboard]
+    name = "Whiteboard integration"
+        [main.whiteboard.whiteboard_enabled]
+        ask.en = "Enable whiteboard"
+        bind = "whiteboard>enabled:/etc/__APP__/meet/__DOMAIN__-config.js"
+        type = "boolean"
+
+        [main.whiteboard.whiteboard_collabServerBaseUrl]
+        ask.en = "Excalidraw URL"
+        bind = "whiteboard>collabServerBaseUrl:/etc/__APP__/meet/__DOMAIN__-config.js"
+        help = ""
+        type = "url"
+        optional = true
+        example = "https://excalidraw-backend.example.com"
+
+        [main.whiteboard.whiteboard_userLimit]
+        ask.en = "User limit"
+        bind = "whiteboard>userLimit:/etc/__APP__/meet/__DOMAIN__-config.js"
+        help = "The user access limit to the whiteboard, introduced as a means to control the performance."
+        type = "number"
+        min = 2
+        
