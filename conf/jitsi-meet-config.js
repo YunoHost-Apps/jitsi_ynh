@@ -920,7 +920,7 @@ var config = {
 
             // { urls: 'stun:__DOMAIN__:3478' },
             { 
-                urls: 'stun:__P2P_STUNSERVERS__' 
+                urls: '__P2P_STUNSERVERS__' 
             },
         ],
     },

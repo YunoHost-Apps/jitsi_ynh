@@ -17,16 +17,16 @@ ynh_systemctl --service="$app-jicofo" --action="stop" --log_path="/var/log/$app/
 ynh_script_progression "Ensuring downward compatibility..."
 
 ynh_app_setting_set_default --key=max_memory --value=200
-ynh_app_setting_set_default --key=startAudioOnly --value="false"
-ynh_app_setting_set_default --key=localRecording_disable --value="false"
-ynh_app_setting_set_default --key=localRecording_disableSelfRecording --value="false"
+ynh_app_setting_set_default --key=startaudioonly --value="false"
+ynh_app_setting_set_default --key=localrecording_disable --value="false"
+ynh_app_setting_set_default --key=localrecording_disableselfrecording --value="false"
 ynh_app_setting_set_default --key=p2p_enabled --value="true"
-ynh_app_setting_set_default --key=p2p_stunServers --value="meet-jit-si-turnrelay.jitsi.net:443"
+ynh_app_setting_set_default --key=p2p_stunservers --value="stun:meet-jit-si-turnrelay.jitsi.net:443"
 ynh_app_setting_set_default --key=etherpad_base --value=""
-ynh_app_setting_set_default --key=etherpad_openSharedDocumentOnJoin --value="false"
+ynh_app_setting_set_default --key=etherpad_openshareddocumentonjoin --value="false"
 ynh_app_setting_set_default --key=whiteboard_enabled --value="false"
-ynh_app_setting_set_default --key=whiteboard_collabServerBaseUrl --value=""
-ynh_app_setting_set_default --key=whiteboard_userLimit --value="25"
+ynh_app_setting_set_default --key=whiteboard_collabserverbaseurl --value=""
+ynh_app_setting_set_default --key=whiteboard_userlimit --value="25"
 
 gpasswd --add prosody "$app"
 gpasswd --add www-data "$app"
