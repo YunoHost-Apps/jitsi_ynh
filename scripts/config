@@ -7,20 +7,6 @@ source /usr/share/yunohost/helpers
 # SPECIFIC GETTERS FOR TOML SHORT KEY
 #=================================================
 
-get__max_memory(){
-  local max_memory=$(ynh_app_setting_get --key=max_memory)
-
-  # If max_memory doesn't exist, create it and set to default 75 mb value
-  if [ -z "$max_memory" ]; then
-    max_memory=75
-    ynh_app_setting_set --key=max_memory --value=$max_memory
-  fi
-
-  cat << EOF
-value: $max_memory
-EOF
-}
-
 #=================================================
 # SPECIFIC VALIDATORS FOR TOML SHORT KEYS
 #=================================================

@@ -25,7 +25,7 @@ services = ["__APP__-jicofo","__APP__-videobridge"]
         ask.en = "Disable local recording"
         bind = "localRecording>disable:/etc/__APP__/meet/__DOMAIN__-config.js"
         type = "boolean"
-        help = "If activated, if forbid any user to record the meeting to local storage."
+        help = "Forbid any user to record the meeting to local storage."
         
         [main.recording.localRecording_disableSelfRecording]
         ask.en = "Disable self recording"
