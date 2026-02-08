@@ -43,7 +43,7 @@ ram.runtime = "50M"
     [resources.sources]
     [resources.sources.jitsi-meet-web]
     url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.9008-1_all.deb"
-    sha256 = "758e0adffe5d7620e747dd0c75085413492ebb4c109f173f6690ef0b0cacd30df"
+    sha256 = "758e0adffe5d7620e747dd0c75085413492ebb4c109f173f6690ef0b0cacd30d"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-web.deb"
