@@ -7,7 +7,7 @@ name = "Jitsi Meet"
 description.en = "Video conferencing web application"
 description.fr = "Application web de conférence vidéo"
 
-version = "2.0.10710~ynh2"
+version = "2.0.10741~ynh1"
 
 maintainers = []
 
@@ -42,8 +42,8 @@ ram.runtime = "50M"
 [resources]
     [resources.sources]
     [resources.sources.jitsi-meet-web]
-    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.8979-1_all.deb"
-    sha256 = "60626bd6f8629ea68d657bae7c52d182752d7760309592e673815a3b7639896f"
+    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.9008-1_all.deb"
+    sha256 = "758e0adffe5d7620e747dd0c75085413492ebb4c109f173f6690ef0b0cacd30df"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-web.deb"
@@ -60,8 +60,8 @@ ram.runtime = "50M"
     rename = "jitsi-jicofo.deb"
 
     [resources.sources.jitsi-videobridge]
-    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-270-g38ea5ea44-1_all.deb"
-    sha256 = "23e2ef7b2d6e00040d424245c4f1dab15334819a92f6c1daea24b1ea672bde7e"
+    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-272-g0360d0488-1_all.deb"
+    sha256 = "c2f46ee27e098392347435f4a0fb6f80ef62ad6d393258b301858d486ac3cb07"
     format = "whatever"
     extract = false
     rename = "jitsi-videobridge.deb"
@@ -71,8 +71,8 @@ ram.runtime = "50M"
     sha256 = "a0f9255a88fef2e375b590f2823ddbc70ab38142b9931cd3f1c7c0b700bf7043"
 
     [resources.sources.jitsi-meet-prosody]
-    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.8979-1_all.deb"
-    sha256 = "562fffe7b620a9836edfcbfd9034b09376a64ab0acb938296cda9fb25a1dc2f6"
+    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.9008-1_all.deb"
+    sha256 = "7c814c70ceb6bcb4c296db79593a08ab20f56c5c4dc99d0fd41ba32f9377a9f1"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-prosody.deb"
