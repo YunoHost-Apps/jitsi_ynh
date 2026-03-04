@@ -24,8 +24,6 @@ _setup_sources() {
         mv "$install_dir/temp/usr/share/${packages[$package]}/" "$install_dir/$package/"
         ynh_safe_rm "$install_dir/temp"
     done
-
-    ynh_setup_source --dest_dir="$install_dir/jitsi-meet-prosody" --source_id=mod_auth_ldap
 }
 
 ynh_jniwrapper_armhf () {
