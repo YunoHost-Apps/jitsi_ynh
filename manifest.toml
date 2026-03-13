@@ -77,14 +77,6 @@ ram.runtime = "50M"
     extract = false
     rename = "jitsi-meet-prosody.deb"
 
-    [resources.sources.mod_auth_ldap]
-    url = "https://hg.prosody.im/prosody-modules/raw-file/tip/mod_auth_ldap/mod_auth_ldap.lua"
-    sha256 = "49c67ec86ec75ac8de93803be2ac7f907d1e9d3d22cd4c88fd48aaeed7a411e3"
-    format = "whatever"
-    extract = false
-    rename = "mod_auth_ldap.lua"
-
-
     [resources.system_user]
 
     [resources.install_dir]
