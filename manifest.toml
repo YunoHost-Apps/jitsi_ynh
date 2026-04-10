@@ -7,7 +7,7 @@ name = "Jitsi Meet"
 description.en = "Video conferencing web application"
 description.fr = "Application web de conférence vidéo"
 
-version = "2.0.10741~ynh3"
+version = "2.0.10888~ynh1"
 
 maintainers = []
 
@@ -42,8 +42,8 @@ ram.runtime = "50M"
 [resources]
     [resources.sources]
     [resources.sources.jitsi-meet-web]
-    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.9008-1_all.deb"
-    sha256 = "758e0adffe5d7620e747dd0c75085413492ebb4c109f173f6690ef0b0cacd30d"
+    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.9139-1_all.deb"
+    sha256 = "f442e369b414fb25a824f89c427e9e620bc2533a18d56811d93812b4527ff3c2"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-web.deb"
@@ -53,15 +53,15 @@ ram.runtime = "50M"
     sha256 = "a0f9255a88fef2e375b590f2823ddbc70ab38142b9931cd3f1c7c0b700bf7043"
 
     [resources.sources.jitsi-jicofo]
-    url = "https://download.jitsi.org/stable/jicofo_1.0-1169-1_all.deb"
-    sha256 = "51ed3fac419a18885da7e6d821f8429556e4c365dc97a59dfd78da6a13163eee"
+    url = "https://download.jitsi.org/stable/jicofo_1.0-1174-1_all.deb"
+    sha256 = "24e5a6e44eb2e0e4b6ffafcbd3abbd4da47ea5780d681852f141cf45e6fcb81e"
     format = "whatever"
     extract = false
     rename = "jitsi-jicofo.deb"
 
     [resources.sources.jitsi-videobridge]
-    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-272-g0360d0488-1_all.deb"
-    sha256 = "c2f46ee27e098392347435f4a0fb6f80ef62ad6d393258b301858d486ac3cb07"
+    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-287-g4f55d380a-1_all.deb"
+    sha256 = "309bda740f94610e4defcffa329bfe4f1b7f5a6e82fca697bd700bf459da8b29"
     format = "whatever"
     extract = false
     rename = "jitsi-videobridge.deb"
@@ -71,8 +71,8 @@ ram.runtime = "50M"
     sha256 = "a0f9255a88fef2e375b590f2823ddbc70ab38142b9931cd3f1c7c0b700bf7043"
 
     [resources.sources.jitsi-meet-prosody]
-    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.9008-1_all.deb"
-    sha256 = "7c814c70ceb6bcb4c296db79593a08ab20f56c5c4dc99d0fd41ba32f9377a9f1"
+    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.9139-1_all.deb"
+    sha256 = "b84368e7d9f9b05526768cce49f95062a0cc70e8a4a4f9f84917b7cd53d90254"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-prosody.deb"
