@@ -60,7 +60,7 @@ ram.runtime = "50M"
     rename = "jitsi-jicofo.deb"
 
     [resources.sources.jitsi-videobridge]
-    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-291-gb4b5ccc8c-1_all"
+    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-291-gb4b5ccc8c-1_all.deb"
     sha256 = "e0b97fc8aab6eea4f9b7254597060764f8e27b39735264ff3ff14a7b3d80823a"
     format = "whatever"
     extract = false
