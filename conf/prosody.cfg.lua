@@ -76,7 +76,6 @@ Component "conference.__DOMAIN__" "muc"
     modules_enabled = {
         "muc_meeting_id";
         "muc_domain_mapper";
-        "polls";
         --"token_verification";
         "muc_rate_limit";
     }
@@ -137,5 +136,6 @@ Component "lobby.__DOMAIN__" "muc"
     muc_room_default_public_jids = true
     modules_enabled = {
         "muc_rate_limit";
-        "polls";
     }
+
+Component "polls.__DOMAIN__" "polls_component"
