@@ -72,7 +72,7 @@ ram.runtime = "50M"
 
     [resources.sources.jitsi-meet-prosody]
     url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.9268-1_all.deb"
-    sha256 = "22d0379a5402f8c66bc2e050b5713ac17362efd269bca770a9728b5416d7dabc
+    sha256 = "22d0379a5402f8c66bc2e050b5713ac17362efd269bca770a9728b5416d7dabc"
     format = "whatever"
     extract = false
     rename = "jitsi-meet-prosody.deb"
