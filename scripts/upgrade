@@ -80,6 +80,7 @@ ynh_script_progression "configuring Jitsi-Jicofo..."
 
 ynh_config_add --template="jitsi-jicofo-config" --destination="/etc/$app/jicofo/config"
 ynh_config_add --template="jitsi-jicofo-jicofo.conf" --destination="/etc/$app/jicofo/jicofo.conf"
+ynh_config_add --template="jitsi-videobridge-jvb.conf" --destination="/etc/$app/videobridge/jvb.conf"
 ynh_config_add --template="jitsi-jicofo-logging.properties" --destination="/etc/$app/jicofo/logging.properties"
 
 #=================================================
