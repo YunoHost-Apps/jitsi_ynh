@@ -45,7 +45,7 @@ services = ["__APP__-jicofo","__APP__-videobridge"]
         bind = "stunServers>urls:/etc/__APP__/meet/__DOMAIN__-config.js"
         help = "STUN servers that will be used in the peer to peer connections"
         type = "string"
-        pattern.regexp = '^stun:(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,}):\d\d+$'
+        pattern.regexp = '^stun:((xn--)?[a-z0-9][a-z0-9-_]{0,62}\.)*(xn--)?[a-z0-9-]{1,}:\d\d+$'
         pattern.error = "Provide a domain and a port in this format `stun:DOMAIN:PORT`"
         example = "stun:meet-jit-si-turnrelay.jitsi.net:443"
     
@@ -57,7 +57,7 @@ services = ["__APP__-jicofo","__APP__-videobridge"]
         help = "If set, add a `Open shared document` link to the bottom right menu that will open an etherpad document."
         type = "url"
         optional = true
-        pattern.regexp = '^https?://(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})(:\d\d+)?/p/$'
+        pattern.regexp = '^https?://((xn--)?[a-z0-9][a-z0-9-_]{0,62}\.)*(xn--)?[a-z0-9-]{1,}(:\d\d+)?/p/$'
         pattern.error = "Provide a pad URL ending with `/p/`"
         example = "https://your-etherpad-installati.on/p/"
 
