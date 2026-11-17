@@ -42,7 +42,7 @@ ram.runtime = "50M"
 [resources]
     [resources.sources]
     [resources.sources.jitsi-meet-web]
-    url = "https://download.jitsi.org/stable/stable/jitsi-meet-web_1.0.9644-1_all.deb"
+    url = "https://download.jitsi.org/stable/jitsi-meet-web_1.0.9644-1_all.deb"
     sha256 = "9f6a2d486922a386cca16e2a5e6a74e9ca95a575488d9ea8d462f3cc4b15e603"
     format = "whatever"
     extract = false
@@ -53,14 +53,14 @@ ram.runtime = "50M"
     sha256 = "e69793c4e68f5cbd15deef9f22c8027da2fb384c7ee76f096007b2f7e0ff0c05"
 
     [resources.sources.jitsi-jicofo]
-    url = "https://download.jitsi.org/stable/stable/jicofo_1.0-1233-1_all.deb"
+    url = "https://download.jitsi.org/stable/jicofo_1.0-1233-1_all.deb"
     sha256 = "fed5b3cc175c55ad460bf8c33e6c01e21f4a3c3b6788cc43610cfc004c9bd7e4"
     format = "whatever"
     extract = false
     rename = "jitsi-jicofo.deb"
 
     [resources.sources.jitsi-videobridge]
-    url = "https://download.jitsi.org/stable/stable/jitsi-videobridge2_2.3-358-gf8efaa72c-1_all.deb"
+    url = "https://download.jitsi.org/stable/jitsi-videobridge2_2.3-358-gf8efaa72c-1_all.deb"
     sha256 = "cb69e8a1f582284f9d57951cc0f336e0e2ab1a0b4f396b6ed8b3576bea41c38c"
     format = "whatever"
     extract = false
@@ -71,7 +71,7 @@ ram.runtime = "50M"
     sha256 = "e69793c4e68f5cbd15deef9f22c8027da2fb384c7ee76f096007b2f7e0ff0c05"
 
     [resources.sources.jitsi-meet-prosody]
-    url = "https://download.jitsi.org/stable/stable/jitsi-meet-prosody_1.0.9644-1_all.deb"
+    url = "https://download.jitsi.org/stable/jitsi-meet-prosody_1.0.9644-1_all.deb"
     sha256 = "7306cb96de0679aeb6ca3d7eecca2949a79a98bee13049536c94716b07d4c221"
     format = "whatever"
     extract = false
