@@ -17,8 +17,8 @@ _setup_sources() {
         ynh_safe_rm "$install_dir/${package}"
         ynh_setup_source --dest_dir="$install_dir/temp" --source_id="$package"
         pushd "$install_dir/temp"
-            ar x "$package.deb" data.tar.xz
-            tar xf data.tar.xz
+            ar x "$package.deb" data.tar.zst
+            tar --zstd -xf data.tar.zst
         popd
 
         mv "$install_dir/temp/usr/share/${packages[$package]}/" "$install_dir/$package/"
